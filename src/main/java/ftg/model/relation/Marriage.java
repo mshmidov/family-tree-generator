@@ -1,6 +1,6 @@
 package ftg.model.relation;
 
-import ftg.model.Person;
+import ftg.model.person.Person;
 
 public final class Marriage extends AbstractRelation implements Relation {
 

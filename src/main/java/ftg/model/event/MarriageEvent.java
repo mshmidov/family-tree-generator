@@ -1,6 +1,6 @@
 package ftg.model.event;
 
-import ftg.model.Person;
+import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
 
 import static com.google.common.base.Preconditions.checkArgument;

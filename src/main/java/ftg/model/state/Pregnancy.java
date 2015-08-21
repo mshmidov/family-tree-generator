@@ -1,6 +1,6 @@
 package ftg.model.state;
 
-import ftg.model.Person;
+import ftg.model.person.Person;
 
 public final class Pregnancy implements State {
 

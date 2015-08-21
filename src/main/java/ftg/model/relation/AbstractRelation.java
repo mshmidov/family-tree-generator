@@ -3,7 +3,7 @@ package ftg.model.relation;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
-import ftg.model.Person;
+import ftg.model.person.Person;
 
 import java.util.Objects;
 import java.util.Set;

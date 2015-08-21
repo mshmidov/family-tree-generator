@@ -1,4 +1,4 @@
-package ftg.model;
+package ftg.model.person;
 
 import com.google.common.collect.ImmutableList;
 import ftg.model.relation.Relations;
