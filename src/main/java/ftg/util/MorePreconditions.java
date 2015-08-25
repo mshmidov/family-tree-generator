@@ -1,7 +1,5 @@
 package ftg.util;
 
-import com.google.common.base.Preconditions;
-
 import java.util.function.Predicate;
 
 public final class MorePreconditions {
@@ -11,14 +9,14 @@ public final class MorePreconditions {
 
     public static <T> T checkArgument(T argument, Predicate<T> condition) {
         if (!condition.test(argument)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(String.format("%s is wrong value", argument));
         }
         return argument;
     }
 
     public static <T> T checkArgument(T argument, Predicate<T> condition, String message) {
         if (!condition.test(argument)) {
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException(String.format(message, argument));
         }
         return argument;
     }

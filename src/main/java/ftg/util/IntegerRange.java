@@ -1,12 +1,13 @@
 package ftg.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.PrimitiveIterator;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 
-public final class IntegerRange implements Predicate<Integer> {
+import static com.google.common.base.Preconditions.checkArgument;
+
+public final class IntegerRange implements Predicate<Integer>, Iterable<Integer> {
 
     private final int lower;
 
@@ -17,15 +18,16 @@ public final class IntegerRange implements Predicate<Integer> {
     }
 
     private IntegerRange(int lower, int upper) {
+        checkArgument(lower < upper);
         this.lower = lower;
         this.upper = upper;
     }
 
-    public int getLower() {
+    public int getFirst() {
         return lower;
     }
 
-    public int getUpper() {
+    public int getLast() {
         return upper;
     }
 
@@ -38,7 +40,37 @@ public final class IntegerRange implements Predicate<Integer> {
         return includes(integer);
     }
 
-    public IntStream values() {
+    public IntStream stream() {
         return IntStream.rangeClosed(lower, upper);
+    }
+
+    @Override
+    public PrimitiveIterator.OfInt iterator() {
+        return new IntegerRangeIterator(lower, upper);
+    }
+
+    private static class IntegerRangeIterator implements PrimitiveIterator.OfInt {
+
+        private final int upper;
+
+        private int current;
+
+        public IntegerRangeIterator(int lower, int upper) {
+            this.upper = upper;
+            this.current = lower;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return current <= upper;
+        }
+
+        @Override
+        public int nextInt() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return current++;
+        }
     }
 }

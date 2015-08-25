@@ -1,62 +1,111 @@
 package ftg.model.time;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Range;
-import ftg.util.IntegerRange;
-import ftg.util.MorePreconditions;
+import com.google.common.base.MoreObjects;
 
-import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static ftg.util.MorePreconditions.between;
+import static com.google.common.base.Preconditions.checkState;
+import static ftg.model.time.TredecimalCalendar.*;
 import static ftg.util.MorePreconditions.checkArgument;
 
-public class TredecimalDate {
+public final class TredecimalDate implements Comparable<TredecimalDate> {
 
-    public static final int YEAR_FIRST_DAY = 1;
-    public static final int YEAR_LAST_DAY = 365;
+    private final long dayOfEpoch;
 
-    public static final IntegerRange YEAR_DAYS = IntegerRange.inclusive(YEAR_FIRST_DAY, YEAR_LAST_DAY);
-    public static final IntegerRange MONTHS = IntegerRange.inclusive(1, 13);
-    public static final IntegerRange MONTH_DAYS = IntegerRange.inclusive(1, 28);
+    private final long year;
+    private final int dayOfYear;
 
-    private final int year;
+    public TredecimalDate(long dayOfEpoch) {
+        this.dayOfEpoch = dayOfEpoch;
 
-    private final int day;
+        if (dayOfEpoch >= 0) {
+            this.year = dayOfEpoch / DAYS_IN_YEAR;
+        } else {
+            this.year = (dayOfEpoch + 1) / DAYS_IN_YEAR - 1;
+        }
 
-    private final Optional<Integer> month;
-
-    private final int dayOfMonth;
-
-    public TredecimalDate(int year, int day) {
-        this.year = year;
-        this.day = checkArgument(day, YEAR_DAYS);
-        final int monthIndex = ((day - 1) / 28) + 1;
-        this.month = MONTH_DAYS.includes(monthIndex)
-                ? Optional.of(monthIndex)
-                : Optional.empty();
-        this.dayOfMonth = day % 28;
+        this.dayOfYear = checkArgument((int) (dayOfEpoch - year * DAYS_IN_YEAR), YEAR_DAYS);
     }
 
-    public int getYear() {
+    public TredecimalDate(long year, int day) {
+        this(year * DAYS_IN_YEAR + checkArgument(day, YEAR_DAYS));
+    }
+
+    public long getDayOfEpoch() {
+        return dayOfEpoch;
+    }
+
+    public boolean isZeroDay() {
+        return dayOfYear == 0;
+    }
+
+    public long getYear() {
         return year;
     }
 
-    public int getDay() {
-        return day;
+    public int getDayOfYear() {
+        return dayOfYear;
     }
 
-    public Optional<Integer> getMonth() {
-        return month;
+    public Month getMonth() {
+        checkState(!isZeroDay(), "Zero day has no month");
+        return TredecimalCalendar.Month.values()[(dayOfYear - 1) / DAYS_IN_MONTH];
     }
 
     public int getDayOfMonth() {
-        return dayOfMonth;
+        checkState(!isZeroDay(), "Zero day has no month");
+        return dayOfYear - ((dayOfYear - 1) / DAYS_IN_MONTH) * DAYS_IN_MONTH;
     }
 
-    public boolean IsYearDay() {
-        return day == YEAR_DAYS.getUpper();
+    public TredecimalDate plusDays(int days) {
+        if (days == 0) {
+            return this;
+        }
+
+        return new TredecimalDate(dayOfEpoch + days);
+    }
+
+    public TredecimalDate plusMonths(int months) {
+        checkState(!isZeroDay(), "Zero day has no month");
+        if (months == 0) {
+            return this;
+        }
+
+        return new TredecimalDate(dayOfEpoch + months * DAYS_IN_MONTH);
+    }
+
+    public TredecimalDate plusYears(int years) {
+        if (years == 0) {
+            return this;
+        }
+
+        return new TredecimalDate(year + years, dayOfYear);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TredecimalDate that = (TredecimalDate) o;
+        return Objects.equals(dayOfEpoch, that.dayOfEpoch);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("dayOfEpoch", dayOfEpoch)
+                .add("year", year)
+                .add("dayOfYear", dayOfYear)
+                .toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dayOfEpoch);
+    }
+
+    @Override
+    public int compareTo(TredecimalDate o) {
+        return Long.compare(dayOfEpoch, o.dayOfEpoch);
     }
 }
