@@ -11,7 +11,7 @@ public class LongRangeSupplier extends ParameterSupplier {
 
     @Override
     public List<PotentialAssignment> getValueSources(ParameterSignature sig) {
-        final LongRange annotation = sig.getAnnotation(LongRange.class);
+        final LongsInRange annotation = sig.getAnnotation(LongsInRange.class);
 
         final List<PotentialAssignment> list = new ArrayList<>();
 

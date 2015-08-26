@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @ParametersSuppliedBy(LongRangeSupplier.class)
-public @interface LongRange {
+public @interface LongsInRange {
 
     long from() default -100;
 

@@ -1,10 +1,10 @@
 package ftg.model.time;
 
 import com.google.common.testing.EqualsTester;
-import ftg.IntegerRange;
 import ftg.Integers;
-import ftg.LongRange;
+import ftg.IntegersInRange;
 import ftg.Longs;
+import ftg.LongsInRange;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
@@ -25,7 +25,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void canBeCreatedFromAnyDayOfEpoch(@LongRange(from = -800, to = 800, step = 10) @Longs long day) {
+    public void canBeCreatedFromAnyDayOfEpoch(@LongsInRange(from = -800, to = 800, step = 10) @Longs long day) {
 
         final TredecimalDate date = new TredecimalDate(day);
 
@@ -33,7 +33,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void canBeCreatedFromYearAndDay(@LongRange(from = -800, to = 800, step = 10) @Longs long day) {
+    public void canBeCreatedFromYearAndDay(@LongsInRange(from = -800, to = 800, step = 10) @Longs long day) {
 
         final TredecimalDate date = new TredecimalDate(day);
         final TredecimalDate date2 = new TredecimalDate(date.getYear(), date.getDayOfYear());
@@ -43,7 +43,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void canBeCreatedFromYearMonthAndDay(@LongRange(from = -800, to = 800, step = 10) @Longs long day) {
+    public void canBeCreatedFromYearMonthAndDay(@LongsInRange(from = -800, to = 800, step = 10) @Longs long day) {
 
         final TredecimalDate date = new TredecimalDate(day);
         if (!date.isZeroDay()) {
@@ -66,7 +66,7 @@ public class TredecimalDateTest {
 
 
     @Theory
-    public void comparesAsDayOfEpoch(@LongRange @Longs long day) {
+    public void comparesAsDayOfEpoch(@LongsInRange @Longs long day) {
 
         final TredecimalDate date = new TredecimalDate(day);
         final TredecimalDate date2 = new TredecimalDate(day + 1);
@@ -77,7 +77,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void calculatesCorrectMonth(@IntegerRange @Integers int year, Month month) {
+    public void calculatesCorrectMonth(@IntegersInRange @Integers int year, Month month) {
         final TredecimalDate firstDayOfMonth = new TredecimalDate(year, month.getDays().getFirst());
         final TredecimalDate lastDayOfMonth = new TredecimalDate(year, month.getDays().getLast());
 
@@ -86,9 +86,9 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void calculatesCorrectDayOfMonth(@Integers @IntegerRange int year,
+    public void calculatesCorrectDayOfMonth(@Integers @IntegersInRange int year,
                                             Month month,
-                                            @IntegerRange(from = 1, to = 28) int day) {
+                                            @IntegersInRange(from = 1, to = 28) int day) {
 
         final int dayOfYear = month.getDays().getFirst() + day - 1;
         final TredecimalDate date = new TredecimalDate(year, dayOfYear);
@@ -97,7 +97,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void zeroDayIsSpecial(@Integers @IntegerRange int year) {
+    public void zeroDayIsSpecial(@Integers @IntegersInRange int year) {
         final TredecimalDate date = new TredecimalDate(year, 0);
 
         assertThat(date.isZeroDay(), is(true));
@@ -108,9 +108,9 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void addsDays(@IntegerRange(from = -1, to = 1) int year,
+    public void addsDays(@IntegersInRange(from = -1, to = 1) int year,
                          Month month,
-                         @IntegerRange(from = 0, to = 2) int days) {
+                         @IntegersInRange(from = 0, to = 2) int days) {
 
         final TredecimalDate date = new TredecimalDate(year, month.getDays().getLast());
         final TredecimalDate date1 = date.plusDays(days);
@@ -119,9 +119,9 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void addsMonths(@IntegerRange(from = -1, to = 1) int year,
-                           @IntegerRange(from = 0, to = 27) int delta,
-                           @IntegerRange(from = 1, to = 28) int day) {
+    public void addsMonths(@IntegersInRange(from = -1, to = 1) int year,
+                           @IntegersInRange(from = 0, to = 27) int delta,
+                           @IntegersInRange(from = 1, to = 28) int day) {
 
         final TredecimalDate date = new TredecimalDate(year, day);
         final TredecimalDate date1 = date.plusMonths(delta);
@@ -141,7 +141,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void addsYears(@IntegerRange(from = -1, to = 1) int year, @IntegerRange(from = 0, to = 5) int delta) {
+    public void addsYears(@IntegersInRange(from = -1, to = 1) int year, @IntegersInRange(from = 0, to = 5) int delta) {
 
         final TredecimalDate date = new TredecimalDate(year, 10);
         final TredecimalDate date1 = date.plusYears(delta);
@@ -151,9 +151,9 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void subtractsDays(@IntegerRange(from = -1, to = 1) int year,
+    public void subtractsDays(@IntegersInRange(from = -1, to = 1) int year,
                               Month month,
-                              @IntegerRange(from = 0, to = 2) int days) {
+                              @IntegersInRange(from = 0, to = 2) int days) {
 
         final TredecimalDate date = new TredecimalDate(year, month.getDays().getLast());
         final TredecimalDate date1 = date.minusDays(days);
@@ -162,9 +162,9 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void subtractsMonths(@IntegerRange(from = -1, to = 1) int year,
-                                @IntegerRange(from = 0, to = 27) int delta,
-                                @IntegerRange(from = 1, to = 28) int day) {
+    public void subtractsMonths(@IntegersInRange(from = -1, to = 1) int year,
+                                @IntegersInRange(from = 0, to = 27) int delta,
+                                @IntegersInRange(from = 1, to = 28) int day) {
 
         final TredecimalDate date = new TredecimalDate(year, day);
         final TredecimalDate date1 = date.minusMonths(delta);
@@ -184,7 +184,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void subtractsYears(@IntegerRange(from = -1, to = 1) int year, @IntegerRange(from = 0, to = 5) int delta) {
+    public void subtractsYears(@IntegersInRange(from = -1, to = 1) int year, @IntegersInRange(from = 0, to = 5) int delta) {
 
         final TredecimalDate date = new TredecimalDate(year, 10);
         final TredecimalDate date1 = date.minusYears(delta);
@@ -195,7 +195,7 @@ public class TredecimalDateTest {
 
 
     @Theory
-    public void additionIsSubtractionWithDifferentSign(@IntegerRange(from = 1, to = 10) int delta) {
+    public void additionIsSubtractionWithDifferentSign(@IntegersInRange(from = 1, to = 10) int delta) {
 
         final TredecimalDate date = new TredecimalDate(1);
 
@@ -223,7 +223,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void equalsIsWorking(@IntegerRange(from = 1, to = 28) int day) {
+    public void equalsIsWorking(@IntegersInRange(from = 1, to = 28) int day) {
         new EqualsTester()
                 .addEqualityGroup(new TredecimalDate(day), new TredecimalDate(0, day), new TredecimalDate(0, Month.ONE, day))
                 .addEqualityGroup(new TredecimalDate(512), new TredecimalDate(1, 147), new TredecimalDate(1, Month.SIX, 7))
@@ -233,7 +233,7 @@ public class TredecimalDateTest {
     }
 
     @Theory
-    public void toStringIsWorking(@IntegerRange(from = 0, to = 364, step = 20) int day) {
+    public void toStringIsWorking(@IntegersInRange(from = 0, to = 364, step = 20) int day) {
         final TredecimalDate date = new TredecimalDate(day);
         assertThat(date.toString(), containsString("dayOfEpoch="+date.getDayOfEpoch()));
         assertThat(date.toString(), containsString("year="+date.getYear()));

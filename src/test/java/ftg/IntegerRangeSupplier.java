@@ -11,7 +11,7 @@ public class IntegerRangeSupplier extends ParameterSupplier {
 
     @Override
     public List<PotentialAssignment> getValueSources(ParameterSignature sig) {
-        final IntegerRange annotation = sig.getAnnotation(IntegerRange.class);
+        final IntegersInRange annotation = sig.getAnnotation(IntegersInRange.class);
 
         final List<PotentialAssignment> list = new ArrayList<>();
 

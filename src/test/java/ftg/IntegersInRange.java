@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @ParametersSuppliedBy(IntegerRangeSupplier.class)
-public @interface IntegerRange {
+public @interface IntegersInRange {
 
     int from() default -100;
 
