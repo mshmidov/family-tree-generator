@@ -7,14 +7,14 @@ public final class MorePreconditions {
     private MorePreconditions() {
     }
 
-    public static <T> T checkArgument(T argument, Predicate<T> condition) {
+    public static <T> T checkedArgument(T argument, Predicate<T> condition) {
         if (!condition.test(argument)) {
             throw new IllegalArgumentException(String.format("%s is wrong value", argument));
         }
         return argument;
     }
 
-    public static <T> T checkArgument(T argument, Predicate<T> condition, String message) {
+    public static <T> T checkedArgument(T argument, Predicate<T> condition, String message) {
         if (!condition.test(argument)) {
             throw new IllegalArgumentException(String.format(message, argument));
         }

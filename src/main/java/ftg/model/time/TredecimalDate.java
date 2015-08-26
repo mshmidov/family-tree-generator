@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static ftg.model.time.TredecimalCalendar.*;
-import static ftg.util.MorePreconditions.checkArgument;
+import static ftg.util.MorePreconditions.checkedArgument;
 
 public final class TredecimalDate implements Comparable<TredecimalDate> {
 
@@ -28,11 +28,11 @@ public final class TredecimalDate implements Comparable<TredecimalDate> {
     }
 
     public TredecimalDate(long year, int day) {
-        this(year * DAYS_IN_YEAR + checkArgument(day, YEAR_DAYS));
+        this(year * DAYS_IN_YEAR + checkedArgument(day, YEAR_DAYS));
     }
 
     public TredecimalDate(long year, Month month, int dayOfMonth) {
-        this(year * DAYS_IN_YEAR + month.getDays().getFirst() + checkArgument(dayOfMonth, MONTH_DAYS) - 1);
+        this(year * DAYS_IN_YEAR + month.getDays().getFirst() + checkedArgument(dayOfMonth, MONTH_DAYS) - 1);
     }
 
     public long getDayOfEpoch() {
