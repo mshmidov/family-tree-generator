@@ -24,11 +24,15 @@ public final class TredecimalDate implements Comparable<TredecimalDate> {
             this.year = (dayOfEpoch + 1) / DAYS_IN_YEAR - 1;
         }
 
-        this.dayOfYear = checkArgument((int) (dayOfEpoch - year * DAYS_IN_YEAR), YEAR_DAYS);
+        this.dayOfYear = (int) (dayOfEpoch - year * DAYS_IN_YEAR);
     }
 
     public TredecimalDate(long year, int day) {
         this(year * DAYS_IN_YEAR + checkArgument(day, YEAR_DAYS));
+    }
+
+    public TredecimalDate(long year, Month month, int dayOfMonth) {
+        this(year * DAYS_IN_YEAR + month.getDays().getFirst() + checkArgument(dayOfMonth, MONTH_DAYS) - 1);
     }
 
     public long getDayOfEpoch() {
@@ -49,7 +53,7 @@ public final class TredecimalDate implements Comparable<TredecimalDate> {
 
     public Month getMonth() {
         checkState(!isZeroDay(), "Zero day has no month");
-        return TredecimalCalendar.Month.values()[(dayOfYear - 1) / DAYS_IN_MONTH];
+        return Month.values()[(dayOfYear - 1) / DAYS_IN_MONTH];
     }
 
     public int getDayOfMonth() {
@@ -70,8 +74,14 @@ public final class TredecimalDate implements Comparable<TredecimalDate> {
         if (months == 0) {
             return this;
         }
+        if (months < 0) {
+            return minusMonths(-months);
+        }
 
-        return new TredecimalDate(dayOfEpoch + months * DAYS_IN_MONTH);
+        final int plusYears = (getMonth().ordinal() + months) / Month.values().length;
+        final int plusMonths = months - plusYears * Month.values().length;
+
+        return new TredecimalDate(year + plusYears, dayOfYear + plusMonths * DAYS_IN_MONTH);
     }
 
     public TredecimalDate plusYears(int years) {
@@ -80,6 +90,39 @@ public final class TredecimalDate implements Comparable<TredecimalDate> {
         }
 
         return new TredecimalDate(year + years, dayOfYear);
+    }
+
+    public TredecimalDate minusDays(int days) {
+        return plusDays(-days);
+    }
+
+    public TredecimalDate minusMonths(int months) {
+        checkState(!isZeroDay(), "Zero day has no month");
+        if (months == 0) {
+            return this;
+        }
+        if (months < 0) {
+            return plusMonths(-months);
+        }
+
+        int fullYears = months / 13;
+        final int monthsLeft = months - fullYears * 13;
+
+        final Month m = getMonth();
+
+        if (monthsLeft > m.ordinal()) {
+            fullYears++;
+        }
+
+        final Month newMonth = (monthsLeft == 0)
+                               ? m
+                               : Month.values()[Month.values().length - monthsLeft];
+
+        return new TredecimalDate(year - fullYears, newMonth, getDayOfMonth());
+    }
+
+    public TredecimalDate minusYears(int years) {
+        return plusYears(-years);
     }
 
     @Override
