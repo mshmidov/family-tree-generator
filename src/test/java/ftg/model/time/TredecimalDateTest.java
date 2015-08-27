@@ -1,6 +1,5 @@
 package ftg.model.time;
 
-import com.google.common.testing.EqualsTester;
 import ftg.Integers;
 import ftg.IntegersInRange;
 import ftg.Longs;
@@ -229,24 +228,6 @@ public class TredecimalDateTest {
         assertThat(date.minusDays(0), is(sameInstance(date)));
         assertThat(date.minusMonths(0), is(sameInstance(date)));
         assertThat(date.minusYears(0), is(sameInstance(date)));
-    }
-
-    @Theory
-    public void equalsIsWorking(@IntegersInRange(from = 1, to = 28) int day) {
-        new EqualsTester()
-                .addEqualityGroup(new TredecimalDate(day), new TredecimalDate(0, day), new TredecimalDate(0, Month.ONE, day))
-                .addEqualityGroup(new TredecimalDate(512), new TredecimalDate(1, 147), new TredecimalDate(1, Month.SIX, 7))
-                .addEqualityGroup(new TredecimalDate(-364), new TredecimalDate(-1, 1), new TredecimalDate(-1, Month.ONE, 1))
-                .addEqualityGroup(new TredecimalDate(365), new TredecimalDate(1, 0))
-                .testEquals();
-    }
-
-    @Theory
-    public void toStringIsWorking(@IntegersInRange(from = 0, to = 364, step = 20) int day) {
-        final TredecimalDate date = new TredecimalDate(day);
-        assertThat(date.toString(), containsString("dayOfEpoch=" + date.getDayOfEpoch()));
-        assertThat(date.toString(), containsString("year=" + date.getYear()));
-        assertThat(date.toString(), containsString("dayOfYear=" + date.getDayOfYear()));
     }
 }
 

@@ -25,6 +25,7 @@ dependencies {
 pitest {
 //    enableDefaultIncrementalAnalysis = true
     mutators = ['STRONGER', 'CONSTRUCTOR_CALLS', 'INLINE_CONSTS', 'MATH']
+    excludedMethods=['equals', 'hashCode', 'toString']
 }
 
 task wrapper(type: Wrapper) {
