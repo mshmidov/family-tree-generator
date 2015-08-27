@@ -74,6 +74,15 @@ public class TredecimalDateTest {
         assertThat(date.compareTo(date2), is(equalTo(Long.compare(date.getDayOfEpoch(), date2.getDayOfEpoch()))));
         assertThat(date.compareTo(date), is(equalTo(Long.compare(date.getDayOfEpoch(), date.getDayOfEpoch()))));
         assertThat(date2.compareTo(date), is(equalTo(Long.compare(date2.getDayOfEpoch(), date.getDayOfEpoch()))));
+
+        assertThat(date.isBefore(date2), is(true));
+        assertThat(date2.isAfter(date), is(true));
+
+        assertThat(date.isAfter(date2), is(false));
+        assertThat(date2.isBefore(date), is(false));
+
+        assertThat(date.isAfter(date), is(false));
+        assertThat(date.isBefore(date), is(false));
     }
 
     @Theory
@@ -235,9 +244,9 @@ public class TredecimalDateTest {
     @Theory
     public void toStringIsWorking(@IntegersInRange(from = 0, to = 364, step = 20) int day) {
         final TredecimalDate date = new TredecimalDate(day);
-        assertThat(date.toString(), containsString("dayOfEpoch="+date.getDayOfEpoch()));
-        assertThat(date.toString(), containsString("year="+date.getYear()));
-        assertThat(date.toString(), containsString("dayOfYear="+date.getDayOfYear()));
+        assertThat(date.toString(), containsString("dayOfEpoch=" + date.getDayOfEpoch()));
+        assertThat(date.toString(), containsString("year=" + date.getYear()));
+        assertThat(date.toString(), containsString("dayOfYear=" + date.getDayOfYear()));
     }
 }
 

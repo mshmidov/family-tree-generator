@@ -61,6 +61,14 @@ public final class TredecimalDate implements Comparable<TredecimalDate> {
         return dayOfYear - ((dayOfYear - 1) / DAYS_IN_MONTH) * DAYS_IN_MONTH;
     }
 
+    public boolean isBefore(TredecimalDate other) {
+        return compareTo(other) < 0;
+    }
+
+    public boolean isAfter(TredecimalDate other) {
+        return compareTo(other) > 0;
+    }
+
     public TredecimalDate plusDays(int days) {
         if (days == 0) {
             return this;
