@@ -2,7 +2,7 @@ package ftg.model.time;
 
 import ftg.util.IntegerRange;
 
-public enum Month {
+public enum TredecimalMonth {
     ONE,
     TWO,
     THREE,
@@ -21,11 +21,11 @@ public enum Month {
             this.ordinal() * TredecimalCalendar.DAYS_IN_MONTH + 1,
             (this.ordinal() + 1) * TredecimalCalendar.DAYS_IN_MONTH);
 
-    public static Month first() {
+    public static TredecimalMonth first() {
         return values()[0];
     }
 
-    public static Month last() {
+    public static TredecimalMonth last() {
         return values()[values().length - 1];
     }
 
@@ -33,13 +33,13 @@ public enum Month {
         return days;
     }
 
-    public Month previous() {
+    public TredecimalMonth previous() {
         return this == first()
                ? last()
                : values()[this.ordinal() - 1];
     }
 
-    public Month next() {
+    public TredecimalMonth next() {
         return this == last()
                ? first()
                : values()[this.ordinal() + 1];

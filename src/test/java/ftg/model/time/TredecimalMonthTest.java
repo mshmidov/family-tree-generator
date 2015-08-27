@@ -9,28 +9,28 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
-public class MonthTest {
+public class TredecimalMonthTest {
 
 
     @Theory
-    public void previousMonthIsCircular(Month month) {
+    public void previousMonthIsCircular(TredecimalMonth month) {
 
-        final Month previous = month.previous();
+        final TredecimalMonth previous = month.previous();
 
-        if (month == Month.first()) {
-            assertThat(previous, is(equalTo(Month.last())));
+        if (month == TredecimalMonth.first()) {
+            assertThat(previous, is(equalTo(TredecimalMonth.last())));
         } else {
             assertThat(previous.ordinal(), is(equalTo(month.ordinal() - 1)));
         }
     }
 
     @Theory
-    public void nextMonthIsCircular(Month month) {
+    public void nextMonthIsCircular(TredecimalMonth month) {
 
-        final Month next = month.next();
+        final TredecimalMonth next = month.next();
 
-        if (month == Month.last()) {
-            assertThat(next, is(equalTo(Month.first())));
+        if (month == TredecimalMonth.last()) {
+            assertThat(next, is(equalTo(TredecimalMonth.first())));
         } else {
             assertThat(next.ordinal(), is(equalTo(month.ordinal() + 1)));
         }
