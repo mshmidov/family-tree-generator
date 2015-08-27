@@ -1,6 +1,9 @@
 package ftg.util;
 
+import com.google.common.base.MoreObjects;
+
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.PrimitiveIterator;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -47,6 +50,28 @@ public final class IntegerRange implements Predicate<Integer>, Iterable<Integer>
     @Override
     public PrimitiveIterator.OfInt iterator() {
         return new IntegerRangeIterator(lower, upper);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IntegerRange integers = (IntegerRange) o;
+        return Objects.equals(lower, integers.lower) &&
+                Objects.equals(upper, integers.upper);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lower, upper);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("lower", lower)
+                .add("upper", upper)
+                .toString();
     }
 
     private static class IntegerRangeIterator implements PrimitiveIterator.OfInt {
