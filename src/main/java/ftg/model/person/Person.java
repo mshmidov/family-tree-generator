@@ -2,6 +2,7 @@ package ftg.model.person;
 
 import com.google.common.collect.ImmutableList;
 import ftg.model.relation.Relations;
+import ftg.model.time.TredecimalDate;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,11 +17,11 @@ public final class Person {
 
     private final Sex sex;
 
-    private final int birthYear;
+    private final TredecimalDate birthYear;
 
     private final Relations relations = new Relations();
 
-    public Person(String name, String surname, Sex sex, int birthYear) {
+    public Person(String name, String surname, Sex sex, TredecimalDate birthYear) {
         this.name = name;
         this.surnames.add(surname);
         this.sex = sex;
@@ -43,7 +44,7 @@ public final class Person {
         return ImmutableList.copyOf(surnames);
     }
 
-    public int getBirthYear() {
+    public TredecimalDate getBirthYear() {
         return birthYear;
     }
 

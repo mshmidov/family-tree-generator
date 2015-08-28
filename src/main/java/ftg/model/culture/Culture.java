@@ -2,8 +2,8 @@ package ftg.model.culture;
 
 import ftg.generator.Generator;
 import ftg.generator.LimitedGenerator;
-import ftg.model.person.Person;
 import ftg.model.culture.surname.Surname;
+import ftg.model.person.Person;
 
 public interface Culture {
 
@@ -13,5 +13,7 @@ public interface Culture {
 
     Generator<String> names(Person.Sex sex);
 
-    LimitedGenerator<Surname> surnames();
+    LimitedGenerator<Surname> uniqueSurnames();
+
+    Generator<Surname> surnames();
 }

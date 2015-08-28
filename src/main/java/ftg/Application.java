@@ -1,42 +1,56 @@
 package ftg;
 
-import com.google.common.collect.ImmutableMap;
-import ftg.exception.InitializationError;
 import ftg.model.Country;
 import ftg.model.World;
-import ftg.model.culture.SimpleCulture;
-import ftg.model.culture.surname.RussianSurname;
+import ftg.model.culture.Culture;
+import ftg.model.person.Person;
+import ftg.model.time.TredecimalCalendar;
+import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateRange;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+import java.util.Random;
 
 public class Application {
 
+    final Random random = new Random();
+
     public static void main(String[] args) {
 
-        final World world = new World(ImmutableMap.of(Country.OMORJE,
-                new SimpleCulture(
-                        loadLines("./omorje/name_m.txt"),
-                        loadLines("./omorje/name_f.txt"),
-                        loadLines("./omorje/surname_noble.txt"),
-                        RussianSurname::new)
-        ));
-
-        System.out.println(world.getCulture(Country.OMORJE).surnames().get());
+        Application application = new Application();
+        application.simulation();
 
     }
 
+    public void simulation() {
 
-    private static List<String> loadLines(String resource) {
-        try {
-            return Files.readAllLines(Paths.get(ClassLoader.getSystemResource(resource).toURI()), Charset.defaultCharset());
-        } catch (IOException | URISyntaxException e) {
-            throw new InitializationError(e);
+        final ResourceLoader resourceLoader = new ResourceLoader();
+
+        final World world = new World(resourceLoader.loadCultures());
+
+        final TredecimalDate simulationStart = new TredecimalDate(0);
+        final TredecimalDate simulationEnd = simulationStart.plusYears(100);
+
+        final Culture culture = world.getCulture(Country.OMORJE);
+
+        culture.uniqueSurnames().stream()
+                .limit(100)
+                .map(surname -> {
+                    final Person.Sex sex = (random.nextBoolean())
+                                           ? Person.Sex.MALE
+                                           : Person.Sex.FEMALE;
+                    return new Person(
+                            culture.names(sex).get(),
+                            surname.getForm(sex),
+                            sex,
+                            simulationStart.minusDays(random.nextInt(50 * TredecimalCalendar.DAYS_IN_YEAR)));
+                })
+                .forEach(world::addlivingPerson);
+
+
+        for (TredecimalDate date : TredecimalDateRange.inclusive(simulationStart, simulationEnd)) {
+
         }
     }
+
 
 }
