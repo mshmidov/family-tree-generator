@@ -1,10 +1,13 @@
 package ftg.model.culture.surname;
 
+import ftg.model.culture.Culture;
 import ftg.model.person.Person;
 
 import java.util.Objects;
 
 public final class RussianSurname implements Surname {
+
+    private final Culture culture;
 
     private final String maleForm;
 
@@ -12,10 +15,16 @@ public final class RussianSurname implements Surname {
 
     private final String toString;
 
-    public RussianSurname(String maleForm) {
+    public RussianSurname(Culture culture, String maleForm) {
+        this.culture = culture;
         this.maleForm = maleForm;
         femaleForm = calculateFemaleSurname(maleForm);
         toString = String.format("%s / %s", maleForm, femaleForm);
+    }
+
+    @Override
+    public Culture getCulture() {
+        return culture;
     }
 
     @Override

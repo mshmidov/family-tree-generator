@@ -1,11 +1,12 @@
 package ftg.model.culture;
 
-import com.google.common.base.Function;
 import ftg.generator.*;
 import ftg.model.culture.surname.Surname;
 import ftg.model.person.Person;
 
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class SimpleCulture implements Culture {
 
@@ -18,11 +19,14 @@ public class SimpleCulture implements Culture {
                          List<String> femaleNames,
                          List<String> uniqueSurnames,
                          List<String> surnames,
-                         Function<String, Surname> surnameFactory)  {
+                         BiFunction<Culture, String, Surname> surnameFactory) {
         this.maleNames = new RandomElementGenerator<>(maleNames);
         this.femaleNames = new RandomElementGenerator<>(femaleNames);
-        this.uniqueSurnames = new TransformingLimitedGenerator<>(new RandomUniqueElementGenerator<>(uniqueSurnames), surnameFactory);
-        this.surnames = new TransformingGenerator<>(new RandomElementGenerator<>(surnames), surnameFactory);
+
+        final Function<String, Surname> surnameGenerator = (s) -> surnameFactory.apply(this, s);
+
+        this.uniqueSurnames = new TransformingLimitedGenerator<>(new RandomUniqueElementGenerator<>(uniqueSurnames), surnameGenerator);
+        this.surnames = new TransformingGenerator<>(new RandomElementGenerator<>(surnames), surnameGenerator);
     }
 
     @Override
@@ -38,8 +42,8 @@ public class SimpleCulture implements Culture {
     @Override
     public Generator<String> names(Person.Sex sex) {
         return (sex == Person.Sex.MALE)
-               ? maleNames
-               : femaleNames;
+                ? maleNames
+                : femaleNames;
     }
 
     @Override

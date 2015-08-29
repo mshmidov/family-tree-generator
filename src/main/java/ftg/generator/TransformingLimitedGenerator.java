@@ -1,6 +1,7 @@
 package ftg.generator;
 
-import com.google.common.base.Function;
+
+import java.util.function.Function;
 
 public class TransformingLimitedGenerator<I, O> extends TransformingGenerator<I, O> implements LimitedGenerator<O> {
 

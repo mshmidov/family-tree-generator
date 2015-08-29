@@ -3,6 +3,7 @@ package ftg;
 import ftg.model.Country;
 import ftg.model.World;
 import ftg.model.culture.Culture;
+import ftg.model.culture.surname.Surname;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalCalendar;
 import ftg.model.time.TredecimalDate;
@@ -34,22 +35,25 @@ public class Application {
 
         culture.uniqueSurnames().stream()
                 .limit(100)
-                .map(surname -> {
-                    final Person.Sex sex = (random.nextBoolean())
-                                           ? Person.Sex.MALE
-                                           : Person.Sex.FEMALE;
-                    return new Person(
-                            culture.names(sex).get(),
-                            surname.getForm(sex),
-                            sex,
-                            simulationStart.minusDays(random.nextInt(50 * TredecimalCalendar.DAYS_IN_YEAR)));
-                })
+                .map(surname -> randomPerson(simulationStart, surname))
                 .forEach(world::addlivingPerson);
 
 
         for (TredecimalDate date : TredecimalDateRange.inclusive(simulationStart, simulationEnd)) {
 
         }
+    }
+
+    private Person randomPerson(TredecimalDate simulationStart, Surname surname) {
+        final Person.Sex sex = (random.nextBoolean())
+                ? Person.Sex.MALE
+                : Person.Sex.FEMALE;
+
+        return new Person(
+                surname.getCulture().names(sex).get(),
+                surname.getForm(sex),
+                sex,
+                simulationStart.minusDays(random.nextInt(50 * TredecimalCalendar.DAYS_IN_YEAR)));
     }
 
 

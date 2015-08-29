@@ -1,7 +1,7 @@
 package ftg.generator;
 
-import com.google.common.base.Function;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class TransformingGenerator<I, O> implements Generator<O> {
