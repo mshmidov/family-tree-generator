@@ -1,5 +1,6 @@
 package ftg;
 
+import ftg.generator.Generator;
 import ftg.model.Country;
 import ftg.model.World;
 import ftg.model.culture.Culture;
@@ -8,12 +9,15 @@ import ftg.model.person.Person;
 import ftg.model.time.TredecimalCalendar;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateRange;
+import ftg.generator.RandomChoice;
 
 import java.util.Random;
 
 public class Application {
 
     final Random random = new Random();
+
+    final Generator<Person.Sex> randomSex = RandomChoice.ofEnum(Person.Sex.class);
 
     public static void main(String[] args) {
 
@@ -45,9 +49,7 @@ public class Application {
     }
 
     private Person randomPerson(TredecimalDate simulationStart, Surname surname) {
-        final Person.Sex sex = (random.nextBoolean())
-                ? Person.Sex.MALE
-                : Person.Sex.FEMALE;
+        final Person.Sex sex = randomSex.get();
 
         return new Person(
                 surname.getCulture().names(sex).get(),
