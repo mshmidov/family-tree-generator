@@ -34,7 +34,7 @@ public final class IntegerRange implements Predicate<Integer>, Iterable<Integer>
         return upper;
     }
 
-    public boolean includes(int i) {
+    public boolean includes(long i) {
         return (lower <= i) && (i <= upper);
     }
 

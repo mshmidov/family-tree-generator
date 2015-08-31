@@ -6,12 +6,19 @@ import com.google.common.collect.ImmutableSet;
 import ftg.model.culture.Culture;
 import ftg.model.event.Event;
 import ftg.model.person.Person;
+import ftg.model.time.TredecimalDate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkState;
 
 public final class World {
+
+    private static final Logger LOGGER = LogManager.getLogger(World.class);
+
+    private TredecimalDate currentDate;
 
     private final Map<Country, Culture> cultures;
 
@@ -21,8 +28,17 @@ public final class World {
 
     private final List<Event> events = new ArrayList<>();
 
-    public World(Map<Country, Culture> cultures) {
+    public World(TredecimalDate currentDate, Map<Country, Culture> cultures) {
+        this.currentDate = currentDate;
         this.cultures = ImmutableMap.copyOf(cultures);
+    }
+
+    public TredecimalDate getCurrentDate() {
+        return currentDate;
+    }
+
+    public void setCurrentDate(TredecimalDate currentDate) {
+        this.currentDate = currentDate;
     }
 
     public Set<Country> getCountries() {
@@ -41,7 +57,7 @@ public final class World {
         return ImmutableSet.copyOf(deadPersons);
     }
 
-    public void addlivingPerson(Person person) {
+    public void addLivingPerson(Person person) {
         livingPersons.add(person);
     }
 
@@ -56,6 +72,8 @@ public final class World {
     }
 
     public void submitEvent(Event event) {
+        LOGGER.debug("Adding event {}", event);
         events.add(event);
+        event.apply(this);
     }
 }

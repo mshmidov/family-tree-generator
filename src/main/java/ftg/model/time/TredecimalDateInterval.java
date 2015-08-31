@@ -17,7 +17,7 @@ public final class TredecimalDateInterval implements Comparable<TredecimalDateIn
 
     private final int daysOfYear;
 
-    public static TredecimalDateInterval between(TredecimalDate a, TredecimalDate b) {
+    public static TredecimalDateInterval intervalBetween(TredecimalDate a, TredecimalDate b) {
         return new TredecimalDateInterval(abs(a.getDayOfEpoch() - b.getDayOfEpoch()));
     }
 

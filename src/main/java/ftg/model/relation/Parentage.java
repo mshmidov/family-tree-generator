@@ -4,7 +4,7 @@ import ftg.model.person.Person;
 
 public class Parentage extends AbstractRelation implements Relation {
 
-    public Parentage create(Person father, Person mother, Person child) {
+    public static Parentage create(Person father, Person mother, Person child) {
         final Parentage parentage = new Parentage(father, mother, child);
         father.getRelations().add(parentage);
         mother.getRelations().add(parentage);

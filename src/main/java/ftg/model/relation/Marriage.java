@@ -22,4 +22,9 @@ public final class Marriage extends AbstractRelation implements Relation {
     public Person getWife() {
         return getParticipant(Role.WIFE);
     }
+
+    public void remove() {
+        getHusband().getRelations().remove(this);
+        getWife().getRelations().remove(this);
+    }
 }
