@@ -18,6 +18,8 @@ public final class World {
 
     private static final Logger LOGGER = LogManager.getLogger(World.class);
 
+    private final TredecimalDate originDate;
+
     private TredecimalDate currentDate;
 
     private final Map<Country, Culture> cultures;
@@ -29,8 +31,13 @@ public final class World {
     private final List<Event> events = new ArrayList<>();
 
     public World(TredecimalDate currentDate, Map<Country, Culture> cultures) {
+        this.originDate = currentDate;
         this.currentDate = currentDate;
         this.cultures = ImmutableMap.copyOf(cultures);
+    }
+
+    public TredecimalDate getOriginDate() {
+        return originDate;
     }
 
     public TredecimalDate getCurrentDate() {
