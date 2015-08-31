@@ -9,10 +9,12 @@ import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkState;
+import static ftg.model.time.TredecimalDateFormat.ISO;
 
 public final class World {
 
@@ -46,6 +48,7 @@ public final class World {
 
     public void setCurrentDate(TredecimalDate currentDate) {
         this.currentDate = currentDate;
+        ThreadContext.put("date", ISO.format(currentDate));
     }
 
     public Set<Country> getCountries() {
