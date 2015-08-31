@@ -20,7 +20,7 @@ public class TredecimalDateRangeTest {
     public void iteratesThroughAllValues(@Longs({-730, 0, 730}) long day) {
         final TredecimalDate first = new TredecimalDate(day);
         final TredecimalDate last = new TredecimalDate(day + 28);
-        final TredecimalDateRange range = TredecimalDateRange.inclusive(first, last);
+        final TredecimalDateRange range = TredecimalDateRange.inclusiveDateRange(first, last);
 
         TredecimalDate d = first;
         for (TredecimalDate date : range) {
@@ -34,7 +34,7 @@ public class TredecimalDateRangeTest {
     public void includesDatesFromIterator(@Longs({-730, 0, 730}) long day) {
         final TredecimalDate first = new TredecimalDate(day);
         final TredecimalDate last = new TredecimalDate(day + 2);
-        final TredecimalDateRange range = TredecimalDateRange.inclusive(first, last);
+        final TredecimalDateRange range = TredecimalDateRange.inclusiveDateRange(first, last);
 
         final Iterator<TredecimalDate> iterator = range.iterator();
         while (iterator.hasNext()) {
@@ -48,7 +48,7 @@ public class TredecimalDateRangeTest {
     public void notIncludesDatesOutsideBoundaries(@Longs({-730, 0, 730}) long day) {
         final TredecimalDate first = new TredecimalDate(day);
         final TredecimalDate last = new TredecimalDate(day + 700);
-        final TredecimalDateRange range = TredecimalDateRange.inclusive(first, last);
+        final TredecimalDateRange range = TredecimalDateRange.inclusiveDateRange(first, last);
 
         for (int i = 1; i <= 3; i++) {
             assertThat(range.includes(first.minusDays(i)), is(false));
@@ -62,7 +62,7 @@ public class TredecimalDateRangeTest {
     @Theory
     public void lowerBoundaryIsNotAfterThenUpper(@Longs({-730, 0, 730}) long day) {
         final TredecimalDate lower = new TredecimalDate(day);
-        assertThrown(() -> TredecimalDateRange.inclusive(lower, lower.minusDays(1))).isInstanceOf(IllegalArgumentException.class);
+        assertThrown(() -> TredecimalDateRange.inclusiveDateRange(lower, lower.minusDays(1))).isInstanceOf(IllegalArgumentException.class);
     }
 
 }

@@ -1,9 +1,26 @@
 package ftg.model.relation;
 
+import ftg.model.person.Person;
+import ftg.util.MorePreconditions;
+
+import java.util.function.Predicate;
+
 public enum Role {
-    FATHER,
-    MOTHER,
-    CHILD,
-    HUSBAND,
-    WIFE
+    FATHER(p -> p.getSex() == Person.Sex.MALE),
+    MOTHER(p -> p.getSex() == Person.Sex.FEMALE),
+    CHILD(p -> true),
+    HUSBAND(p -> p.getSex() == Person.Sex.MALE),
+    WIFE(p -> p.getSex() == Person.Sex.FEMALE),
+    WIDOWER(p -> p.getSex() == Person.Sex.MALE),
+    WIDOW(p -> p.getSex() == Person.Sex.FEMALE);
+
+    public final Predicate<Person> acceptable;
+
+    Role(Predicate<Person> acceptable) {
+        this.acceptable = acceptable;
+    }
+
+    public Person check(Person person) {
+        return MorePreconditions.checkedArgument(person, acceptable);
+    }
 }

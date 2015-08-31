@@ -4,59 +4,45 @@ import ftg.generator.Generator;
 import ftg.model.Country;
 import ftg.model.World;
 import ftg.model.culture.Culture;
-import ftg.model.culture.surname.Surname;
-import ftg.model.person.Person;
-import ftg.model.time.TredecimalCalendar;
 import ftg.model.time.TredecimalDate;
-import ftg.model.time.TredecimalDateRange;
-import ftg.generator.RandomChoice;
-
-import java.util.Random;
+import ftg.util.IntegerRange;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Application {
 
-    final Random random = new Random();
+    private static final Logger LOGGER = LogManager.getLogger(Application.class);
 
-    final Generator<Person.Sex> randomSex = RandomChoice.ofEnum(Person.Sex.class);
 
     public static void main(String[] args) {
 
-        Application application = new Application();
-        application.simulation();
+        final ResourceLoader resourceLoader = new ResourceLoader();
+        final World world = new World(new TredecimalDate(0), resourceLoader.loadCultures());
+
+        final Simulation simulation = new Simulation(world);
+
+        populate(simulation);
+
+        final TredecimalDate simulationEnd = world.getCurrentDate().plusYears(300);
+
+        while (!simulation.getCurrentDate().isAfter(simulationEnd)) {
+            simulation.nextDay();
+        }
 
     }
 
-    public void simulation() {
+    private static void populate(Simulation simulation) {
+        final IntegerRange age = IntegerRange.inclusive(17, 50);
 
-        final ResourceLoader resourceLoader = new ResourceLoader();
+        final World world = simulation.getWorld();
 
-        final World world = new World(resourceLoader.loadCultures());
+        for (Country country : world.getCountries()) {
+            final Culture culture = world.getCulture(country);
 
-        final TredecimalDate simulationStart = new TredecimalDate(0);
-        final TredecimalDate simulationEnd = simulationStart.plusYears(100);
-
-        final Culture culture = world.getCulture(Country.OMORJE);
-
-        culture.uniqueSurnames().stream()
-                .limit(100)
-                .map(surname -> randomPerson(simulationStart, surname))
-                .forEach(world::addlivingPerson);
-
-
-        for (TredecimalDate date : TredecimalDateRange.inclusive(simulationStart, simulationEnd)) {
-
+            culture.uniqueSurnames().stream()
+                    .limit(100)
+                    .map(surname -> simulation.randomPerson(surname, age))
+                    .forEach(world::addLivingPerson);
         }
     }
-
-    private Person randomPerson(TredecimalDate simulationStart, Surname surname) {
-        final Person.Sex sex = randomSex.get();
-
-        return new Person(
-                surname.getCulture().names(sex).get(),
-                surname.getForm(sex),
-                sex,
-                simulationStart.minusDays(random.nextInt(50 * TredecimalCalendar.DAYS_IN_YEAR)));
-    }
-
-
 }

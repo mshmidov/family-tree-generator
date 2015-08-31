@@ -14,7 +14,7 @@ public final class TredecimalDateRange implements Iterable<TredecimalDate> {
 
     private final TredecimalDate last;
 
-    public static TredecimalDateRange inclusive(TredecimalDate first, TredecimalDate last) {
+    public static TredecimalDateRange inclusiveDateRange(TredecimalDate first, TredecimalDate last) {
         return new TredecimalDateRange(first, last);
     }
 

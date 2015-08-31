@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import ftg.model.person.Person;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -15,12 +16,12 @@ abstract class AbstractRelation implements Relation {
 
     protected AbstractRelation(Role r1, Person p1, Role r2, Person p2) {
         this.possibleRoles = ImmutableSet.of(r1, r2);
-        this.participants = ImmutableBiMap.of(r1, p1, r2, p2);
+        this.participants = ImmutableBiMap.of(r1, r1.check(p1), r2, r2.check(p2));
     }
 
     protected AbstractRelation(Role r1, Person p1, Role r2, Person p2, Role r3, Person p3) {
         this.possibleRoles = ImmutableSet.of(r1, r2, r3);
-        this.participants = ImmutableBiMap.of(r1, p1, r2, p2, r3, p3);
+        this.participants = ImmutableBiMap.of(r1, r1.check(p1), r2, r2.check(p2), r3, r3.check(p3));
     }
 
     @Override
@@ -49,6 +50,11 @@ abstract class AbstractRelation implements Relation {
         }
 
         throw new IllegalArgumentException(String.format("%s is not valid role for %s", role, this.getClass().getSimpleName()));
+    }
+
+    @Override
+    public List<Participant> getParticipants() {
+        return null;
     }
 
     @Override

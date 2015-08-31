@@ -65,7 +65,7 @@ public class TredecimalDateIntervalTest {
         final TredecimalDate dateA = new TredecimalDate(a);
         final TredecimalDate dateB = new TredecimalDate(b);
 
-        final TredecimalDateInterval interval = TredecimalDateInterval.between(dateA, dateB);
+        final TredecimalDateInterval interval = TredecimalDateInterval.intervalBetween(dateA, dateB);
 
         assertThat(interval.getDays(), is(equalTo(abs(a - b))));
     }
