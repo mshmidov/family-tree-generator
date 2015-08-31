@@ -1,5 +1,7 @@
 package ftg;
 
+import ftg.generator.Generator;
+import ftg.generator.RandomChoice;
 import ftg.model.World;
 import ftg.model.culture.surname.Surname;
 import ftg.model.event.BirthEvent;
@@ -25,7 +27,9 @@ public final class Simulation {
 
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
 
-    final Random random = new Random();
+    private final Random random = new Random();
+
+    private final Generator<Person.Sex> randomSex = RandomChoice.ofEnum(Person.Sex.class);
 
     private final World world;
 
@@ -79,12 +83,9 @@ public final class Simulation {
     }
 
     public Person randomPerson(Surname surname, IntegerRange age) {
-        final Person.Sex sex = (random.nextBoolean())
-                               ? Person.Sex.MALE
-                               : Person.Sex.FEMALE;
 
+        final Person.Sex sex = randomSex.get();
         int days = random.nextInt(age.getLast() * DAYS_IN_YEAR) - age.getFirst() * DAYS_IN_YEAR + 1;
-
 
         return new Person(
                 surname.getCulture().names(sex).get(),
@@ -104,9 +105,7 @@ public final class Simulation {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (random.nextDouble() >= 1 - chance) {
 
-            final Person.Sex sex = (random.nextBoolean())
-                                   ? Person.Sex.MALE
-                                   : Person.Sex.FEMALE;
+            final Person.Sex sex = randomSex.get();
 
             world.submitEvent(new ConceptionEvent(world.getCurrentDate(),
                     female.getRelations().getSingle(Marriage.class).get().getHusband(),
