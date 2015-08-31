@@ -78,16 +78,19 @@ public final class Simulation {
                 .forEach(person -> decideDeath(person, world));
     }
 
-    public Person randomPerson(Surname surname) {
+    public Person randomPerson(Surname surname, IntegerRange age) {
         final Person.Sex sex = (random.nextBoolean())
                                ? Person.Sex.MALE
                                : Person.Sex.FEMALE;
+
+        int days = random.nextInt(age.getLast() * DAYS_IN_YEAR) - age.getFirst() * DAYS_IN_YEAR + 1;
+
 
         return new Person(
                 surname.getCulture().names(sex).get(),
                 surname,
                 sex,
-                world.getOriginDate().minusDays(random.nextInt(50 * DAYS_IN_YEAR)));
+                world.getCurrentDate().minusDays(days));
     }
 
     private void decideMarriage(Person male, List<Person> unmarriedFemales, World world) {

@@ -4,6 +4,7 @@ import ftg.model.Country;
 import ftg.model.World;
 import ftg.model.culture.Culture;
 import ftg.model.time.TredecimalDate;
+import ftg.util.IntegerRange;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +31,8 @@ public class Application {
     }
 
     private static void populate(Simulation simulation) {
+        final IntegerRange age = IntegerRange.inclusive(17, 50);
+
         final World world = simulation.getWorld();
 
         for (Country country : world.getCountries()) {
@@ -37,7 +40,7 @@ public class Application {
 
             culture.uniqueSurnames().stream()
                     .limit(100)
-                    .map(simulation::randomPerson)
+                    .map(surname -> simulation.randomPerson(surname, age))
                     .forEach(world::addLivingPerson);
         }
 
