@@ -1,4 +1,4 @@
-package ftg;
+package ftg.application;
 
 import ftg.commons.generator.Generator;
 import ftg.commons.generator.RandomChoice;

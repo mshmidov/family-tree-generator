@@ -1,4 +1,4 @@
-package ftg.bootstrap;
+package ftg.application.bootstrap;
 
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;

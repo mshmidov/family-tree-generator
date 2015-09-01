@@ -1,4 +1,4 @@
-package ftg;
+package ftg.application;
 
 import ftg.commons.range.IntegerRange;
 import ftg.model.Country;

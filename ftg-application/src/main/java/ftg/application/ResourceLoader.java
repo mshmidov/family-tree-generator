@@ -1,4 +1,4 @@
-package ftg;
+package ftg.application;
 
 import com.google.common.collect.ImmutableMap;
 import ftg.commons.exception.InitializationError;
