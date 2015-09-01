@@ -1,3 +1,3 @@
 dependencies {
-    testCompile project(':ftg-test-commons')
+    testCompile project(':ftg-commons-test')
 }
