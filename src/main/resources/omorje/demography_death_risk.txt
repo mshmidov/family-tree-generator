@@ -1,0 +1,15 @@
+# Risk of death per age group
+# Chance per year is 1/(table value)
+# First data column - men, second - women
+#
+0       |177    |227
+1-4     |4386   |5376
+5-14    |8333   |10417
+15-24   |1908   |4132
+25-34   |1215   |2488
+35-44   |663    |1106
+45-54   |279    |421
+55-64   |112    |178
+65-74   |42     |65
+75-84   |15     |21
+85+     |6      |7

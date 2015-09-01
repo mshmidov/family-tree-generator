@@ -1,6 +1,5 @@
 package ftg;
 
-import ftg.generator.Generator;
 import ftg.model.Country;
 import ftg.model.World;
 import ftg.model.culture.Culture;

@@ -21,7 +21,7 @@ public final class IntegerRange implements Predicate<Integer>, Iterable<Integer>
     }
 
     private IntegerRange(int lower, int upper) {
-        checkArgument(lower < upper);
+        checkArgument(lower <= upper);
         this.lower = lower;
         this.upper = upper;
     }

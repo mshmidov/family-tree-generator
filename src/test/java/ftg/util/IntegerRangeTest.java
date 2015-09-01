@@ -88,9 +88,8 @@ public class IntegerRangeTest {
     }
 
     @Theory
-    public void lowerBoundaryIsLessThenUpper(@Integers({-1, 0, 1}) int lower) {
+    public void lowerBoundaryIsLessOrEqualToUpper(@Integers({-1, 0, 1}) int lower) {
         assertThrown(() -> IntegerRange.inclusive(lower, lower - 1)).isInstanceOf(IllegalArgumentException.class);
-        assertThrown(() -> IntegerRange.inclusive(lower, lower)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Theory
