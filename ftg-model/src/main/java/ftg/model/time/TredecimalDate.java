@@ -5,7 +5,7 @@ import com.google.common.base.MoreObjects;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
-import static ftg.commons.util.MorePreconditions.checkedArgument;
+import static ftg.commons.MorePreconditions.checkedArgument;
 import static ftg.model.time.TredecimalCalendar.*;
 
 public final class TredecimalDate implements Comparable<TredecimalDate> {

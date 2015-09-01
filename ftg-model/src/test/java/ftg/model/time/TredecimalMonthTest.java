@@ -1,6 +1,6 @@
 package ftg.model.time;
 
-import ftg.commons.util.IntegerRange;
+import ftg.commons.range.IntegerRange;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;

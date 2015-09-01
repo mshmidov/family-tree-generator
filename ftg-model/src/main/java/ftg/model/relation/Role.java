@@ -1,6 +1,6 @@
 package ftg.model.relation;
 
-import ftg.commons.util.MorePreconditions;
+import ftg.commons.MorePreconditions;
 import ftg.model.person.Person;
 
 import java.util.function.Predicate;

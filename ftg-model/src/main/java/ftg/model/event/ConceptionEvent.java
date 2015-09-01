@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static ftg.commons.util.MorePreconditions.checkedArgument;
+import static ftg.commons.MorePreconditions.checkedArgument;
 import static ftg.model.person.Person.Sex.FEMALE;
 import static ftg.model.person.Person.Sex.MALE;
 

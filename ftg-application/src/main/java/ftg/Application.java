@@ -1,6 +1,6 @@
 package ftg;
 
-import ftg.commons.util.IntegerRange;
+import ftg.commons.range.IntegerRange;
 import ftg.model.Country;
 import ftg.model.World;
 import ftg.model.culture.Culture;

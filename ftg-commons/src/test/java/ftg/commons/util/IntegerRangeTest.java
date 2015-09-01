@@ -1,5 +1,6 @@
 package ftg.commons.util;
 
+import ftg.commons.range.IntegerRange;
 import ftg.commons.test.Integers;
 import ftg.commons.test.IntegersInRange;
 import org.hamcrest.CoreMatchers;

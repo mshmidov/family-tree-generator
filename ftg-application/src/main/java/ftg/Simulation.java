@@ -2,7 +2,7 @@ package ftg;
 
 import ftg.commons.generator.Generator;
 import ftg.commons.generator.RandomChoice;
-import ftg.commons.util.IntegerRange;
+import ftg.commons.range.IntegerRange;
 import ftg.model.World;
 import ftg.model.culture.surname.Surname;
 import ftg.model.event.BirthEvent;

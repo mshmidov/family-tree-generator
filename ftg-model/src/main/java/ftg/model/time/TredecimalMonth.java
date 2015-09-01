@@ -1,6 +1,6 @@
 package ftg.model.time;
 
-import ftg.commons.util.IntegerRange;
+import ftg.commons.range.IntegerRange;
 
 public enum TredecimalMonth {
     ONE,

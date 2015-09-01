@@ -1,4 +1,4 @@
-package ftg.commons.util;
+package ftg.commons;
 
 import java.util.function.Predicate;
 

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import ftg.commons.exception.InitializationError;
-import ftg.commons.util.IntegerRange;
+import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
 
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static ftg.commons.util.MorePreconditions.checkedArgument;
+import static ftg.commons.MorePreconditions.checkedArgument;
 
 public final class DemographyLoader {
 

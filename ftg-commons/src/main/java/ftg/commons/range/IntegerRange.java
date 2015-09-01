@@ -1,4 +1,4 @@
-package ftg.commons.util;
+package ftg.commons.range;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;

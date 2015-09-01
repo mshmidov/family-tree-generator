@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects;
 
 import java.util.Objects;
 
-import static ftg.commons.util.MorePreconditions.checkedArgument;
+import static ftg.commons.MorePreconditions.checkedArgument;
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 import static ftg.model.time.TredecimalCalendar.YEAR_DAYS;
 import static java.lang.Math.*;
