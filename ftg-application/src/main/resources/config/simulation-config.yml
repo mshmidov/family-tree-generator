@@ -1,0 +1,17 @@
+---
+countries:
+- name: "Оморье"
+  namingSystem:
+    namingLogic: "russian"
+    maleNames:
+    - "omorje/name_m.txt"
+    femaleNames:
+    - "omorje/name_f.txt"
+    commonSurnames:
+    - "omorje/surname_common.txt"
+    - "omorje/surname_general.txt"
+    uniqueSurnames:
+    - "omorje/surname_noble.txt"
+    - "omorje/surname_boyar.txt"
+  demography:
+    deathRisk: "omorje/demography_death_risk.txt"

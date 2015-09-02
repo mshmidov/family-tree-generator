@@ -1,8 +1,9 @@
-package ftg.model.relation;
+package ftg.model.person;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import ftg.model.relation.Relation;
 
 import java.util.List;
 import java.util.Optional;

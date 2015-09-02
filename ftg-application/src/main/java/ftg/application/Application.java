@@ -1,24 +1,29 @@
 package ftg.application;
 
+import ftg.application.bootstrap.ConfigurationLoader;
+import ftg.application.configuration.Country;
+import ftg.application.configuration.naming.NamingSystem;
 import ftg.commons.range.IntegerRange;
-import ftg.model.Country;
 import ftg.model.World;
-import ftg.model.culture.Culture;
 import ftg.model.time.TredecimalDate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
 
 public class Application {
 
     private static final Logger LOGGER = LogManager.getLogger(Application.class);
 
+    public static void main(String[] args) throws IOException, URISyntaxException {
 
-    public static void main(String[] args) {
+        final List<Country> countries = new ConfigurationLoader("./config/").loadConfiguration("simulation-config.yml");
 
-        final ResourceLoader resourceLoader = new ResourceLoader();
-        final World world = new World(new TredecimalDate(0), resourceLoader.loadCultures());
+        final World world = new World(new TredecimalDate(0));
 
-        final Simulation simulation = new Simulation(world);
+        final Simulation simulation = new Simulation(countries, world);
 
         populate(simulation);
 
@@ -35,12 +40,12 @@ public class Application {
 
         final World world = simulation.getWorld();
 
-        for (Country country : world.getCountries()) {
-            final Culture culture = world.getCulture(country);
+        for (Country country : simulation.getCountries().values()) {
+            final NamingSystem namingSystem = country.getNamingSystem();
 
-            culture.uniqueSurnames().stream()
+            namingSystem.getUniqueSurnames().stream()
                     .limit(100)
-                    .map(surname -> simulation.randomPerson(surname, age))
+                    .map(surname -> simulation.randomPerson(country, surname, age))
                     .forEach(world::addLivingPerson);
         }
     }

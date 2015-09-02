@@ -1,11 +1,8 @@
 package ftg.model.person;
 
 import com.google.common.collect.ImmutableList;
-import ftg.model.culture.surname.Surname;
 import ftg.model.relation.Relation;
-import ftg.model.relation.Relations;
 import ftg.model.state.State;
-import ftg.model.state.States;
 import ftg.model.time.TredecimalDate;
 
 import java.util.LinkedList;

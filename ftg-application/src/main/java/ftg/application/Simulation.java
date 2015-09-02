@@ -1,22 +1,26 @@
 package ftg.application;
 
+import com.google.common.collect.ImmutableMap;
+import ftg.application.configuration.Country;
 import ftg.commons.generator.Generator;
 import ftg.commons.generator.RandomChoice;
 import ftg.commons.range.IntegerRange;
 import ftg.model.World;
-import ftg.model.culture.surname.Surname;
 import ftg.model.event.BirthEvent;
 import ftg.model.event.ConceptionEvent;
 import ftg.model.event.DeathEvent;
 import ftg.model.event.MarriageEvent;
 import ftg.model.person.Person;
+import ftg.model.person.Surname;
 import ftg.model.relation.Marriage;
 import ftg.model.state.Pregnancy;
+import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -31,12 +35,19 @@ public final class Simulation {
 
     private final Generator<Person.Sex> randomSex = RandomChoice.ofEnum(Person.Sex.class);
 
-    private final World world;
-
     final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
 
-    public Simulation(World world) {
+    private final Map<String, Country> countries;
+
+    private final World world;
+
+    public Simulation(List<Country> countries, World world) {
+        this.countries = ImmutableMap.copyOf(countries.stream().collect(Collectors.toMap(Country::getName, c -> c)));
         this.world = world;
+    }
+
+    public Map<String, Country> getCountries() {
+        return countries;
     }
 
     public World getWorld() {
@@ -74,7 +85,7 @@ public final class Simulation {
         // births
         world.getLivingPersons().stream()
                 .filter(person -> person.hasState(Pregnancy.class))
-                .filter(person -> intervalBetween(world.getCurrentDate(), person.getStates().getSingle(Pregnancy.class).get().getConceptionDate()).getDays() == 280)
+                .filter(person -> intervalBetween(world.getCurrentDate(), person.getStates().getOptionalSingle(Pregnancy.class).get().getConceptionDate()).getDays() == 280)
                 .forEach(female -> decideBirth(female, world));
 
         // deaths
@@ -82,16 +93,20 @@ public final class Simulation {
                 .forEach(person -> decideDeath(person, world));
     }
 
-    public Person randomPerson(Surname surname, IntegerRange age) {
+    public Person randomPerson(Country country, Surname surname, IntegerRange age) {
 
         final Person.Sex sex = randomSex.get();
         int days = random.nextInt(age.getLast() * DAYS_IN_YEAR) - age.getFirst() * DAYS_IN_YEAR + 1;
 
-        return new Person(
-                surname.getCulture().names(sex).get(),
+        final Person newPerson = new Person(
+                country.getNamingSystem().getNames(sex).get(),
                 surname,
                 sex,
                 world.getCurrentDate().minusDays(days));
+
+        newPerson.getStates().add(new Residence(country.getName()));
+
+        return newPerson;
     }
 
     private void decideMarriage(Person male, List<Person> unmarriedFemales, World world) {
@@ -115,16 +130,17 @@ public final class Simulation {
     }
 
     private void decideBirth(Person female, World world) {
-        final Pregnancy pregnancy = female.getStates().getSingle(Pregnancy.class).get();
-        final String childName = pregnancy.getFather().getSurnameObject().getCulture().names(pregnancy.getChildSex()).get();
+        final Pregnancy pregnancy = female.getStates().getOptionalSingle(Pregnancy.class).get();
+        final String fatherCountry = pregnancy.getFather().getStates().getSingle(Residence.class).getCountry();
+        final String childName = countries.get(fatherCountry).getNamingSystem().getNames(pregnancy.getChildSex()).get();
         world.submitEvent(new BirthEvent(world.getCurrentDate(), female, pregnancy, childName));
     }
 
     private void decideDeath(Person person, World world) {
         final long age = intervalBetween(person.getBirthDate(), world.getCurrentDate()).getYears();
         final double chance = (age < 1)
-                              ? 100D / 1000D / DAYS_IN_YEAR
-                              : 15D / 1000D / DAYS_IN_YEAR;
+                ? 100D / 1000D / DAYS_IN_YEAR
+                : 15D / 1000D / DAYS_IN_YEAR;
 
         if (random.nextDouble() >= 1 - chance) {
             world.submitEvent(new DeathEvent(person));

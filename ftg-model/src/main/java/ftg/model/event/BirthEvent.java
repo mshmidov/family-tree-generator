@@ -5,6 +5,7 @@ import ftg.model.World;
 import ftg.model.person.Person;
 import ftg.model.relation.Parentage;
 import ftg.model.state.Pregnancy;
+import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
 import org.apache.logging.log4j.LogManager;
@@ -37,6 +38,7 @@ public final class BirthEvent implements Event {
         mother.getStates().removeAll(Pregnancy.class);
         final Person child = new Person(childName, father.getSurnameObject(), childSex, date);
         Parentage.create(father, mother, child);
+        child.getStates().add(mother.getStates().getSingle(Residence.class));
         world.addLivingPerson(child);
         LOGGER.info("{} is born of {} and {}", child, father, mother);
     }

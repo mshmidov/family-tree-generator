@@ -1,9 +1,7 @@
 package ftg.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import ftg.model.culture.Culture;
 import ftg.model.event.Event;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
@@ -11,7 +9,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static ftg.model.time.TredecimalDateFormat.ISO;
@@ -24,18 +25,15 @@ public final class World {
 
     private TredecimalDate currentDate;
 
-    private final Map<Country, Culture> cultures;
-
     private final Set<Person> livingPersons = new LinkedHashSet<>();
 
     private final Set<Person> deadPersons = new LinkedHashSet<>();
 
     private final List<Event> events = new ArrayList<>();
 
-    public World(TredecimalDate currentDate, Map<Country, Culture> cultures) {
+    public World(TredecimalDate currentDate) {
         this.originDate = currentDate;
         this.currentDate = currentDate;
-        this.cultures = ImmutableMap.copyOf(cultures);
     }
 
     public TredecimalDate getOriginDate() {
@@ -49,14 +47,6 @@ public final class World {
     public void setCurrentDate(TredecimalDate currentDate) {
         this.currentDate = currentDate;
         ThreadContext.put("date", ISO.format(currentDate));
-    }
-
-    public Set<Country> getCountries() {
-        return cultures.keySet();
-    }
-
-    public Culture getCulture(Country key) {
-        return cultures.get(key);
     }
 
     public Set<Person> getLivingPersons() {

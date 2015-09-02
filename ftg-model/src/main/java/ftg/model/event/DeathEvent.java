@@ -21,7 +21,6 @@ public final class DeathEvent implements Event {
 
     @Override
     public void apply(World world) {
-        deceased.getStates().removeAll();
 
         deceased.getRelations().getSingle(Marriage.class).ifPresent(marriage -> {
             marriage.remove();
