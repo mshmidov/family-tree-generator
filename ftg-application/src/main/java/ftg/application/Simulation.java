@@ -131,8 +131,9 @@ public final class Simulation {
 
     private void decideBirth(Person female, World world) {
         final Pregnancy pregnancy = female.getState(Pregnancy.class);
-        final String fatherCountry = pregnancy.getFather().getState(Residence.class).getCountry();
-        final String childName = countries.get(fatherCountry).getNamingSystem().getNames(pregnancy.getChildSex()).get();
+        final String countryOfNaming = female.getState(Residence.class).getCountry();
+        final String childName = countries.get(countryOfNaming).getNamingSystem().getNameForNewborn(female, pregnancy);
+
         world.submitEvent(new BirthEvent(world.getCurrentDate(), female, pregnancy, childName));
     }
 

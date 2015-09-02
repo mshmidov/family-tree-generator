@@ -3,6 +3,7 @@ package ftg.application.configuration.naming;
 import ftg.commons.generator.*;
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
+import ftg.model.state.Pregnancy;
 
 import java.util.List;
 
@@ -28,6 +29,10 @@ public final class NamingSystem {
 
         this.uniqueSurnames = new TransformingLimitedGenerator<>(new RandomUniqueElementGenerator<>(uniqueSurnames), namingLogic::newSurname);
         this.commonSurnames = new TransformingGenerator<>(new RandomElementGenerator<>(commonSurnames), namingLogic::newSurname);
+    }
+
+    public String getNameForNewborn(Person mother, Pregnancy pregnancy) {
+        return namingLogic.getNameForNewborn(mother, pregnancy, this);
     }
 
     public Generator<String> getMaleNames() {

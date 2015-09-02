@@ -1,12 +1,20 @@
 package ftg.application.configuration.naming;
 
+import ftg.model.person.Person;
 import ftg.model.person.Surname;
+import ftg.model.state.Pregnancy;
 
 public final class RussianNamingLogic implements NamingLogic {
 
     @Override
     public Surname newSurname(String surname) {
         return new Surname(surname, calculateFemaleSurname(surname));
+    }
+
+    @Override
+    public String getNameForNewborn(Person mother, Pregnancy pregnancy, NamingSystem namingSystem) {
+        // primitive implementation
+        return namingSystem.getNames(pregnancy.getChildSex()).get();
     }
 
     private String calculateFemaleSurname(String maleForm) {
