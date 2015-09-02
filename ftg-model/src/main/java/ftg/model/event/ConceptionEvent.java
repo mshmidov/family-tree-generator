@@ -52,7 +52,7 @@ public final class ConceptionEvent implements Event {
     @Override
     public void apply(World world) {
         LOGGER.info("{} is pregnant from {}", mother, father);
-        mother.getStates().add(new Pregnancy(conceptionDate, father, childSex));
+        mother.addState(new Pregnancy(conceptionDate, father, childSex));
     }
 
     @Override

@@ -85,7 +85,7 @@ public final class Simulation {
         // births
         world.getLivingPersons().stream()
                 .filter(person -> person.hasState(Pregnancy.class))
-                .filter(person -> intervalBetween(world.getCurrentDate(), person.getStates().getOptionalSingle(Pregnancy.class).get().getConceptionDate()).getDays() == 280)
+                .filter(person -> intervalBetween(world.getCurrentDate(), person.getState(Pregnancy.class).getConceptionDate()).getDays() == 280)
                 .forEach(female -> decideBirth(female, world));
 
         // deaths
@@ -104,7 +104,7 @@ public final class Simulation {
                 sex,
                 world.getCurrentDate().minusDays(days));
 
-        newPerson.getStates().add(new Residence(country.getName()));
+        newPerson.addState(new Residence(country.getName()));
 
         return newPerson;
     }
@@ -130,8 +130,8 @@ public final class Simulation {
     }
 
     private void decideBirth(Person female, World world) {
-        final Pregnancy pregnancy = female.getStates().getOptionalSingle(Pregnancy.class).get();
-        final String fatherCountry = pregnancy.getFather().getStates().getSingle(Residence.class).getCountry();
+        final Pregnancy pregnancy = female.getState(Pregnancy.class);
+        final String fatherCountry = pregnancy.getFather().getState(Residence.class).getCountry();
         final String childName = countries.get(fatherCountry).getNamingSystem().getNames(pregnancy.getChildSex()).get();
         world.submitEvent(new BirthEvent(world.getCurrentDate(), female, pregnancy, childName));
     }

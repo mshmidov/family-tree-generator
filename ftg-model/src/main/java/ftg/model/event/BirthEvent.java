@@ -35,10 +35,10 @@ public final class BirthEvent implements Event {
 
     @Override
     public void apply(World world) {
-        mother.getStates().removeAll(Pregnancy.class);
+        mother.removeState(Pregnancy.class);
         final Person child = new Person(childName, father.getSurnameObject(), childSex, date);
         Parentage.create(father, mother, child);
-        child.getStates().add(mother.getStates().getSingle(Residence.class));
+        child.addState(mother.getState(Residence.class));
         world.addLivingPerson(child);
         LOGGER.info("{} is born of {} and {}", child, father, mother);
     }

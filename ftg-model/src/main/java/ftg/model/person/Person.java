@@ -5,8 +5,12 @@ import ftg.model.relation.Relation;
 import ftg.model.state.State;
 import ftg.model.time.TredecimalDate;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkState;
 
 public final class Person {
 
@@ -22,7 +26,7 @@ public final class Person {
 
     private final Relations relations = new Relations();
 
-    private final States states = new States();
+    private final Map<Class<? extends State>, State> states = new HashMap<>();
 
     public Person(String name, Surname surname, Sex sex, TredecimalDate birthDate) {
         this.name = name;
@@ -59,20 +63,29 @@ public final class Person {
         return birthDate;
     }
 
+    public boolean hasState(Class<? extends State> stateClass) {
+        return states.containsKey(stateClass);
+    }
+
+    public void addState(State state) {
+        states.put(state.getClass(), state);
+    }
+
+    public <S extends State> S getState(Class<S> stateClass) {
+        checkState(hasState(stateClass));
+        return stateClass.cast(states.get(stateClass));
+    }
+
+    public void removeState(Class<? extends State> stateClass) {
+        states.remove(stateClass);
+    }
+
     public Relations getRelations() {
         return relations;
     }
 
-    public States getStates() {
-        return states;
-    }
-
     public <R extends Relation> boolean hasRelation(Class<R> relationClass) {
         return relations.contains(relationClass);
-    }
-
-    public <S extends State> boolean hasState(Class<S> stateClass) {
-        return getStates().contains(stateClass);
     }
 
     @Override
@@ -82,7 +95,7 @@ public final class Person {
 
     private String getFullSurname() {
         return (surnames.size() > 1 && sex == Sex.FEMALE)
-               ? String.format("%s (%s)", surnames.getLast().getFemaleForm(), surnames.getFirst().getFemaleForm())
-               : surnames.getLast().getForm(sex);
+                ? String.format("%s (%s)", surnames.getLast().getFemaleForm(), surnames.getFirst().getFemaleForm())
+                : surnames.getLast().getForm(sex);
     }
 }
