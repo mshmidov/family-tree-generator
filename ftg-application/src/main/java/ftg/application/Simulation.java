@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 import static ftg.model.time.TredecimalDateInterval.intervalBetween;
 import static java.lang.Math.*;
+import static java.util.Objects.requireNonNull;
 
 public final class Simulation {
 
@@ -157,9 +158,8 @@ public final class Simulation {
 
     private void decideDeath(Person person, World world) {
         final long age = intervalBetween(person.getBirthDate(), world.getCurrentDate()).getYears();
-        final double chance = (age < 1)
-                ? 100D / 1000D / DAYS_IN_YEAR
-                : 15D / 1000D / DAYS_IN_YEAR;
+        final Country country = requireNonNull(countries.get(person.getState(Residence.class).getCountry()));
+        final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
 
         if (random.nextDouble() >= 1 - chance) {
             world.submitEvent(new DeathEvent(person));

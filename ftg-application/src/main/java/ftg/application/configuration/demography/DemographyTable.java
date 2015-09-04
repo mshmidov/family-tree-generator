@@ -28,7 +28,7 @@ public final class DemographyTable {
 
     }
 
-    public double get(int age, Person.Sex sex) {
+    public double get(long age, Person.Sex sex) {
         final Optional<IntegerRange> range = ageRanges.stream().filter(r -> r.includes(age)).findFirst();
 
         return checked(map(sex).get(range.orElse(ageRanges.last())), isNotNull(), NoSuchElementException::new);

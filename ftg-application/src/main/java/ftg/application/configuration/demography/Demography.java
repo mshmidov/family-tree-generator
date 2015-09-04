@@ -10,7 +10,7 @@ public final class Demography {
         this.deathRiskTable = deathRiskTable;
     }
 
-    public double getDeathRisk(int age, Person.Sex sex) {
+    public double getDeathRisk(long age, Person.Sex sex) {
         return deathRiskTable.get(age, sex);
     }
 }
