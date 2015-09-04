@@ -8,9 +8,12 @@ public final class Country {
 
     private final NamingSystem namingSystem;
 
-    public Country(String name, NamingSystem namingSystem) {
+    private final Demography demography;
+
+    public Country(String name, NamingSystem namingSystem, Demography demography) {
         this.name = name;
         this.namingSystem = namingSystem;
+        this.demography = demography;
     }
 
     public String getName() {
@@ -19,5 +22,9 @@ public final class Country {
 
     public NamingSystem getNamingSystem() {
         return namingSystem;
+    }
+
+    public Demography getDemography() {
+        return demography;
     }
 }

@@ -3,6 +3,8 @@ package ftg.application.bootstrap;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
+import ftg.application.bootstrap.configfile.DemographyConfig;
+import ftg.application.configuration.Demography;
 import ftg.commons.exception.InitializationError;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
@@ -23,6 +25,10 @@ public final class DemographyLoader {
 
     public DemographyLoader(String path) {
         this.path = path;
+    }
+
+    public Demography loadDemography(DemographyConfig cfg) {
+        return new Demography();
     }
 
     public Table<IntegerRange, Person.Sex, Double> loadDeathRisk() {

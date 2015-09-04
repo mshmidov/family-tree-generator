@@ -29,11 +29,14 @@ public final class ConfigurationLoader {
 
     private final ObjectMapper objectMapper;
 
+    private final DemographyLoader demographyLoader;
+
     public ConfigurationLoader(String path) {
         this.path = path;
+        this.demographyLoader = new DemographyLoader(path);
 
-        objectMapper = new ObjectMapper(new YAMLFactory());
-        objectMapper.registerModule(new MrBeanModule());
+        this.objectMapper = new ObjectMapper(new YAMLFactory());
+        this.objectMapper.registerModule(new MrBeanModule());
     }
 
 
@@ -41,10 +44,14 @@ public final class ConfigurationLoader {
 
         final ConfigurationFile configurationFile = loadConfigFile(configFile);
 
+
         final ImmutableList.Builder<Country> builder = ImmutableList.<Country>builder();
 
         configurationFile.getCountries().stream()
-                .map(cfg -> new Country(cfg.getName(), createNamingSystem(cfg.getNamingSystem())))
+                .map(cfg -> new Country(
+                        cfg.getName(),
+                        createNamingSystem(cfg.getNamingSystem()),
+                        demographyLoader.loadDemography(cfg.getDemography())))
                 .forEach(builder::add);
 
         return builder.build();
