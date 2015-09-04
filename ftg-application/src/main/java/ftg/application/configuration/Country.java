@@ -1,5 +1,6 @@
 package ftg.application.configuration;
 
+import ftg.application.configuration.demography.Demography;
 import ftg.application.configuration.naming.NamingSystem;
 
 public final class Country {

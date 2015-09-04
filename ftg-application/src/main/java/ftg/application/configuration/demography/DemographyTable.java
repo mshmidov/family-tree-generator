@@ -1,4 +1,4 @@
-package ftg.application.configuration.naming;
+package ftg.application.configuration.demography;
 
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
@@ -16,20 +16,16 @@ public final class DemographyTable {
 
     private final Map<IntegerRange, Double> femaleValues = new HashMap<>();
 
-    public void put(IntegerRange ageRange, Person.Sex sex, double value) {
+    public static DemographyTableBuilder builder() {
+        return new DemographyTableBuilder();
+    }
 
-        if (!ageRanges.contains(ageRange)) {
+    DemographyTable(DemographyTableBuilder builder) {
 
-            for (IntegerRange range : ageRanges) {
-                if (ageRange.intersectsWith(range)) {
-                    throw new IllegalArgumentException();
-                }
-            }
+        ageRanges.addAll(builder.getAgeRanges());
+        maleValues.putAll(builder.getMaleValues());
+        femaleValues.putAll(builder.getFemaleValues());
 
-            ageRanges.add(ageRange);
-        }
-
-        map(sex).put(ageRange, value);
     }
 
     public double get(int age, Person.Sex sex) {

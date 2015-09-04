@@ -1,6 +1,5 @@
-package ftg.application.configuration;
+package ftg.application.configuration.demography;
 
-import ftg.application.configuration.naming.DemographyTable;
 import ftg.model.person.Person;
 
 public final class Demography {

@@ -2,8 +2,9 @@ package ftg.application.bootstrap;
 
 import com.google.common.collect.ImmutableList;
 import ftg.application.bootstrap.configfile.DemographyConfig;
-import ftg.application.configuration.Demography;
-import ftg.application.configuration.naming.DemographyTable;
+import ftg.application.configuration.demography.Demography;
+import ftg.application.configuration.demography.DemographyTable;
+import ftg.application.configuration.demography.DemographyTableBuilder;
 import ftg.commons.exception.InitializationError;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
@@ -36,14 +37,14 @@ public final class DemographyLoader {
 
         try (final Stream<String> lines = Files.lines(getPath(file))) {
 
-            final DemographyTable result = new DemographyTable();
+            final DemographyTableBuilder result = DemographyTable.builder();
 
             lines.filter(line -> !line.startsWith("#"))
                     .map(this::parseInputLine)
                     .flatMap(List::stream)
                     .forEach(triple -> result.put(triple.getLeft(), triple.getMiddle(), triple.getRight()));
 
-            return result;
+            return result.build();
 
         } catch (IOException | IllegalArgumentException e) {
             throw new InitializationError(e);
