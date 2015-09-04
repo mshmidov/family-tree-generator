@@ -126,7 +126,7 @@ public final class Simulation {
             if (candidates.isEmpty()) {
                 // TODO introduce new random female
             } else {
-                int index = min((int) floor(abs(random.nextGaussian() * candidates.size() / 3)), candidates.size());
+                int index = min((int) floor(abs(random.nextGaussian() * (candidates.size() - 1) / 3)), candidates.size() - 1);
                 world.submitEvent(new MarriageEvent(male, unmarriedFemales.remove(index)));
             }
 
