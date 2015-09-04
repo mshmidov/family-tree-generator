@@ -37,6 +37,11 @@ public final class IntegerRange implements Predicate<Integer>, Iterable<Integer>
         return (lower <= i) && (i <= upper);
     }
 
+    public boolean intersectsWith(IntegerRange other) {
+        return this.lower <= other.upper && other.lower <= this.upper;
+
+    }
+
     @Override
     public boolean test(Integer integer) {
         return includes(integer);
