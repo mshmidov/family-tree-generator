@@ -2,6 +2,7 @@ package ftg.application;
 
 import com.google.common.collect.ImmutableMap;
 import ftg.application.configuration.Country;
+import ftg.application.lineage.Lineages;
 import ftg.commons.generator.Generator;
 import ftg.commons.generator.RandomChoice;
 import ftg.commons.range.IntegerRange;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 import static ftg.model.time.TredecimalDateInterval.intervalBetween;
+import static java.lang.Math.*;
 
 public final class Simulation {
 
@@ -40,6 +42,8 @@ public final class Simulation {
     private final Map<String, Country> countries;
 
     private final World world;
+
+    private final Lineages lineages = new Lineages();
 
     public Simulation(List<Country> countries, World world) {
         this.countries = ImmutableMap.copyOf(countries.stream().collect(Collectors.toMap(Country::getName, c -> c)));
@@ -111,8 +115,22 @@ public final class Simulation {
 
     private void decideMarriage(Person male, List<Person> unmarriedFemales, World world) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
-        if (!unmarriedFemales.isEmpty() && random.nextDouble() >= 1 - chance) {
-            world.submitEvent(new MarriageEvent(male, unmarriedFemales.remove(0)));
+        if (random.nextDouble() >= 1 - chance) {
+
+            final List<Person> candidates = unmarriedFemales.stream()
+                    .filter(f -> !lineages.findClosestAncestry(male, f).isPresent()) // male is not descendant of female
+                    .filter(f -> !lineages.findClosestAncestry(f, male).isPresent()) // female is not descendant of male
+                    .filter(f -> lineages.findClosestRelation(male, f, 2).orElse(2) >= 2) // no siblings
+                    .collect(Collectors.toList());
+
+            if (candidates.isEmpty()) {
+                // TODO introduce new random female
+            } else {
+                int index = min((int) floor(abs(random.nextGaussian() * candidates.size() / 3)), candidates.size());
+                world.submitEvent(new MarriageEvent(male, unmarriedFemales.remove(index)));
+            }
+
+
         }
     }
 

@@ -35,12 +35,12 @@ public final class Lineages {
         kinshipProviders.put(Ancestors.FATHER, p -> p.getRelations().get(Parentage.class).stream()
                 .filter(parentage -> parentage.getRole(p) == Role.CHILD)
                 .findFirst()
-                .flatMap(parentage -> Optional.of(parentage.getFather())));
+                .map(Parentage::getFather));
 
         kinshipProviders.put(Ancestors.MOTHER, p -> p.getRelations().get(Parentage.class).stream()
                 .filter(parentage -> parentage.getRole(p) == Role.CHILD)
                 .findFirst()
-                .flatMap(parentage -> Optional.of(parentage.getMother())));
+                .map(Parentage::getMother));
 
         kinshipProviders.put(Ancestors.PATERNAL_GRANDFATHER, p -> getFather(p).flatMap(this::getFather));
         kinshipProviders.put(Ancestors.PATERNAL_GRANDMOTHER, p -> getFather(p).flatMap(this::getMother));
@@ -68,15 +68,29 @@ public final class Lineages {
         return getAncestor(person, Ancestors.MOTHER);
     }
 
+    public Optional<Integer> findClosestAncestry(Person person, Person ancestor) {
+        if (knownRelation.contains(person, ancestor)) {
+            return Optional.of(knownRelation.get(person, ancestor));
+        }
+
+        if (Objects.equals(person, ancestor)) {
+            return Optional.of(0);
+        }
+
+        return PARENTS.stream()
+                .flatMap(parent -> streamFromOptional(getAncestor(person, parent)))
+                .flatMap(parent -> streamFromOptional(findClosestAncestry(parent, ancestor)))
+                .map(r -> r + 1)
+                .peek(r -> cacheRelation(person, ancestor, r))
+                .min(Integer::compare);
+
+    }
+
     public Optional<Integer> findClosestRelation(Person a, Person b, int depthLimit) {
 
         checkState(!Objects.equals(requireNonNull(a), requireNonNull(b)), "Both arguments are same person");
 
-        final Optional<Integer> relation = recursiveFindClosestRelation(a, b, 0, depthLimit);
-
-        relation.ifPresent(r -> cacheRelation(a, b, r));
-
-        return relation;
+        return recursiveFindClosestRelation(a, b, 0, depthLimit);
     }
 
     private Optional<Integer> recursiveFindClosestRelation(Person a, Person b, int depth, int depthLimit) {
@@ -97,13 +111,12 @@ public final class Lineages {
                 .flatMap(this::streamFromOptional)
                 .collect(Collectors.toList());
 
-        final Optional<Integer> recursiveResult = UniquePairs.of(ancestors).stream()
+        return UniquePairs.of(ancestors).stream()
                 .map(pair -> recursiveFindClosestRelation(pair.get(0), pair.get(1), depth + 1, depthLimit))
                 .flatMap(this::streamFromOptional)
-                .peek(r -> cacheRelation(a, b, r + 1))
-                .collect(Collectors.minBy(Integer::compare));
-
-        return recursiveResult.map(r -> r + 1);
+                .map(r -> r + 1)
+                .peek(r -> cacheRelation(a, b, r))
+                .min(Integer::compare);
     }
 
 
