@@ -1,4 +1,4 @@
-package ftg.application.fx.dashboard;
+package ftg.application.gui.dashboard;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

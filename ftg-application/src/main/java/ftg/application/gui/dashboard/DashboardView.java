@@ -1,6 +1,6 @@
-package ftg.application.fx.dashboard;
+package ftg.application.gui.dashboard;
 
-import ftg.application.fxsupport.AbstractFxView;
+import ftg.application.gui.support.AbstractFxView;
 
 public class DashboardView extends AbstractFxView<DashboardPresenter> {
 

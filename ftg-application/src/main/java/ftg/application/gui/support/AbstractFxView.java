@@ -1,4 +1,4 @@
-package ftg.application.fxsupport;
+package ftg.application.gui.support;
 
 import com.google.inject.Inject;
 import javafx.fxml.FXMLLoader;

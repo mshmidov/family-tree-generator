@@ -1,4 +1,4 @@
-package ftg.application.fxsupport;
+package ftg.application.gui.support;
 
 public class JavaFxInitializationError extends Error {
 

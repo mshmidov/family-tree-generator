@@ -1,4 +1,4 @@
-package ftg.application.fxsupport;
+package ftg.application.gui.support;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
