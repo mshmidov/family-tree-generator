@@ -13,9 +13,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-public class Application {
+public class CommandLineApplication {
 
-    private static final Logger LOGGER = LogManager.getLogger(Application.class);
+    private static final Logger LOGGER = LogManager.getLogger(CommandLineApplication.class);
 
     public static void main(String[] args) throws IOException, URISyntaxException {
 
