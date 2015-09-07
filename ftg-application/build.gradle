@@ -1,7 +1,5 @@
 dependencies {
-    compile project(':ftg-model')
-
-    compile 'com.google.inject:guice:4.0'
+    compile project(':ftg-simulation')
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.1'
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-mrbean', version: '2.6.1'

@@ -1,7 +1,7 @@
-package ftg.application.configuration;
+package ftg.simulation.configuration;
 
-import ftg.application.configuration.demography.Demography;
-import ftg.application.configuration.naming.NamingSystem;
+import ftg.simulation.configuration.demography.Demography;
+import ftg.simulation.configuration.naming.NamingSystem;
 
 public final class Country {
 

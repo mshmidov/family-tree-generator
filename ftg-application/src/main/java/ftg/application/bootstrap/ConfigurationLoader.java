@@ -6,11 +6,11 @@ import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 import com.google.common.collect.ImmutableList;
 import ftg.application.bootstrap.configfile.ConfigurationFile;
 import ftg.application.bootstrap.configfile.NamingSystemConfig;
-import ftg.application.configuration.Country;
-import ftg.application.configuration.naming.CulturalNaming;
-import ftg.application.configuration.naming.NamingLogic;
-import ftg.application.configuration.naming.NamingSystem;
 import ftg.commons.exception.InitializationError;
+import ftg.simulation.configuration.Country;
+import ftg.simulation.configuration.naming.CulturalNaming;
+import ftg.simulation.configuration.naming.NamingLogic;
+import ftg.simulation.configuration.naming.NamingSystem;
 
 import java.io.IOException;
 import java.io.InputStream;

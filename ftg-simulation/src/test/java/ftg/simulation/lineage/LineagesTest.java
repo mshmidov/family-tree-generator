@@ -1,4 +1,4 @@
-package ftg.application.lineage;
+package ftg.simulation.lineage;
 
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
@@ -13,6 +13,7 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+
 
 @RunWith(Theories.class)
 public class LineagesTest {
@@ -79,9 +80,6 @@ public class LineagesTest {
 
         // then
         assertThat(lineages.findClosestRelation(child1, child2, 10), is(equalTo(Optional.of(2))));
-        assertThat(lineages.findClosestRelation(child1, grandfather1, 10), is(equalTo(Optional.of(2))));
-        assertThat(lineages.findClosestRelation(child1, grandmother2, 10), is(equalTo(Optional.of(2))));
-        assertThat(lineages.findClosestRelation(child1, grandmother3, 10), is(equalTo(Optional.empty())));
 
     }
 

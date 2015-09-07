@@ -1,4 +1,4 @@
-package ftg.application.configuration.naming;
+package ftg.simulation.configuration.naming;
 
 public enum CulturalNaming {
     RUSSIAN(new RussianNamingLogic());

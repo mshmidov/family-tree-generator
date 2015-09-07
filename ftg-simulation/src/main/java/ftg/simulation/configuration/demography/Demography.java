@@ -1,4 +1,4 @@
-package ftg.application.configuration.demography;
+package ftg.simulation.configuration.demography;
 
 import ftg.model.person.Person;
 

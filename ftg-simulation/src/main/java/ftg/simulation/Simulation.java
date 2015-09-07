@@ -1,8 +1,6 @@
-package ftg.application;
+package ftg.simulation;
 
 import com.google.common.collect.ImmutableMap;
-import ftg.application.configuration.Country;
-import ftg.application.lineage.Lineages;
 import ftg.commons.generator.Generator;
 import ftg.commons.generator.RandomChoice;
 import ftg.commons.range.IntegerRange;
@@ -16,7 +14,11 @@ import ftg.model.person.Surname;
 import ftg.model.relation.Marriage;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
+import ftg.model.time.TredecimalCalendar;
 import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateInterval;
+import ftg.simulation.configuration.Country;
+import ftg.simulation.lineage.Lineages;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,8 +27,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
-import static ftg.model.time.TredecimalDateInterval.intervalBetween;
 import static java.lang.Math.*;
 import static java.util.Objects.requireNonNull;
 
@@ -83,14 +83,14 @@ public final class Simulation {
         world.getLivingPersons().stream()
                 .filter(person -> person.getSex() == Person.Sex.FEMALE)
                 .filter(female -> female.getRelations().getSingle(Marriage.class).isPresent())
-                .filter(female -> fertileAge.includes(intervalBetween(female.getBirthDate(), world.getCurrentDate()).getYears()))
+                .filter(female -> fertileAge.includes(TredecimalDateInterval.intervalBetween(female.getBirthDate(), world.getCurrentDate()).getYears()))
                 .filter(female -> !female.hasState(Pregnancy.class))
                 .forEach(female -> decidePregnancyInMarriage(female, world));
 
         // births
         world.getLivingPersons().stream()
                 .filter(person -> person.hasState(Pregnancy.class))
-                .filter(person -> intervalBetween(world.getCurrentDate(), person.getState(Pregnancy.class).getConceptionDate()).getDays() == 280)
+                .filter(person -> TredecimalDateInterval.intervalBetween(world.getCurrentDate(), person.getState(Pregnancy.class).getConceptionDate()).getDays() == 280)
                 .forEach(female -> decideBirth(female, world));
 
         // deaths
@@ -101,7 +101,7 @@ public final class Simulation {
     public Person randomPerson(Country country, Surname surname, IntegerRange age) {
 
         final Person.Sex sex = randomSex.get();
-        int days = random.nextInt(age.getLast() * DAYS_IN_YEAR) - age.getFirst() * DAYS_IN_YEAR + 1;
+        int days = random.nextInt(age.getLast() * TredecimalCalendar.DAYS_IN_YEAR) - age.getFirst() * TredecimalCalendar.DAYS_IN_YEAR + 1;
 
         final Person newPerson = new Person(
                 country.getNamingSystem().getNames(sex).get(),
@@ -115,7 +115,7 @@ public final class Simulation {
     }
 
     private void decideMarriage(Person male, List<Person> unmarriedFemales, World world) {
-        final double chance = 60D / 1000D / DAYS_IN_YEAR;
+        final double chance = 60D / 1000D / TredecimalCalendar.DAYS_IN_YEAR;
         if (random.nextDouble() >= 1 - chance) {
 
             final List<Person> candidates = unmarriedFemales.stream()
@@ -136,7 +136,7 @@ public final class Simulation {
     }
 
     private void decidePregnancyInMarriage(Person female, World world) {
-        final double chance = 60D / 1000D / DAYS_IN_YEAR;
+        final double chance = 60D / 1000D / TredecimalCalendar.DAYS_IN_YEAR;
         if (random.nextDouble() >= 1 - chance) {
 
             final Person.Sex sex = randomSex.get();
@@ -157,9 +157,9 @@ public final class Simulation {
     }
 
     private void decideDeath(Person person, World world) {
-        final long age = intervalBetween(person.getBirthDate(), world.getCurrentDate()).getYears();
+        final long age = TredecimalDateInterval.intervalBetween(person.getBirthDate(), world.getCurrentDate()).getYears();
         final Country country = requireNonNull(countries.get(person.getState(Residence.class).getCountry()));
-        final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
+        final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / TredecimalCalendar.DAYS_IN_YEAR;
 
         if (random.nextDouble() >= 1 - chance) {
             world.submitEvent(new DeathEvent(person));

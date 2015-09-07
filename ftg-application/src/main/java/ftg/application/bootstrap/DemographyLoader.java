@@ -2,12 +2,12 @@ package ftg.application.bootstrap;
 
 import com.google.common.collect.ImmutableList;
 import ftg.application.bootstrap.configfile.DemographyConfig;
-import ftg.application.configuration.demography.Demography;
-import ftg.application.configuration.demography.DemographyTable;
-import ftg.application.configuration.demography.DemographyTableBuilder;
 import ftg.commons.exception.InitializationError;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
+import ftg.simulation.configuration.demography.Demography;
+import ftg.simulation.configuration.demography.DemographyTable;
+import ftg.simulation.configuration.demography.DemographyTableBuilder;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 

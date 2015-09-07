@@ -1,11 +1,12 @@
 package ftg.application;
 
 import ftg.application.bootstrap.ConfigurationLoader;
-import ftg.application.configuration.Country;
-import ftg.application.configuration.naming.NamingSystem;
 import ftg.commons.range.IntegerRange;
 import ftg.model.World;
 import ftg.model.time.TredecimalDate;
+import ftg.simulation.Simulation;
+import ftg.simulation.configuration.Country;
+import ftg.simulation.configuration.naming.NamingSystem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

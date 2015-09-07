@@ -1,0 +1,6 @@
+dependencies {
+    compile project(':ftg-commons')
+    compile project(':ftg-model')
+
+    testCompile project(':ftg-commons-test')
+}

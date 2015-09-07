@@ -1,4 +1,4 @@
-package ftg.application.lineage;
+package ftg.simulation.lineage;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;

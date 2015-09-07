@@ -1,4 +1,4 @@
-package ftg.application.lineage;
+package ftg.simulation.lineage;
 
 public enum Ancestors {
     FATHER,

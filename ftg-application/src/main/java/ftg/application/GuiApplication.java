@@ -11,17 +11,12 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import javax.inject.Provider;
-
 public class GuiApplication extends Application {
 
     private Injector injector;
 
     @Inject
     private DashboardView dashboardView;
-
-    @Inject
-    private Provider<DashboardPresenter> presenterProvider;
 
     public static void main(String[] args) {
         launch(args);
