@@ -17,6 +17,7 @@ import ftg.model.state.Residence;
 import ftg.model.time.TredecimalCalendar;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateInterval;
+import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.lineage.Lineages;
 import org.apache.logging.log4j.LogManager;
@@ -46,8 +47,8 @@ public final class Simulation {
 
     private final Lineages lineages = new Lineages();
 
-    public Simulation(List<Country> countries, World world) {
-        this.countries = ImmutableMap.copyOf(countries.stream().collect(Collectors.toMap(Country::getName, c -> c)));
+    public Simulation(Configuration configuration, World world) {
+        this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
         this.world = world;
     }
 

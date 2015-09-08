@@ -7,9 +7,7 @@ import ftg.application.bootstrap.ConfigurationLoader;
 import ftg.model.World;
 import ftg.model.time.TredecimalDate;
 import ftg.simulation.Simulation;
-import ftg.simulation.configuration.Country;
-
-import java.util.List;
+import ftg.simulation.configuration.Configuration;
 
 public class ApplicationModule extends AbstractModule {
 
@@ -21,8 +19,8 @@ public class ApplicationModule extends AbstractModule {
     @Provides
     @Singleton
     public Simulation getSimulation() {
-        final List<Country> countries = new ConfigurationLoader("./config/").loadConfiguration("simulation-config.yml");
+        final Configuration configuration = new ConfigurationLoader("./config/").loadConfiguration("simulation-config.yml");
         final World world = new World(new TredecimalDate(0));
-        return new Simulation(countries, world);
+        return new Simulation(configuration, world);
     }
 }

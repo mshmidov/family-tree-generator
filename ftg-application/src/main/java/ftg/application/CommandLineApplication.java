@@ -5,6 +5,7 @@ import ftg.commons.range.IntegerRange;
 import ftg.model.World;
 import ftg.model.time.TredecimalDate;
 import ftg.simulation.Simulation;
+import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.configuration.naming.NamingSystem;
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
 
 public class CommandLineApplication {
 
@@ -20,11 +20,11 @@ public class CommandLineApplication {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
 
-        final List<Country> countries = new ConfigurationLoader("./config/").loadConfiguration("simulation-config.yml");
+        final Configuration configuration = new ConfigurationLoader("./config/").loadConfiguration("simulation-config.yml");
 
         final World world = new World(new TredecimalDate(0));
 
-        final Simulation simulation = new Simulation(countries, world);
+        final Simulation simulation = new Simulation(configuration, world);
 
         populate(simulation);
 

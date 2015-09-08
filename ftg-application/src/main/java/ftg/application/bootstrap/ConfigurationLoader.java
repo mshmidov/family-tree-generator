@@ -3,10 +3,10 @@ package ftg.application.bootstrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
-import com.google.common.collect.ImmutableList;
 import ftg.application.bootstrap.configfile.ConfigurationFile;
 import ftg.application.bootstrap.configfile.NamingSystemConfig;
 import ftg.commons.exception.InitializationError;
+import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.configuration.naming.CulturalNaming;
 import ftg.simulation.configuration.naming.NamingLogic;
@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -40,21 +41,21 @@ public final class ConfigurationLoader {
     }
 
 
-    public List<Country> loadConfiguration(String configFile) {
+    public Configuration loadConfiguration(String configFile) {
 
         final ConfigurationFile configurationFile = loadConfigFile(configFile);
 
 
-        final ImmutableList.Builder<Country> builder = ImmutableList.<Country>builder();
+        final List<Country> countries = new ArrayList<>();
 
         configurationFile.getCountries().stream()
                 .map(cfg -> new Country(
                         cfg.getName(),
                         createNamingSystem(cfg.getNamingSystem()),
                         demographyLoader.loadDemography(cfg.getDemography())))
-                .forEach(builder::add);
+                .forEach(countries::add);
 
-        return builder.build();
+        return new Configuration(countries);
     }
 
     private ConfigurationFile loadConfigFile(String configFile) {
