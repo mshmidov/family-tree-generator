@@ -5,15 +5,11 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import ftg.commons.generator.Generator;
-import ftg.commons.generator.RandomChoice;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
-import ftg.model.person.Surname;
 import ftg.model.relation.Marriage;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
-import ftg.model.time.TredecimalCalendar;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateInterval;
 import ftg.model.world.*;
@@ -25,10 +21,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
-import static java.lang.Math.*;
+import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 import static java.util.Objects.requireNonNull;
 
 public final class Simulation {
@@ -36,6 +31,8 @@ public final class Simulation {
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
 
     private final EventBus eventBus;
+    private final RandomChoice randomChoice;
+    private final RandomModel randomModel;
 
     private final Provider<World> worldProvider;
 
@@ -45,16 +42,18 @@ public final class Simulation {
 
     private World world;
 
-
-    private final Random random = new Random();
-
-    private final Generator<Person.Sex> randomSex = RandomChoice.ofEnum(Person.Sex.class);
-
     private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
 
     @Inject
-    public Simulation(EventBus eventBus, Configuration configuration, Provider<World> worldProvider) {
+    public Simulation(EventBus eventBus,
+                      RandomChoice randomChoice,
+                      RandomModel randomModel,
+                      Configuration configuration,
+                      Provider<World> worldProvider) {
+
         this.eventBus = eventBus;
+        this.randomChoice = randomChoice;
+        this.randomModel = randomModel;
         this.worldProvider = worldProvider;
 
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
@@ -110,25 +109,9 @@ public final class Simulation {
                 .forEach(person -> decideDeath(person, world));
     }
 
-    public Person randomPerson(Country country, Surname surname, IntegerRange age) {
-
-        final Person.Sex sex = randomSex.get();
-        int days = random.nextInt(age.getLast() * TredecimalCalendar.DAYS_IN_YEAR) - age.getFirst() * TredecimalCalendar.DAYS_IN_YEAR + 1;
-
-        final Person newPerson = new Person(
-                country.getNamingSystem().getNames(sex).get(),
-                surname,
-                sex,
-                world.getCurrentDate().minusDays(days));
-
-        newPerson.addState(new Residence(country.getName()));
-
-        return newPerson;
-    }
-
     private void decideMarriage(Person male, List<Person> unmarriedFemales, World world) {
-        final double chance = 60D / 1000D / TredecimalCalendar.DAYS_IN_YEAR;
-        if (random.nextDouble() >= 1 - chance) {
+        final double chance = 60D / 1000D / DAYS_IN_YEAR;
+        if (randomChoice.byChance(chance)) {
 
             final List<Person> candidates = unmarriedFemales.stream()
                     .filter(f -> !lineages.findClosestAncestry(male, f).isPresent()) // male is not descendant of female
@@ -139,7 +122,7 @@ public final class Simulation {
             if (candidates.isEmpty()) {
                 // TODO introduce new random female
             } else {
-                int index = min((int) floor(abs(random.nextGaussian() * (candidates.size() - 1) / 3)), candidates.size() - 1);
+                int index = randomChoice.fromRangeByGaussian(candidates.size());
                 eventBus.post(new MarriageEvent(male, unmarriedFemales.remove(index)));
             }
 
@@ -148,10 +131,10 @@ public final class Simulation {
     }
 
     private void decidePregnancyInMarriage(Person female, World world) {
-        final double chance = 60D / 1000D / TredecimalCalendar.DAYS_IN_YEAR;
-        if (random.nextDouble() >= 1 - chance) {
+        final double chance = 60D / 1000D / DAYS_IN_YEAR;
+        if (randomChoice.byChance(chance)) {
 
-            final Person.Sex sex = randomSex.get();
+            final Person.Sex sex = randomChoice.from(Person.Sex.class);
 
             eventBus.post(new ConceptionEvent(world.getCurrentDate(),
                     female.getRelations().getSingle(Marriage.class).get().getHusband(),
@@ -171,9 +154,9 @@ public final class Simulation {
     private void decideDeath(Person person, World world) {
         final long age = TredecimalDateInterval.intervalBetween(person.getBirthDate(), world.getCurrentDate()).getYears();
         final Country country = requireNonNull(countries.get(person.getState(Residence.class).getCountry()));
-        final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / TredecimalCalendar.DAYS_IN_YEAR;
+        final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
 
-        if (random.nextDouble() >= 1 - chance) {
+        if (randomChoice.byChance(chance)) {
             eventBus.post(new DeathEvent(person));
         }
     }

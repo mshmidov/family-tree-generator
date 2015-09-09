@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import ftg.application.gui.support.FxSupportModule;
 import ftg.commons.range.IntegerRange;
 import ftg.model.world.PersonIntroductionEvent;
+import ftg.simulation.RandomModel;
 import ftg.simulation.Simulation;
 import ftg.simulation.SimulationStepEvent;
 import ftg.simulation.configuration.Configuration;
@@ -24,16 +25,20 @@ import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 public class CommandLineApplication {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandLineApplication.class);
+
     private Injector injector;
 
     @Inject
     private EventBus eventBus;
 
     @Inject
-    private Simulation simulation;
+    private RandomModel randomModel;
 
     @Inject
     private Configuration configuration;
+
+    @Inject
+    private Simulation simulation;
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         new CommandLineApplication().runSimulation();
@@ -58,7 +63,7 @@ public class CommandLineApplication {
 
             namingSystem.getUniqueSurnames().stream()
                     .limit(100)
-                    .map(surname -> simulation.randomPerson(country, surname, age))
+                    .map(surname -> randomModel.newPerson(country, surname, age, simulation.getCurrentDate()))
                     .map(PersonIntroductionEvent::new)
                     .forEach(eventBus::post);
         }
