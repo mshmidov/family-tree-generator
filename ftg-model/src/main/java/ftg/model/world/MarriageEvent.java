@@ -1,7 +1,6 @@
-package ftg.model.event;
+package ftg.model.world;
 
 import com.google.common.base.MoreObjects;
-import ftg.model.World;
 import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
 import org.apache.logging.log4j.LogManager;

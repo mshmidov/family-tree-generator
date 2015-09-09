@@ -1,13 +1,15 @@
 package ftg.application;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import ftg.application.gui.support.FxSupportModule;
 import ftg.commons.range.IntegerRange;
-import ftg.model.World;
-import ftg.model.time.TredecimalDate;
+import ftg.model.world.PersonIntroductionEvent;
 import ftg.simulation.Simulation;
+import ftg.simulation.SimulationStepEvent;
+import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.configuration.naming.NamingSystem;
 import org.apache.logging.log4j.LogManager;
@@ -15,28 +17,26 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.stream.LongStream;
+
+import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 
 public class CommandLineApplication {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandLineApplication.class);
-
     private Injector injector;
+
+    @Inject
+    private EventBus eventBus;
 
     @Inject
     private Simulation simulation;
 
+    @Inject
+    private Configuration configuration;
+
     public static void main(String[] args) throws IOException, URISyntaxException {
         new CommandLineApplication().runSimulation();
-    }
-
-    public void runSimulation() {
-        populate(simulation);
-
-        final TredecimalDate simulationEnd = simulation.getWorld().getCurrentDate().plusYears(300);
-
-        while (!simulation.getCurrentDate().isAfter(simulationEnd)) {
-            simulation.nextDay();
-        }
     }
 
     public CommandLineApplication() {
@@ -44,18 +44,23 @@ public class CommandLineApplication {
         injector.injectMembers(this);
     }
 
-    private static void populate(Simulation simulation) {
+    public void runSimulation() {
+        populate();
+
+        LongStream.range(0, 300 * DAYS_IN_YEAR).forEach(i -> eventBus.post(new SimulationStepEvent()));
+    }
+
+    private void populate() {
         final IntegerRange age = IntegerRange.inclusive(17, 50);
 
-        final World world = simulation.getWorld();
-
-        for (Country country : simulation.getCountries().values()) {
+        for (Country country : configuration.getCountries()) {
             final NamingSystem namingSystem = country.getNamingSystem();
 
             namingSystem.getUniqueSurnames().stream()
                     .limit(100)
                     .map(surname -> simulation.randomPerson(country, surname, age))
-                    .forEach(world::addLivingPerson);
+                    .map(PersonIntroductionEvent::new)
+                    .forEach(eventBus::post);
         }
     }
 }

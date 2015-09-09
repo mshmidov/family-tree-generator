@@ -1,8 +1,9 @@
-package ftg.model;
+package ftg.model.world;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import ftg.model.event.Event;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
 import org.apache.logging.log4j.LogManager;
@@ -21,32 +22,23 @@ public final class World {
 
     private static final Logger LOGGER = LogManager.getLogger(World.class);
 
-    private final TredecimalDate originDate;
+    private final EventBus eventBus;
+
+    private final Set<Person> livingPersons = new LinkedHashSet<>();
+    private final Set<Person> deadPersons = new LinkedHashSet<>();
+    private final List<Event> events = new ArrayList<>();
 
     private TredecimalDate currentDate;
 
-    private final Set<Person> livingPersons = new LinkedHashSet<>();
-
-    private final Set<Person> deadPersons = new LinkedHashSet<>();
-
-    private final List<Event> events = new ArrayList<>();
-
-    public World(TredecimalDate currentDate) {
-        this.originDate = currentDate;
+    public World(EventBus eventBus, TredecimalDate currentDate) {
+        this.eventBus = eventBus;
         this.currentDate = currentDate;
-    }
 
-    public TredecimalDate getOriginDate() {
-        return originDate;
+        this.eventBus.register(this);
     }
 
     public TredecimalDate getCurrentDate() {
         return currentDate;
-    }
-
-    public void setCurrentDate(TredecimalDate currentDate) {
-        this.currentDate = currentDate;
-        ThreadContext.put("date", ISO.format(currentDate));
     }
 
     public Set<Person> getLivingPersons() {
@@ -57,23 +49,29 @@ public final class World {
         return ImmutableSet.copyOf(deadPersons);
     }
 
-    public void addLivingPerson(Person person) {
-        livingPersons.add(person);
-    }
-
-    public void killPerson(Person person) {
-        checkState(livingPersons.contains(person), String.format("%s is not among living persons", person));
-        livingPersons.remove(person);
-        deadPersons.add(person);
-    }
-
     public List<Event> getEvents() {
         return ImmutableList.copyOf(events);
     }
 
+    @Subscribe
     public void submitEvent(Event event) {
-        LOGGER.debug("Adding event {}", event);
+        LOGGER.debug("Received {}", event);
         events.add(event);
         event.apply(this);
+    }
+
+    void setDate(TredecimalDate currentDate) {
+        this.currentDate = currentDate;
+        ThreadContext.put("date", ISO.format(currentDate));
+    }
+
+    void addLivingPerson(Person person) {
+        livingPersons.add(person);
+    }
+
+    void killPerson(Person person) {
+        checkState(livingPersons.contains(person), String.format("%s is not among living persons", person));
+        livingPersons.remove(person);
+        deadPersons.add(person);
     }
 }

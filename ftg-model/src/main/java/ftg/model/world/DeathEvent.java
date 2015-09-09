@@ -1,6 +1,5 @@
-package ftg.model.event;
+package ftg.model.world;
 
-import ftg.model.World;
 import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
 import ftg.model.relation.Widowhood;

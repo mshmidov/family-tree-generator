@@ -1,16 +1,13 @@
 package ftg.simulation;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import ftg.commons.generator.Generator;
 import ftg.commons.generator.RandomChoice;
 import ftg.commons.range.IntegerRange;
-import ftg.model.World;
-import ftg.model.event.BirthEvent;
-import ftg.model.event.ConceptionEvent;
-import ftg.model.event.DeathEvent;
-import ftg.model.event.MarriageEvent;
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
 import ftg.model.relation.Marriage;
@@ -19,6 +16,7 @@ import ftg.model.state.Residence;
 import ftg.model.time.TredecimalCalendar;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateInterval;
+import ftg.model.world.*;
 import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.lineage.Lineages;
@@ -37,6 +35,7 @@ public final class Simulation {
 
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
 
+    private final EventBus eventBus;
 
     private final Provider<World> worldProvider;
 
@@ -54,10 +53,14 @@ public final class Simulation {
     private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
 
     @Inject
-    public Simulation(Configuration configuration, Provider<World> worldProvider) {
+    public Simulation(EventBus eventBus, Configuration configuration, Provider<World> worldProvider) {
+        this.eventBus = eventBus;
         this.worldProvider = worldProvider;
+
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
         this.world = worldProvider.get();
+
+        this.eventBus.register(this);
     }
 
     public Map<String, Country> getCountries() {
@@ -72,9 +75,9 @@ public final class Simulation {
         return world.getCurrentDate();
     }
 
-    public void nextDay() {
-        world.setCurrentDate(world.getCurrentDate().plusDays(1));
-
+    @Subscribe
+    public void nextDay(SimulationStepEvent event) {
+        eventBus.post(new NewDateEvent(world.getCurrentDate().plusDays(1)));
         // marriages
         final List<Person> unmarriedFemales = world.getLivingPersons().stream()
                 .filter(person -> person.getSex() == Person.Sex.FEMALE)
@@ -137,7 +140,7 @@ public final class Simulation {
                 // TODO introduce new random female
             } else {
                 int index = min((int) floor(abs(random.nextGaussian() * (candidates.size() - 1) / 3)), candidates.size() - 1);
-                world.submitEvent(new MarriageEvent(male, unmarriedFemales.remove(index)));
+                eventBus.post(new MarriageEvent(male, unmarriedFemales.remove(index)));
             }
 
 
@@ -150,7 +153,7 @@ public final class Simulation {
 
             final Person.Sex sex = randomSex.get();
 
-            world.submitEvent(new ConceptionEvent(world.getCurrentDate(),
+            eventBus.post(new ConceptionEvent(world.getCurrentDate(),
                     female.getRelations().getSingle(Marriage.class).get().getHusband(),
                     female,
                     sex));
@@ -171,7 +174,7 @@ public final class Simulation {
         final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / TredecimalCalendar.DAYS_IN_YEAR;
 
         if (random.nextDouble() >= 1 - chance) {
-            world.submitEvent(new DeathEvent(person));
+            eventBus.post(new DeathEvent(person));
         }
     }
 }

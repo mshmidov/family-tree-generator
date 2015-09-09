@@ -1,6 +1,4 @@
-package ftg.model.event;
-
-import ftg.model.World;
+package ftg.model.world;
 
 public interface Event {
 
