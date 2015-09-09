@@ -16,6 +16,7 @@ import ftg.simulation.configuration.naming.NamingSystem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.inject.Provider;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.stream.LongStream;
@@ -26,19 +27,18 @@ public class CommandLineApplication {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandLineApplication.class);
 
+    private final RandomModel randomModel = new RandomModel();
+
     private Injector injector;
 
     @Inject
     private EventBus eventBus;
 
     @Inject
-    private RandomModel randomModel;
-
-    @Inject
     private Configuration configuration;
 
     @Inject
-    private Simulation simulation;
+    private Provider<Simulation> simulationProvider;
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         new CommandLineApplication().runSimulation();
@@ -50,12 +50,13 @@ public class CommandLineApplication {
     }
 
     public void runSimulation() {
-        populate();
+        final Simulation simulation = simulationProvider.get();
+        populate(simulation);
 
         LongStream.range(0, 300 * DAYS_IN_YEAR).forEach(i -> eventBus.post(new SimulationStepEvent()));
     }
 
-    private void populate() {
+    private void populate(Simulation simulation) {
         final IntegerRange age = IntegerRange.inclusive(17, 50);
 
         for (Country country : configuration.getCountries()) {

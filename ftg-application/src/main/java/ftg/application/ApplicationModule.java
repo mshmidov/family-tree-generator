@@ -8,7 +8,6 @@ import ftg.application.bootstrap.ConfigurationLoader;
 import ftg.model.time.TredecimalDate;
 import ftg.model.world.World;
 import ftg.simulation.RandomChoice;
-import ftg.simulation.Simulation;
 import ftg.simulation.configuration.Configuration;
 
 
@@ -23,13 +22,10 @@ public class ApplicationModule extends AbstractModule {
                 .toProvider(() -> new ConfigurationLoader("./config/").loadConfiguration("simulation-config.yml"))
                 .in(Singleton.class);
 
-        bind(Simulation.class).in(Singleton.class);
-
     }
 
     @Provides
     public World getWorld(EventBus eventBus) {
         return new World(eventBus, new TredecimalDate(0));
     }
-
 }

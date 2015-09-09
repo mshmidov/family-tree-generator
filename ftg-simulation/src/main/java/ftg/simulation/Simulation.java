@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
@@ -30,44 +29,23 @@ public final class Simulation {
 
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
 
-    private final EventBus eventBus;
-    private final RandomChoice randomChoice;
-    private final RandomModel randomModel;
+    private final RandomChoice randomChoice = new RandomChoice();
+    private final Lineages lineages = new Lineages();
+    private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
 
-    private final Provider<World> worldProvider;
+    private final EventBus eventBus;
+
+    private final World world;
 
     private final Map<String, Country> countries;
 
-    private final Lineages lineages = new Lineages();
-
-    private World world;
-
-    private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
-
     @Inject
-    public Simulation(EventBus eventBus,
-                      RandomChoice randomChoice,
-                      RandomModel randomModel,
-                      Configuration configuration,
-                      Provider<World> worldProvider) {
+    public Simulation(EventBus eventBus, Configuration configuration, World world) {
 
         this.eventBus = eventBus;
-        this.randomChoice = randomChoice;
-        this.randomModel = randomModel;
-        this.worldProvider = worldProvider;
-
+        this.world = world;
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
-        this.world = worldProvider.get();
-
         this.eventBus.register(this);
-    }
-
-    public Map<String, Country> getCountries() {
-        return countries;
-    }
-
-    public World getWorld() {
-        return world;
     }
 
     public TredecimalDate getCurrentDate() {
