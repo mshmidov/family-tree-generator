@@ -1,6 +1,8 @@
 package ftg.simulation;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import ftg.commons.generator.Generator;
 import ftg.commons.generator.RandomChoice;
 import ftg.commons.range.IntegerRange;
@@ -35,21 +37,27 @@ public final class Simulation {
 
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
 
+
+    private final Provider<World> worldProvider;
+
+    private final Map<String, Country> countries;
+
+    private final Lineages lineages = new Lineages();
+
+    private World world;
+
+
     private final Random random = new Random();
 
     private final Generator<Person.Sex> randomSex = RandomChoice.ofEnum(Person.Sex.class);
 
-    final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
+    private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
 
-    private final Map<String, Country> countries;
-
-    private final World world;
-
-    private final Lineages lineages = new Lineages();
-
-    public Simulation(Configuration configuration, World world) {
+    @Inject
+    public Simulation(Configuration configuration, Provider<World> worldProvider) {
+        this.worldProvider = worldProvider;
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
-        this.world = world;
+        this.world = worldProvider.get();
     }
 
     public Map<String, Country> getCountries() {
