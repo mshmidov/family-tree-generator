@@ -1,19 +1,18 @@
 package ftg.model.world;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static ftg.model.time.TredecimalDateFormat.ISO;
@@ -22,35 +21,30 @@ public final class World {
 
     private static final Logger LOGGER = LogManager.getLogger(World.class);
 
-    private final EventBus eventBus;
+    private final ObservableSet<Person> livingPersons = FXCollections.observableSet(new LinkedHashSet<>());
+    private final ObservableSet<Person> deadPersons = FXCollections.observableSet(new LinkedHashSet<>());
+    private final ObservableList<Event> events = FXCollections.observableArrayList();
 
-    private final Set<Person> livingPersons = new LinkedHashSet<>();
-    private final Set<Person> deadPersons = new LinkedHashSet<>();
-    private final List<Event> events = new ArrayList<>();
+    private ReadOnlyObjectWrapper<TredecimalDate> currentDate;
 
-    private TredecimalDate currentDate;
-
-    public World(EventBus eventBus, TredecimalDate currentDate) {
-        this.eventBus = eventBus;
-        this.currentDate = currentDate;
-
-        this.eventBus.register(this);
+    public World(TredecimalDate currentDate) {
+        this.currentDate = new ReadOnlyObjectWrapper<>(currentDate);
     }
 
-    public TredecimalDate getCurrentDate() {
-        return currentDate;
+    public ObservableValue<TredecimalDate> getCurrentDate() {
+        return currentDate.getReadOnlyProperty();
     }
 
-    public Set<Person> getLivingPersons() {
-        return ImmutableSet.copyOf(livingPersons);
+    public ObservableSet<Person> getLivingPersons() {
+        return FXCollections.unmodifiableObservableSet(livingPersons);
     }
 
-    public Set<Person> getDeadPersons() {
-        return ImmutableSet.copyOf(deadPersons);
+    public ObservableSet<Person> getDeadPersons() {
+        return FXCollections.unmodifiableObservableSet(deadPersons);
     }
 
-    public List<Event> getEvents() {
-        return ImmutableList.copyOf(events);
+    public ObservableList<Event> getEvents() {
+        return FXCollections.unmodifiableObservableList(events);
     }
 
     @Subscribe
@@ -61,7 +55,7 @@ public final class World {
     }
 
     void setDate(TredecimalDate currentDate) {
-        this.currentDate = currentDate;
+        this.currentDate.setValue(currentDate);
         ThreadContext.put("date", ISO.format(currentDate));
     }
 

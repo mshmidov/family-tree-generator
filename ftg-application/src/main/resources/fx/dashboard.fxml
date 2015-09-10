@@ -2,19 +2,38 @@
 
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.*?>
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1"
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ftg.application.gui.dashboard.DashboardPresenter">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="900.0" spacing="10.0">
             <children>
+                <Button mnemonicParsing="false" onAction="#newSimulation" text="New simulation"/>
+
+                <ComboBox fx:id="randomPeopleCountField" prefHeight="26.0" prefWidth="85.0">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <Integer fx:value="1"/>
+                            <Integer fx:value="10"/>
+                            <Integer fx:value="25"/>
+                            <Integer fx:value="50"/>
+                            <Integer fx:value="100"/>
+                            <Integer fx:value="300"/>
+                            <Integer fx:value="500"/>
+                            <Integer fx:value="1000"/>
+                        </FXCollections>
+                    </items>
+                    <value>
+                        <Integer fx:value="50"/>
+                    </value>
+                </ComboBox>
+                <Button mnemonicParsing="false" onAction="#populateSimulation" text="Populate"/>
+
                 <Label text="Duration (years)"/>
-                <ComboBox fx:id="simulationDurationField" prefWidth="150.0">
+                <ComboBox fx:id="simulationDurationField" prefHeight="26.0" prefWidth="85.0">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
                             <Integer fx:value="1"/>
@@ -31,7 +50,9 @@
                         <Integer fx:value="300"/>
                     </value>
                 </ComboBox>
-                <Button onAction="#handleRunSimulationButtonAction" mnemonicParsing="false" text="Run"/>
+                <Button mnemonicParsing="false" onAction="#runSimulation" text="Run"/>
+                <Label text="People:"/>
+                <Label fx:id="livingPeopleLabel" text=""/>
             </children>
             <padding>
                 <Insets left="10.0"/>

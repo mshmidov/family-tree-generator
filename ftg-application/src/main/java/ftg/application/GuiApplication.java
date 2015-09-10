@@ -3,6 +3,7 @@ package ftg.application;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import ftg.application.cdi.ApplicationModule;
 import ftg.application.gui.dashboard.DashboardPresenter;
 import ftg.application.gui.dashboard.DashboardView;
 import ftg.application.gui.support.FxSupportModule;

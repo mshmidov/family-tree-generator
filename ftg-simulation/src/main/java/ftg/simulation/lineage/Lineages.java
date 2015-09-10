@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
 import ftg.commons.UniquePairs;
+import ftg.commons.Util;
 import ftg.model.person.Person;
 import ftg.model.relation.Parentage;
 import ftg.model.relation.Role;
@@ -15,9 +16,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkState;
+import static ftg.commons.Util.streamFromOptional;
 import static java.util.Objects.requireNonNull;
 
 public final class Lineages {
@@ -108,21 +109,19 @@ public final class Lineages {
 
         final List<Person> ancestors = UniquePairs.of(ImmutableList.of(a, b), PARENTS).stream()
                 .map(pair -> getAncestor(pair.getLeft(), pair.getRight()))
-                .flatMap(this::streamFromOptional)
+                .flatMap(Util::streamFromOptional)
                 .collect(Collectors.toList());
 
         return UniquePairs.of(ancestors).stream()
                 .map(pair -> recursiveFindClosestRelation(pair.get(0), pair.get(1), depth + 1, depthLimit))
-                .flatMap(this::streamFromOptional)
+                .flatMap(Util::streamFromOptional)
                 .map(r -> r + 1)
                 .peek(r -> cacheRelation(a, b, r))
                 .min(Integer::compare);
     }
 
 
-    private <T> Stream<T> streamFromOptional(Optional<T> o) {
-        return o.isPresent() ? Stream.of(o.get()) : Stream.empty();
-    }
+
 
     private void cacheRelation(Person a, Person b, Integer relation) {
         if (Optional.ofNullable(knownRelation.get(a, b)).orElse(Integer.MAX_VALUE) > requireNonNull(relation)) {
