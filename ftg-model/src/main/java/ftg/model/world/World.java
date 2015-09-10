@@ -7,12 +7,9 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-
-import java.util.LinkedHashSet;
 
 import static com.google.common.base.Preconditions.checkState;
 import static ftg.model.time.TredecimalDateFormat.ISO;
@@ -21,8 +18,8 @@ public final class World {
 
     private static final Logger LOGGER = LogManager.getLogger(World.class);
 
-    private final ObservableSet<Person> livingPersons = FXCollections.observableSet(new LinkedHashSet<>());
-    private final ObservableSet<Person> deadPersons = FXCollections.observableSet(new LinkedHashSet<>());
+    private final ObservableList<Person> livingPersons = FXCollections.observableArrayList();
+    private final ObservableList<Person> deadPersons = FXCollections.observableArrayList();
     private final ObservableList<Event> events = FXCollections.observableArrayList();
 
     private ReadOnlyObjectWrapper<TredecimalDate> currentDate;
@@ -35,12 +32,12 @@ public final class World {
         return currentDate.getReadOnlyProperty();
     }
 
-    public ObservableSet<Person> getLivingPersons() {
-        return FXCollections.unmodifiableObservableSet(livingPersons);
+    public ObservableList<Person> getLivingPersons() {
+        return FXCollections.unmodifiableObservableList(livingPersons);
     }
 
-    public ObservableSet<Person> getDeadPersons() {
-        return FXCollections.unmodifiableObservableSet(deadPersons);
+    public ObservableList<Person> getDeadPersons() {
+        return FXCollections.unmodifiableObservableList(deadPersons);
     }
 
     public ObservableList<Event> getEvents() {

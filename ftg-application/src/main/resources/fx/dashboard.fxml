@@ -3,8 +3,7 @@
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import java.lang.*?>
 <VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ftg.application.gui.dashboard.DashboardPresenter">
@@ -52,12 +51,34 @@
                 </ComboBox>
                 <Button mnemonicParsing="false" onAction="#runSimulation" text="Run"/>
                 <Label text="People:"/>
-                <Label fx:id="livingPeopleLabel" text=""/>
+                <Label fx:id="livingPeopleLabel"/>
             </children>
             <padding>
                 <Insets left="10.0"/>
             </padding>
         </HBox>
-        <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS"/>
+        <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
+            <children>
+                <SplitPane dividerPositions="0.7" VBox.vgrow="ALWAYS">
+                    <items>
+                        <Pane/>
+                        <Accordion expandedPane="$rightAccordionFirstPane">
+                            <panes>
+                                <TitledPane animated="false" text="Living people" fx:id="rightAccordionFirstPane">
+                                    <content>
+                                        <ListView fx:id="livingPeopleList"/>
+                                    </content>
+                                </TitledPane>
+                                <TitledPane animated="false" text="Dead people">
+                                    <content>
+                                        <ListView fx:id="deadPeopleList"/>
+                                    </content>
+                                </TitledPane>
+                            </panes>
+                        </Accordion>
+                    </items>
+                </SplitPane>
+            </children>
+        </VBox>
     </children>
 </VBox>
