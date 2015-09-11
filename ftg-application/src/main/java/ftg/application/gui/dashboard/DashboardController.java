@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
 import ftg.model.world.PersonIntroductionEvent;
-import ftg.model.world.World;
 import ftg.simulation.RandomModel;
 import ftg.simulation.Simulation;
 import ftg.simulation.SimulationStepEvent;
@@ -18,12 +17,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 
 import javax.inject.Provider;
 import java.util.List;
@@ -32,7 +25,7 @@ import java.util.stream.LongStream;
 
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 
-public class DashboardPresenter {
+public class DashboardController {
 
     private final EventBus eventBus;
     private final Configuration configuration;
@@ -44,82 +37,42 @@ public class DashboardPresenter {
     private final ObjectProperty<ObservableList<Person>> livingPersons = new SimpleObjectProperty<>();
     private final ObjectProperty<ObservableList<Person>> deadPersons = new SimpleObjectProperty<>();
 
-    @FXML
-    private ComboBox<Integer> randomPeopleCountField;
-
-    @FXML
-    private ComboBox<Integer> simulationDurationField;
-
-    @FXML
-    private Label livingPeopleLabel;
-
-    @FXML
-    private ListView<Person> livingPeopleList;
-
-    @FXML
-    private ListView<Person> deadPeopleList;
-
     private Simulation simulation;
 
     @Inject
-    public DashboardPresenter(EventBus eventBus, Configuration configuration, Provider<Simulation> simulationProvider) {
+    public DashboardController(EventBus eventBus, Configuration configuration, Provider<Simulation> simulationProvider) {
         this.eventBus = eventBus;
         this.configuration = configuration;
         this.simulationProvider = () -> {
             final Simulation simulation = simulationProvider.get();
-            bindToWorld(simulation.getWorld());
+
+            livingPersonsCount.bind(Bindings.size(simulation.getWorld().getLivingPersons()));
+            livingPersons.setValue(simulation.getWorld().getLivingPersons());
+            deadPersons.setValue(simulation.getWorld().getDeadPersons());
+
             return simulation;
         };
     }
 
-    @FXML
-    public void initialize() {
+    public IntegerProperty livingPersonsCountProperty() {
+        return livingPersonsCount;
+    }
+
+    public ObjectProperty<ObservableList<Person>> livingPersonsProperty() {
+        return livingPersons;
+    }
+
+
+    public ObjectProperty<ObservableList<Person>> deadPersonsProperty() {
+        return deadPersons;
+    }
+
+    public void newSimulation() {
         simulation = simulationProvider.get();
-        bindControls();
     }
 
-    @FXML
-    public void newSimulation(ActionEvent actionEvent) {
-        simulation = simulationProvider.get();
-    }
-
-    @FXML
-    public void populateSimulation(ActionEvent actionEvent) {
+    public void populateSimulation(int people) {
         simulationMustExist();
-        populateSimulation(randomPeopleCountField.getValue());
-    }
-
-    @FXML
-    public void runSimulation(ActionEvent event) {
-        simulationMustExist();
-
-        unbindControls();
-
-        LongStream.range(0, simulationDurationField.getValue() * DAYS_IN_YEAR)
-                .forEach(i -> eventBus.post(new SimulationStepEvent()));
-
-        bindControls();
-    }
-
-    private void bindToWorld(World world) {
-        livingPersonsCount.bind(Bindings.size(world.getLivingPersons()));
-        livingPersons.setValue(world.getLivingPersons());
-        deadPersons.setValue(world.getDeadPersons());
-    }
-
-    private void bindControls() {
-        livingPeopleLabel.textProperty().bind(Bindings.convert(livingPersonsCount));
-        livingPeopleList.itemsProperty().set(new SortedList<>(livingPersons.get(), (o1, o2) -> o1.toString().compareTo(o2.toString())));
-        deadPeopleList.itemsProperty().set(new SortedList<>(deadPersons.get(), (o1, o2) -> o1.toString().compareTo(o2.toString())));
-    }
-
-    private void unbindControls() {
-        livingPeopleLabel.textProperty().unbind();
-        livingPeopleList.itemsProperty().unbind();
-        deadPeopleList.itemsProperty().unbind();
-    }
-
-    private void populateSimulation(int people) {
         final IntegerRange age = IntegerRange.inclusive(17, 50);
 
         for (Country country : configuration.getCountries()) {
@@ -134,10 +87,19 @@ public class DashboardPresenter {
         }
     }
 
-    private void simulationMustExist() {
+    public void runSimulation(int years) {
+        simulationMustExist();
+
+        LongStream.range(0, years * DAYS_IN_YEAR)
+                .forEach(i -> eventBus.post(new SimulationStepEvent()));
+    }
+
+    private Simulation simulationMustExist() {
         if (simulation == null) {
             simulation = simulationProvider.get();
         }
+
+        return simulation;
     }
 }
 

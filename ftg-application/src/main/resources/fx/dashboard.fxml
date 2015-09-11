@@ -5,14 +5,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="ftg.application.gui.dashboard.DashboardPresenter">
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="900.0" spacing="10.0">
             <children>
                 <Button mnemonicParsing="false" onAction="#newSimulation" text="New simulation"/>
 
-                <ComboBox fx:id="randomPeopleCountField" prefHeight="26.0" prefWidth="85.0">
+                <ComboBox fx:id="randomPeopleCount" prefHeight="26.0" prefWidth="85.0">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
                             <Integer fx:value="1"/>
@@ -32,7 +31,7 @@
                 <Button mnemonicParsing="false" onAction="#populateSimulation" text="Populate"/>
 
                 <Label text="Duration (years)"/>
-                <ComboBox fx:id="simulationDurationField" prefHeight="26.0" prefWidth="85.0">
+                <ComboBox fx:id="simulationDuration" prefHeight="26.0" prefWidth="85.0">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
                             <Integer fx:value="1"/>
@@ -51,7 +50,7 @@
                 </ComboBox>
                 <Button mnemonicParsing="false" onAction="#runSimulation" text="Run"/>
                 <Label text="People:"/>
-                <Label fx:id="livingPeopleLabel"/>
+                <Label fx:id="livingPeopleCount"/>
             </children>
             <padding>
                 <Insets left="10.0"/>
@@ -62,16 +61,16 @@
                 <SplitPane dividerPositions="0.7" VBox.vgrow="ALWAYS">
                     <items>
                         <Pane/>
-                        <Accordion expandedPane="$rightAccordionFirstPane">
+                        <Accordion expandedPane="$livingPeoplePane">
                             <panes>
-                                <TitledPane animated="false" text="Living people" fx:id="rightAccordionFirstPane">
+                                <TitledPane animated="false" text="Living people" fx:id="livingPeoplePane">
                                     <content>
-                                        <ListView fx:id="livingPeopleList"/>
+                                        <ListView fx:id="livingPeople"/>
                                     </content>
                                 </TitledPane>
                                 <TitledPane animated="false" text="Dead people">
                                     <content>
-                                        <ListView fx:id="deadPeopleList"/>
+                                        <ListView fx:id="deadPeople"/>
                                     </content>
                                 </TitledPane>
                             </panes>

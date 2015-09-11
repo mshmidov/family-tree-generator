@@ -4,10 +4,8 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import ftg.application.cdi.ApplicationModule;
-import ftg.application.gui.dashboard.DashboardPresenter;
+import ftg.application.cdi.FxSupportModule;
 import ftg.application.gui.dashboard.DashboardView;
-import ftg.application.gui.support.FxSupportModule;
-import ftg.application.gui.support.LoadedView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -32,8 +30,7 @@ public class GuiApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Family tree generator");
-        final LoadedView<DashboardPresenter> view = dashboardView.load();
-        primaryStage.setScene(new Scene(view.getRoot(), 800, 600));
+        primaryStage.setScene(new Scene(dashboardView.getParent(), 800, 600));
         primaryStage.show();
     }
 }

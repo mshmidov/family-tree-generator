@@ -5,7 +5,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import ftg.application.cdi.ApplicationModule;
-import ftg.application.gui.support.FxSupportModule;
+import ftg.application.cdi.FxSupportModule;
 import ftg.commons.range.IntegerRange;
 import ftg.model.world.PersonIntroductionEvent;
 import ftg.simulation.RandomModel;
