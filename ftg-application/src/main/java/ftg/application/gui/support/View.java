@@ -4,6 +4,6 @@ import javafx.scene.Parent;
 
 public interface View {
 
-    Parent getParent();
+    Parent getRoot();
 
 }

@@ -1,7 +1,5 @@
 package ftg.application.gui.dashboard;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import ftg.commons.range.IntegerRange;
@@ -36,8 +34,6 @@ public class DashboardController {
 
     private final RandomModel randomModel = new RandomModel();
 
-    private final Supplier<Parent> viewInitializer = Suppliers.memoize(this::initView);
-
     private final IntegerProperty livingPersonsCount = new SimpleIntegerProperty();
 
     private final ObjectProperty<ObservableList<Person>> livingPersons = new SimpleObjectProperty<>();
@@ -50,20 +46,14 @@ public class DashboardController {
         this.configuration = configuration;
         this.dashboardView = dashboardView;
         this.simulationProvider = simulationProvider;
-    }
-
-    public Parent getViewRoot() {
-        return viewInitializer.get();
-    }
-
-    private Parent initView() {
-        final Parent parent = dashboardView.getParent();
 
         dashboardView.setOnNewSimulation(this::newSimulation);
         dashboardView.setOnPopulateSimulation(this::populateSimulation);
         dashboardView.setOnRunSimulation(this::runSimulation);
+    }
 
-        return parent;
+    public Parent getViewRoot() {
+        return dashboardView.getRoot();
     }
 
     public void newSimulation(ActionEvent event) {
