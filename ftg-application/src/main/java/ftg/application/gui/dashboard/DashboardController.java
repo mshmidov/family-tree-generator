@@ -7,7 +7,6 @@ import ftg.model.person.Person;
 import ftg.model.world.PersonIntroductionEvent;
 import ftg.simulation.RandomModel;
 import ftg.simulation.Simulation;
-import ftg.simulation.SimulationStepEvent;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.configuration.naming.NamingSystem;
 import javafx.beans.property.IntegerProperty;
@@ -75,7 +74,7 @@ public class DashboardController {
         simulationMustExist();
 
         LongStream.range(0, years * DAYS_IN_YEAR)
-                .forEach(i -> eventBus.post(new SimulationStepEvent()));
+                .forEach(i -> simulation.nextDay());
     }
 
     private Simulation simulationMustExist() {

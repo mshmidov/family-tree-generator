@@ -2,7 +2,6 @@ package ftg.simulation;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import ftg.commons.Util;
 import ftg.commons.range.IntegerRange;
@@ -63,8 +62,7 @@ public final class Simulation {
         return world.getCurrentDate().getValue();
     }
 
-    @Subscribe
-    public void nextDay(SimulationStepEvent event) {
+    public void nextDay() {
         final TredecimalDate currentDate = world.getCurrentDate().getValue();
 
         eventBus.post(new NewDateEvent(currentDate.plusDays(1)));
