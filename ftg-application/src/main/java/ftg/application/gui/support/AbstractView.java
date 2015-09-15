@@ -15,11 +15,7 @@ public abstract class AbstractView implements View {
 
     protected abstract Parent createView();
 
-    protected abstract void configureView();
-
     private Parent loadParent() {
-        final Parent parent = createView();
-        configureView();
-        return parent;
+        return createView();
     }
 }

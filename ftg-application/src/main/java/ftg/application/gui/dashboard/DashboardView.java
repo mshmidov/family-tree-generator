@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import ftg.application.gui.support.AbstractView;
 import ftg.application.gui.support.JavaFxInitializationError;
 import ftg.model.person.Person;
-import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,13 +14,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
 import java.io.InputStream;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
 public class DashboardView extends AbstractView {
 
     private final FXMLLoader fxmlLoader;
-    private final DashboardController controller;
 
     @FXML
     private ComboBox<Integer> randomPeopleCount;
@@ -37,10 +37,15 @@ public class DashboardView extends AbstractView {
     @FXML
     private ListView<Person> deadPeople;
 
+    private Optional<EventHandler<ActionEvent>> onNewSimulation = Optional.empty();
+
+    private Optional<EventHandler<ActionEvent>> onPopulateSimulation = Optional.empty();
+
+    private Optional<EventHandler<ActionEvent>> onRunSimulation = Optional.empty();
+
     @Inject
-    public DashboardView(FXMLLoader fxmlLoader, DashboardController controller) {
+    public DashboardView(FXMLLoader fxmlLoader) {
         this.fxmlLoader = fxmlLoader;
-        this.controller = controller;
     }
 
     @Override
@@ -54,25 +59,50 @@ public class DashboardView extends AbstractView {
         }
     }
 
-    @Override
-    protected void configureView() {
-        livingPeopleCount.textProperty().bind(Bindings.convert(controller.livingPersonsCountProperty()));
-        livingPeople.itemsProperty().bind(controller.livingPersonsProperty());
-        deadPeople.itemsProperty().bind(controller.deadPersonsProperty());
+    ComboBox<Integer> getRandomPeopleCount() {
+        return randomPeopleCount;
+    }
+
+    ComboBox<Integer> getSimulationDuration() {
+        return simulationDuration;
+    }
+
+    Label getLivingPeopleCount() {
+        return livingPeopleCount;
+    }
+
+    ListView<Person> getLivingPeople() {
+        return livingPeople;
+    }
+
+    ListView<Person> getDeadPeople() {
+        return deadPeople;
+    }
+
+    public void setOnNewSimulation(EventHandler<ActionEvent> onNewSimulation) {
+        this.onNewSimulation = Optional.of(onNewSimulation);
+    }
+
+    public void setOnPopulateSimulation(EventHandler<ActionEvent> onPopulateSimulation) {
+        this.onPopulateSimulation = Optional.of(onPopulateSimulation);
+    }
+
+    public void setOnRunSimulation(EventHandler<ActionEvent> onRunSimulation) {
+        this.onRunSimulation = Optional.of(onRunSimulation);
     }
 
     @FXML
     public void newSimulation(ActionEvent actionEvent) {
-        controller.newSimulation();
+        onNewSimulation.ifPresent(handler -> handler.handle(actionEvent));
     }
 
     @FXML
     public void populateSimulation(ActionEvent actionEvent) {
-        controller.populateSimulation(randomPeopleCount.getValue());
+        onPopulateSimulation.ifPresent(handler -> handler.handle(actionEvent));
     }
 
     @FXML
     public void runSimulation(ActionEvent actionEvent) {
-        controller.runSimulation(simulationDuration.getValue());
+        onRunSimulation.ifPresent(handler -> handler.handle(actionEvent));
     }
 }
