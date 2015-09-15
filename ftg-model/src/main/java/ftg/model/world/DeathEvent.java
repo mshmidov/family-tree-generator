@@ -28,6 +28,6 @@ public final class DeathEvent implements Event {
 
         world.killPerson(deceased);
 
-        LOGGER.info("{} dies at age of {}", deceased, intervalBetween(world.getCurrentDate().getValue(), deceased.getBirthDate()).getYears());
+        LOGGER.info("{} dies at age of {}", deceased, intervalBetween(world.getCurrentDate(), deceased.getBirthDate()).getYears());
     }
 }

@@ -59,11 +59,11 @@ public final class Simulation {
     }
 
     public TredecimalDate getCurrentDate() {
-        return world.getCurrentDate().getValue();
+        return world.getCurrentDate();
     }
 
     public void nextDay() {
-        final TredecimalDate currentDate = world.getCurrentDate().getValue();
+        final TredecimalDate currentDate = world.getCurrentDate();
 
         eventBus.post(new NewDateEvent(currentDate.plusDays(1)));
         // marriages
@@ -131,7 +131,7 @@ public final class Simulation {
 
             final Person.Sex sex = randomChoice.from(Person.Sex.class);
 
-            eventBus.post(new ConceptionEvent(world.getCurrentDate().getValue(),
+            eventBus.post(new ConceptionEvent(world.getCurrentDate(),
                     female.getRelations().getSingle(Marriage.class).get().getHusband(),
                     female,
                     sex));
@@ -143,11 +143,11 @@ public final class Simulation {
         final String countryOfNaming = female.getState(Residence.class).getCountry();
         final String childName = countries.get(countryOfNaming).getNamingSystem().getNameForNewborn(female, pregnancy);
 
-        return new BirthEvent(world.getCurrentDate().getValue(), female, pregnancy, childName);
+        return new BirthEvent(world.getCurrentDate(), female, pregnancy, childName);
     }
 
     private Optional<DeathEvent> decideDeath(Person person, World world) {
-        final long age = intervalBetween(person.getBirthDate(), world.getCurrentDate().getValue()).getYears();
+        final long age = intervalBetween(person.getBirthDate(), world.getCurrentDate()).getYears();
         final Country country = requireNonNull(countries.get(person.getState(Residence.class).getCountry()));
         final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
 

@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.Subscribe;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -26,14 +24,14 @@ public final class World {
     private final List<Person> deadPersons = new ArrayList<>();
     private final List<Event> events = new ArrayList<>();
 
-    private ReadOnlyObjectWrapper<TredecimalDate> currentDate;
+    private TredecimalDate currentDate;
 
     public World(TredecimalDate currentDate) {
-        this.currentDate = new ReadOnlyObjectWrapper<>(currentDate);
+        submitEvent(new NewDateEvent(currentDate));
     }
 
-    public ObservableValue<TredecimalDate> getCurrentDate() {
-        return currentDate.getReadOnlyProperty();
+    public TredecimalDate getCurrentDate() {
+        return currentDate;
     }
 
     public List<Person> getLivingPersons() {
@@ -56,7 +54,7 @@ public final class World {
     }
 
     void setDate(TredecimalDate currentDate) {
-        this.currentDate.setValue(currentDate);
+        this.currentDate = currentDate;
         ThreadContext.put("date", ISO.format(currentDate));
     }
 
