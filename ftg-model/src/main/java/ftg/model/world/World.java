@@ -1,15 +1,19 @@
 package ftg.model.world;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.Subscribe;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static ftg.model.time.TredecimalDateFormat.ISO;
@@ -18,9 +22,9 @@ public final class World {
 
     private static final Logger LOGGER = LogManager.getLogger(World.class);
 
-    private final ObservableList<Person> livingPersons = FXCollections.observableArrayList();
-    private final ObservableList<Person> deadPersons = FXCollections.observableArrayList();
-    private final ObservableList<Event> events = FXCollections.observableArrayList();
+    private final Set<Person> livingPersons = new HashSet<>();
+    private final List<Person> deadPersons = new ArrayList<>();
+    private final List<Event> events = new ArrayList<>();
 
     private ReadOnlyObjectWrapper<TredecimalDate> currentDate;
 
@@ -32,16 +36,16 @@ public final class World {
         return currentDate.getReadOnlyProperty();
     }
 
-    public ObservableList<Person> getLivingPersons() {
-        return FXCollections.unmodifiableObservableList(livingPersons);
+    public List<Person> getLivingPersons() {
+        return ImmutableList.copyOf(livingPersons);
     }
 
-    public ObservableList<Person> getDeadPersons() {
-        return FXCollections.unmodifiableObservableList(deadPersons);
+    public List<Person> getDeadPersons() {
+        return ImmutableList.copyOf(deadPersons);
     }
 
-    public ObservableList<Event> getEvents() {
-        return FXCollections.unmodifiableObservableList(events);
+    public List<Event> getEvents() {
+        return ImmutableList.copyOf(events);
     }
 
     @Subscribe
