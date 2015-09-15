@@ -1,5 +1,6 @@
 package ftg.application.gui.dashboard;
 
+import com.google.common.collect.Ordering;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import ftg.commons.range.IntegerRange;
@@ -21,8 +22,11 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
+import static javafx.collections.FXCollections.observableArrayList;
 
 public class DashboardController {
+
+    private static final Ordering<Person> BY_STRING = Ordering.from((o1, o2) -> o1.toString().compareTo(o2.toString()));
 
     private final EventBus eventBus;
     private final DashboardView dashboardView;
@@ -53,6 +57,7 @@ public class DashboardController {
 
     public void newSimulation() {
         simulation = simulationProvider.get();
+        updateView();
     }
 
     public void populateSimulation(int people) {
@@ -68,6 +73,8 @@ public class DashboardController {
                     .map(PersonIntroductionEvent::new).collect(Collectors.toList())
                     .forEach(eventBus::post);
         }
+
+        updateView();
     }
 
     public void runSimulation(int years) {
@@ -75,14 +82,23 @@ public class DashboardController {
 
         LongStream.range(0, years * DAYS_IN_YEAR)
                 .forEach(i -> simulation.nextDay());
+
+        updateView();
     }
 
     private Simulation simulationMustExist() {
         if (simulation == null) {
             simulation = simulationProvider.get();
+            updateView();
         }
 
         return simulation;
+    }
+
+    private void updateView() {
+        dashboardView.getLivingPeopleCount().setText(String.valueOf(simulation.getWorld().getLivingPersons().size()));
+        dashboardView.getLivingPeople().setItems(observableArrayList(BY_STRING.sortedCopy(simulation.getWorld().getLivingPersons())));
+        dashboardView.getDeadPeople().setItems(observableArrayList(BY_STRING.sortedCopy(simulation.getWorld().getDeadPersons())));
     }
 }
 
