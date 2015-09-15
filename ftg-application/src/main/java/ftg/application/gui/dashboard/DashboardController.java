@@ -8,7 +8,6 @@ import ftg.model.world.PersonIntroductionEvent;
 import ftg.simulation.RandomModel;
 import ftg.simulation.Simulation;
 import ftg.simulation.SimulationStepEvent;
-import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.configuration.naming.NamingSystem;
 import javafx.beans.property.IntegerProperty;
@@ -28,7 +27,6 @@ import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 public class DashboardController {
 
     private final EventBus eventBus;
-    private final Configuration configuration;
     private final DashboardView dashboardView;
     private final Provider<Simulation> simulationProvider;
 
@@ -41,9 +39,8 @@ public class DashboardController {
     private Simulation simulation;
 
     @Inject
-    public DashboardController(EventBus eventBus, Configuration configuration, Provider<Simulation> simulationProvider, DashboardView dashboardView) {
+    public DashboardController(EventBus eventBus, Provider<Simulation> simulationProvider, DashboardView dashboardView) {
         this.eventBus = eventBus;
-        this.configuration = configuration;
         this.dashboardView = dashboardView;
         this.simulationProvider = simulationProvider;
 
@@ -64,7 +61,7 @@ public class DashboardController {
         simulationMustExist();
         final IntegerRange age = IntegerRange.inclusive(17, 50);
 
-        for (Country country : configuration.getCountries()) {
+        for (Country country : simulation.getConfiguration().getCountries()) {
             final NamingSystem namingSystem = country.getNamingSystem();
 
             namingSystem.getUniqueSurnames().stream()

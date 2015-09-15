@@ -37,6 +37,7 @@ public final class Simulation {
 
     private final EventBus eventBus;
 
+    private final Configuration configuration;
     private final World world;
 
     private final Map<String, Country> countries;
@@ -45,8 +46,13 @@ public final class Simulation {
     public Simulation(EventBus eventBus, Configuration configuration, World world) {
 
         this.eventBus = eventBus;
+        this.configuration = configuration;
         this.world = world;
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     public World getWorld() {
