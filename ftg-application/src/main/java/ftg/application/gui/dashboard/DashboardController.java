@@ -15,7 +15,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.Parent;
 
 import javax.inject.Provider;
@@ -53,11 +52,11 @@ public class DashboardController {
         return dashboardView.getRoot();
     }
 
-    public void newSimulation(ActionEvent event) {
+    public void newSimulation() {
         simulation = simulationProvider.get();
     }
 
-    public void populateSimulation(ActionEvent event) {
+    public void populateSimulation(int people) {
         simulationMustExist();
         final IntegerRange age = IntegerRange.inclusive(17, 50);
 
@@ -65,17 +64,17 @@ public class DashboardController {
             final NamingSystem namingSystem = country.getNamingSystem();
 
             namingSystem.getUniqueSurnames().stream()
-                    .limit(dashboardView.getRandomPeopleCount().getValue())
+                    .limit(people)
                     .map(surname -> randomModel.newPerson(country, surname, age, simulation.getCurrentDate()))
                     .map(PersonIntroductionEvent::new).collect(Collectors.toList())
                     .forEach(eventBus::post);
         }
     }
 
-    public void runSimulation(ActionEvent event) {
+    public void runSimulation(int years) {
         simulationMustExist();
 
-        LongStream.range(0, dashboardView.getSimulationDuration().getValue() * DAYS_IN_YEAR)
+        LongStream.range(0, years * DAYS_IN_YEAR)
                 .forEach(i -> eventBus.post(new SimulationStepEvent()));
     }
 

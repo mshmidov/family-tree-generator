@@ -2,9 +2,9 @@ package ftg.application.gui.dashboard;
 
 import com.google.inject.Inject;
 import ftg.application.gui.support.AbstractView;
+import ftg.commons.Action;
 import ftg.model.person.Person;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ComboBox;
@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
 import java.util.Optional;
+import java.util.function.IntConsumer;
 
 public class DashboardView extends AbstractView {
 
@@ -30,23 +31,15 @@ public class DashboardView extends AbstractView {
     @FXML
     private ListView<Person> deadPeople;
 
-    private Optional<EventHandler<ActionEvent>> onNewSimulation = Optional.empty();
+    private Optional<Action> onNewSimulation = Optional.empty();
 
-    private Optional<EventHandler<ActionEvent>> onPopulateSimulation = Optional.empty();
+    private Optional<IntConsumer> onPopulateSimulation = Optional.empty();
 
-    private Optional<EventHandler<ActionEvent>> onRunSimulation = Optional.empty();
+    private Optional<IntConsumer> onRunSimulation = Optional.empty();
 
     @Inject
     public DashboardView(FXMLLoader fxmlLoader) {
         super(fxmlLoader, "fx/dashboard.fxml");
-    }
-
-    ComboBox<Integer> getRandomPeopleCount() {
-        return randomPeopleCount;
-    }
-
-    ComboBox<Integer> getSimulationDuration() {
-        return simulationDuration;
     }
 
     Label getLivingPeopleCount() {
@@ -61,30 +54,30 @@ public class DashboardView extends AbstractView {
         return deadPeople;
     }
 
-    public void setOnNewSimulation(EventHandler<ActionEvent> onNewSimulation) {
-        this.onNewSimulation = Optional.of(onNewSimulation);
+    public void setOnNewSimulation(Action handler) {
+        this.onNewSimulation = Optional.of(handler);
     }
 
-    public void setOnPopulateSimulation(EventHandler<ActionEvent> onPopulateSimulation) {
-        this.onPopulateSimulation = Optional.of(onPopulateSimulation);
+    public void setOnPopulateSimulation(IntConsumer handler) {
+        this.onPopulateSimulation = Optional.of(handler);
     }
 
-    public void setOnRunSimulation(EventHandler<ActionEvent> onRunSimulation) {
-        this.onRunSimulation = Optional.of(onRunSimulation);
+    public void setOnRunSimulation(IntConsumer handler) {
+        this.onRunSimulation = Optional.of(handler);
     }
 
     @FXML
     public void newSimulation(ActionEvent actionEvent) {
-        onNewSimulation.ifPresent(handler -> handler.handle(actionEvent));
+        onNewSimulation.ifPresent(Action::perform);
     }
 
     @FXML
     public void populateSimulation(ActionEvent actionEvent) {
-        onPopulateSimulation.ifPresent(handler -> handler.handle(actionEvent));
+        onPopulateSimulation.ifPresent(handler -> handler.accept(randomPeopleCount.getValue()));
     }
 
     @FXML
     public void runSimulation(ActionEvent actionEvent) {
-        onRunSimulation.ifPresent(handler -> handler.handle(actionEvent));
+        onRunSimulation.ifPresent(handler -> handler.accept(simulationDuration.getValue()));
     }
 }
