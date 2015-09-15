@@ -2,6 +2,7 @@ package ftg.application.gui.dashboard;
 
 import com.google.common.collect.Ordering;
 import com.google.common.eventbus.EventBus;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
@@ -15,9 +16,12 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.Parent;
 
 import javax.inject.Provider;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -27,6 +31,9 @@ import static javafx.collections.FXCollections.observableArrayList;
 public class DashboardController {
 
     private static final Ordering<Person> BY_STRING = Ordering.from((o1, o2) -> o1.toString().compareTo(o2.toString()));
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(
+            new ThreadFactoryBuilder().setNameFormat("dashboard-controller-tasks-%d").build());
 
     private final EventBus eventBus;
     private final DashboardView dashboardView;
@@ -80,8 +87,15 @@ public class DashboardController {
     public void runSimulation(int years) {
         simulationMustExist();
 
-        LongStream.range(0, years * DAYS_IN_YEAR)
-                .forEach(i -> simulation.nextDay());
+        final int totalDays = years * DAYS_IN_YEAR;
+
+        LongStream.range(0, totalDays).forEach(day -> executor.submit(new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                simulation.nextDay();
+                return null;
+            }
+        }));
 
         updateView();
     }
