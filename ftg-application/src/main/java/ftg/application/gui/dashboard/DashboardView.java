@@ -1,20 +1,23 @@
 package ftg.application.gui.dashboard;
 
-import com.google.inject.Inject;
-import ftg.application.gui.support.AbstractView;
+import com.google.common.collect.Ordering;
 import ftg.commons.Action;
 import ftg.model.person.Person;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.IntConsumer;
 
-public class DashboardView extends AbstractView {
+import static javafx.collections.FXCollections.observableArrayList;
+
+public class DashboardView {
+
+    private static final Ordering<Person> BY_STRING = Ordering.from((o1, o2) -> o1.toString().compareTo(o2.toString()));
 
     @FXML
     private ComboBox<Integer> randomPeopleCount;
@@ -37,21 +40,13 @@ public class DashboardView extends AbstractView {
 
     private Optional<IntConsumer> onRunSimulation = Optional.empty();
 
-    @Inject
-    public DashboardView(FXMLLoader fxmlLoader) {
-        super(fxmlLoader, "fx/dashboard.fxml");
+    public void setLivingPeople(List<Person> livingPeople) {
+        this.livingPeople.setItems(observableArrayList(BY_STRING.sortedCopy(livingPeople)));
+        this.livingPeopleCount.setText(String.valueOf(livingPeople.size()));
     }
 
-    Label getLivingPeopleCount() {
-        return livingPeopleCount;
-    }
-
-    ListView<Person> getLivingPeople() {
-        return livingPeople;
-    }
-
-    ListView<Person> getDeadPeople() {
-        return deadPeople;
+    public void setDeadPeople(List<Person> deadPeople) {
+        this.deadPeople.setItems(observableArrayList(BY_STRING.sortedCopy(deadPeople)));
     }
 
     public void setOnNewSimulation(Action handler) {
@@ -67,17 +62,17 @@ public class DashboardView extends AbstractView {
     }
 
     @FXML
-    public void newSimulation(ActionEvent actionEvent) {
+    private void newSimulation(ActionEvent actionEvent) {
         onNewSimulation.ifPresent(Action::perform);
     }
 
     @FXML
-    public void populateSimulation(ActionEvent actionEvent) {
+    private void populateSimulation(ActionEvent actionEvent) {
         onPopulateSimulation.ifPresent(handler -> handler.accept(randomPeopleCount.getValue()));
     }
 
     @FXML
-    public void runSimulation(ActionEvent actionEvent) {
+    private void runSimulation(ActionEvent actionEvent) {
         onRunSimulation.ifPresent(handler -> handler.accept(simulationDuration.getValue()));
     }
 }

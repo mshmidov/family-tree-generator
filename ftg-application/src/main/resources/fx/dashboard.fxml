@@ -5,7 +5,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="ftg.application.gui.dashboard.DashboardView">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="900.0" spacing="10.0">
             <children>
