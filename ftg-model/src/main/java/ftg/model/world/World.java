@@ -1,70 +1,94 @@
 package ftg.model.world;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.eventbus.Subscribe;
+import com.google.common.collect.ImmutableSet;
 import ftg.model.person.Person;
-import ftg.model.time.TredecimalDate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkState;
-import static ftg.model.time.TredecimalDateFormat.ISO;
+import static com.google.common.base.Preconditions.checkArgument;
+import static ftg.commons.MorePreconditions.checked;
 
 public final class World {
 
-    private static final Logger LOGGER = LogManager.getLogger(World.class);
+    private final Map<String, Person> persons = new HashMap<>();
 
-    private final Set<Person> livingPersons = new HashSet<>();
-    private final List<Person> deadPersons = new ArrayList<>();
     private final List<Event> events = new ArrayList<>();
 
-    private TredecimalDate currentDate;
+    private final Set<Person> livingPersons = new HashSet<>();
 
-    public World(TredecimalDate currentDate) {
-        submitEvent(new NewDateEvent(currentDate));
+    private final Set<Person> livingMales = new HashSet<>();
+
+    private final Set<Person> livingFemales = new HashSet<>();
+
+    private final Set<Person> deadPersons = new HashSet<>();
+
+    public World() {
     }
 
-    public TredecimalDate getCurrentDate() {
-        return currentDate;
+    public World(World other) {
+        other.getEvents().forEach(this::submitEvent);
     }
 
-    public List<Person> getLivingPersons() {
-        return ImmutableList.copyOf(livingPersons);
+    public Person getPerson(String id) {
+        return checked(persons.get(id), Objects::nonNull, () -> new IllegalArgumentException("No person found by id " + id));
     }
 
-    public List<Person> getDeadPersons() {
-        return ImmutableList.copyOf(deadPersons);
+    public List<Person> getPersons() {
+        return ImmutableList.copyOf(persons.values());
     }
 
     public List<Event> getEvents() {
         return ImmutableList.copyOf(events);
     }
 
-    @Subscribe
+    public Set<Person> getLivingPersons() {
+        return ImmutableSet.copyOf(livingPersons);
+    }
+
+    public Set<Person> getLivingMales() {
+        return ImmutableSet.copyOf(livingMales);
+    }
+
+    public Set<Person> getLivingFemales() {
+        return ImmutableSet.copyOf(livingFemales);
+    }
+
+    public Set<Person> getDeadPersons() {
+        return ImmutableSet.copyOf(deadPersons);
+    }
+
     public void submitEvent(Event event) {
-        LOGGER.debug("Received {}", event);
         events.add(event);
         event.apply(this);
+
+        if (event instanceof BirthEvent) {
+            final String id = ((BirthEvent) event).getChildData().getId();
+            final Person person = persons.get(id);
+            livingPersons.add(person);
+            livingBucket(person.getSex()).add(person);
+
+        } else if (event instanceof PersonIntroductionEvent) {
+            final String id = ((PersonIntroductionEvent) event).getPersonData().getId();
+            final Person person = persons.get(id);
+            livingPersons.add(person);
+            livingBucket(person.getSex()).add(person);
+
+        } else if (event instanceof DeathEvent) {
+            final String id = ((DeathEvent) event).getDeceasedId();
+            final Person person = persons.get(id);
+            livingPersons.remove(person);
+            livingBucket(person.getSex()).remove(person);
+            deadPersons.add(person);
+        }
     }
 
-    void setDate(TredecimalDate currentDate) {
-        this.currentDate = currentDate;
-        ThreadContext.put("date", ISO.format(currentDate));
+    void addPerson(Person person) {
+        checkArgument(!persons.containsKey(person.getId()));
+        persons.put(person.getId(), person);
     }
 
-    void addLivingPerson(Person person) {
-        livingPersons.add(person);
-    }
-
-    void killPerson(Person person) {
-        checkState(livingPersons.contains(person), String.format("%s is not among living persons", person));
-        livingPersons.remove(person);
-        deadPersons.add(person);
+    private Set<Person> livingBucket(Person.Sex sex) {
+        return (sex == Person.Sex.MALE) ? livingMales : livingFemales;
     }
 }

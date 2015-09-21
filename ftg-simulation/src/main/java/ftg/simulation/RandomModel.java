@@ -2,6 +2,7 @@ package ftg.simulation;
 
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
+import ftg.model.person.PersonData;
 import ftg.model.person.Surname;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
@@ -13,20 +14,19 @@ public final class RandomModel {
 
     private final RandomChoice randomChoice = new RandomChoice();
 
-    public Person newPerson(Country country, Surname surname, IntegerRange age, TredecimalDate currentDate) {
+    public PersonData newPersonData(long personCounter, Country country, Surname surname, IntegerRange age, TredecimalDate currentDate) {
 
         final Person.Sex sex = randomChoice.from(Person.Sex.class);
         final int days = randomChoice.between(age.getFirst() * DAYS_IN_YEAR, age.getLast() * DAYS_IN_YEAR);
 
-        final Person newPerson = new Person(
+
+        return new PersonData(
+                personCounter,
                 country.getNamingSystem().getNames(sex).get(),
                 surname,
                 sex,
-                currentDate.minusDays(days));
-
-        newPerson.addState(new Residence(country.getName()));
-
-        return newPerson;
+                currentDate.minusDays(days),
+                new Residence(country.getName()));
     }
 
 }

@@ -1,6 +1,9 @@
 dependencies {
     compile project(':ftg-simulation')
 
+    compile group: 'org.reactfx', name: 'reactfx', version: '1.4.1'
+    compile group: 'org.fxmisc.easybind', name: 'easybind', version: '1.0.3'
+
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.1'
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-mrbean', version: '2.6.1'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.6.1'

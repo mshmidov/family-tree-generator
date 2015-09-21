@@ -9,6 +9,7 @@ import org.junit.experimental.theories.Theories;
 import org.junit.runner.RunWith;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -17,6 +18,8 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
 public class LineagesTest {
+
+    private final AtomicLong personCounter = new AtomicLong(0);
 
     @Test
     public void shouldFindFather() {
@@ -125,10 +128,10 @@ public class LineagesTest {
     }
 
     private Person newMale(String name) {
-        return new Person(name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0));
+        return new Person(String.valueOf(personCounter.incrementAndGet()), name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0));
     }
 
     private Person newFemale(String name) {
-        return new Person(name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0));
+        return new Person(String.valueOf(personCounter.incrementAndGet()), name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0));
     }
 }

@@ -8,11 +8,11 @@ import java.util.stream.Stream;
 
 public class RandomUniqueElementGenerator<T> implements LimitedGenerator<T> {
 
-    private final ArrayList<T> elements;
+    private final List<T> elements;
     private final Random random = new Random();
 
     public RandomUniqueElementGenerator(List<T> elements) {
-        this.elements = new ArrayList<>(elements);
+        this.elements = Collections.synchronizedList(new ArrayList<>(elements));
         Collections.shuffle(elements, random);
     }
 

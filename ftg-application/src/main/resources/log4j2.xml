@@ -13,7 +13,7 @@
             <AppenderRef ref="Console"/>
         </Root>
 
-        <Logger name="ftg" level="info"/>
+        <AsyncLogger name="ftg" level="trace" />
 
     </Loggers>
 </Configuration>

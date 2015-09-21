@@ -1,11 +1,12 @@
 package ftg.simulation;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import ftg.commons.Util;
+import ftg.commons.cdi.PersonCounter;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
+import ftg.model.person.PersonData;
 import ftg.model.relation.Marriage;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
@@ -17,9 +18,11 @@ import ftg.simulation.lineage.Lineages;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
@@ -30,23 +33,23 @@ public final class Simulation {
 
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
 
+    private final AtomicLong personCounter;
+
     private final RandomChoice randomChoice = new RandomChoice();
     private final Lineages lineages = new Lineages();
     private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
 
-    private final EventBus eventBus;
-
     private final Configuration configuration;
-    private final World world;
 
     private final Map<String, Country> countries;
 
-    @Inject
-    public Simulation(EventBus eventBus, Configuration configuration, World world) {
+    private TredecimalDate currentDate = new TredecimalDate(0);
 
-        this.eventBus = eventBus;
+    @Inject
+    public Simulation(Configuration configuration, @PersonCounter AtomicLong personCounter) {
+
         this.configuration = configuration;
-        this.world = world;
+        this.personCounter = personCounter;
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
     }
 
@@ -54,57 +57,59 @@ public final class Simulation {
         return configuration;
     }
 
-    public World getWorld() {
-        return world;
-    }
-
     public TredecimalDate getCurrentDate() {
-        return world.getCurrentDate();
+        return currentDate;
     }
 
-    public void nextDay() {
-        final TredecimalDate currentDate = world.getCurrentDate();
+    public List<Event> nextDay(World world) {
 
-        eventBus.post(new NewDateEvent(currentDate.plusDays(1)));
+        currentDate = currentDate.plusDays(1);
+
+        final List<Event> events = new ArrayList<>();
+
         // marriages
-        final List<Person> unmarriedFemales = world.getLivingPersons().stream()
-                .filter(person -> person.getSex() == Person.Sex.FEMALE)
+        final List<Person> unmarriedFemales = world.getLivingFemales().stream()
                 .filter(female -> !female.hasRelation(Marriage.class))
                 .sorted((o1, o2) -> o1.getBirthDate().compareTo(o2.getBirthDate()))
                 .collect(Collectors.toList());
 
-        world.getLivingPersons().stream()
-                .filter(person -> person.getSex() == Person.Sex.MALE)
+        world.getLivingMales().stream()
                 .filter(male -> !male.hasRelation(Marriage.class))
-                .forEach(male -> decideMarriage(male, unmarriedFemales, world));
+                .map(male -> decideMarriage(male, unmarriedFemales))
+                .flatMap(Util::streamFromOptional)
+                .peek(events::add)
+                .forEach(world::submitEvent);
 
 
         // pregnancies
-        world.getLivingPersons().stream()
-                .filter(person -> person.getSex() == Person.Sex.FEMALE)
+        world.getLivingFemales().stream()
+                .filter(female -> !female.hasState(Pregnancy.class))
                 .filter(female -> female.getRelations().getSingle(Marriage.class).isPresent())
                 .filter(female -> fertileAge.includes(intervalBetween(female.getBirthDate(), currentDate).getYears()))
-                .filter(female -> !female.hasState(Pregnancy.class))
-                .forEach(female -> decidePregnancyInMarriage(female, world));
+                .map(this::decidePregnancyInMarriage)
+                .flatMap(Util::streamFromOptional)
+                .peek(events::add)
+                .forEach(world::submitEvent);
 
         // births
-
-        world.getLivingPersons().stream()
+        world.getLivingFemales().stream()
                 .filter(person -> person.hasState(Pregnancy.class))
                 .filter(person -> intervalBetween(currentDate, person.getState(Pregnancy.class).getConceptionDate()).getDays() == 280)
-                .map(female -> decideBirth(female, world))
-                .collect(Collectors.toList())
-                .forEach(eventBus::post);
+                .map(this::decideBirth)
+                .peek(events::add)
+                .forEach(world::submitEvent);
 
         // deaths
         world.getLivingPersons().stream()
-                .map(person -> decideDeath(person, world))
+                .map(this::decideDeath)
                 .flatMap(Util::streamFromOptional)
-                .collect(Collectors.toList())
-                .forEach(eventBus::post);
+                .peek(events::add)
+                .forEach(world::submitEvent);
+
+        return events;
     }
 
-    private void decideMarriage(Person male, List<Person> unmarriedFemales, World world) {
+    private Optional<MarriageEvent> decideMarriage(Person male, List<Person> unmarriedFemales) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (randomChoice.byChance(chance)) {
 
@@ -118,39 +123,51 @@ public final class Simulation {
                 // TODO introduce new random female
             } else {
                 int index = randomChoice.fromRangeByGaussian(candidates.size());
-                eventBus.post(new MarriageEvent(male, unmarriedFemales.remove(index)));
+                return Optional.of(new MarriageEvent(currentDate, male.getId(), unmarriedFemales.remove(index).getId()));
             }
 
 
         }
+        return Optional.empty();
     }
 
-    private void decidePregnancyInMarriage(Person female, World world) {
+    private Optional<ConceptionEvent> decidePregnancyInMarriage(Person female) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (randomChoice.byChance(chance)) {
 
             final Person.Sex sex = randomChoice.from(Person.Sex.class);
 
-            eventBus.post(new ConceptionEvent(world.getCurrentDate(),
-                    female.getRelations().getSingle(Marriage.class).get().getHusband(),
-                    female,
+            return Optional.of(new ConceptionEvent(currentDate,
+                    female.getRelations().getSingle(Marriage.class).get().getHusband().getId(),
+                    female.getId(),
                     sex));
         }
+        return Optional.empty();
     }
 
-    private Event decideBirth(Person female, World world) {
-        final Pregnancy pregnancy = female.getState(Pregnancy.class);
-        final String countryOfNaming = female.getState(Residence.class).getCountry();
-        final String childName = countries.get(countryOfNaming).getNamingSystem().getNameForNewborn(female, pregnancy);
+    private Event decideBirth(Person mother) {
+        final Pregnancy pregnancy = mother.getState(Pregnancy.class);
+        final Residence residence = mother.getState(Residence.class);
 
-        return new BirthEvent(world.getCurrentDate(), female, pregnancy, childName);
+        final String childName = countries.get(residence.getCountry()).getNamingSystem().getNameForNewborn(mother, pregnancy);
+
+        final PersonData childData = new PersonData(
+                personCounter.incrementAndGet(),
+                childName,
+                pregnancy.getFather().getSurnameObject(),
+                pregnancy.getChildSex(),
+                currentDate,
+                residence
+        );
+
+        return new BirthEvent(childData, mother.getId(), pregnancy.getFather().getId());
     }
 
-    private Optional<DeathEvent> decideDeath(Person person, World world) {
-        final long age = intervalBetween(person.getBirthDate(), world.getCurrentDate()).getYears();
+    private Optional<DeathEvent> decideDeath(Person person) {
+        final long age = intervalBetween(person.getBirthDate(), currentDate).getYears();
         final Country country = requireNonNull(countries.get(person.getState(Residence.class).getCountry()));
         final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
 
-        return randomChoice.byChance(chance) ? Optional.of(new DeathEvent(person)) : Optional.empty();
+        return randomChoice.byChance(chance) ? Optional.of(new DeathEvent(currentDate, person.getId())) : Optional.empty();
     }
 }

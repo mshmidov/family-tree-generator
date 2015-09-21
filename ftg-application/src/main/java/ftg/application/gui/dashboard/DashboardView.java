@@ -9,7 +9,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.IntConsumer;
 
@@ -40,12 +40,12 @@ public class DashboardView {
 
     private Optional<IntConsumer> onRunSimulation = Optional.empty();
 
-    public void setLivingPeople(List<Person> livingPeople) {
+    public void setLivingPeople(Collection<Person> livingPeople) {
         this.livingPeople.setItems(observableArrayList(BY_STRING.sortedCopy(livingPeople)));
         this.livingPeopleCount.setText(String.valueOf(livingPeople.size()));
     }
 
-    public void setDeadPeople(List<Person> deadPeople) {
+    public void setDeadPeople(Collection<Person> deadPeople) {
         this.deadPeople.setItems(observableArrayList(BY_STRING.sortedCopy(deadPeople)));
     }
 

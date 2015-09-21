@@ -16,6 +16,8 @@ public final class Person {
 
     public enum Sex {MALE, FEMALE}
 
+    private final String id;
+
     private final String name;
 
     private final LinkedList<Surname> surnames = new LinkedList<>();
@@ -28,11 +30,16 @@ public final class Person {
 
     private final Map<Class<? extends State>, State> states = new HashMap<>();
 
-    public Person(String name, Surname surname, Sex sex, TredecimalDate birthDate) {
+    public Person(String id, String name, Surname surname, Sex sex, TredecimalDate birthDate) {
+        this.id = id;
         this.name = name;
         this.surnames.add(surname);
         this.sex = sex;
         this.birthDate = birthDate;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
