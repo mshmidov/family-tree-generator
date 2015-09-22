@@ -24,20 +24,28 @@ public class DashboardController extends AbstractController<DashboardView> {
 
         super(fxmlLoader, "fx/dashboard.fxml");
 
+        view.progressProperty().bind(simulationService.progressProperty());
+        view.progressVisibleProperty().bind(simulationService.runningProperty());
+
         final BooleanBinding servicesAreRunning = Bindings.or(peopleGeneratorService.runningProperty(), simulationService.runningProperty());
 
         peopleGeneratorService.valueProperty().addListener((observable, oldValue, newValue) -> {
-            newValue.forEach(world.get()::submitEvent);
+            if (newValue != null) {
+                newValue.forEach(world.get()::submitEvent);
+                view.setLivingPeople(world.get().getLivingPersons());
+                view.setDeadPeople(world.get().getDeadPersons());
+            }
         });
 
         simulationService.valueProperty().addListener((observable, oldValue, newValue) -> {
-            newValue.forEach(world.get()::submitEvent);
-            view.setLivingPeople(world.get().getLivingPersons());
-            view.setDeadPeople(world.get().getDeadPersons());
+            if (newValue != null) {
+                newValue.forEach(world.get()::submitEvent);
+                view.setLivingPeople(world.get().getLivingPersons());
+                view.setDeadPeople(world.get().getDeadPersons());
+            }
         });
 
         view.setOnNewSimulation(() -> {
-            LOGGER.trace("onNewSimulation");
             if (!servicesAreRunning.get()) {
                 world.setValue(new World());
                 simulationService.invalidateCaches();
@@ -45,14 +53,12 @@ public class DashboardController extends AbstractController<DashboardView> {
         });
 
         view.setOnPopulateSimulation(people -> {
-            LOGGER.trace("onPopulateSimulation(" + people + ")");
             if (!servicesAreRunning.get()) {
                 peopleGeneratorService.workOrderProperty().setValue(new PeopleGeneratorService.WorkOrder(people, simulationService.getSimulation().getCurrentDate()));
             }
         });
 
         view.setOnRunSimulation(years -> {
-            LOGGER.trace("onRunSimulation(" + years + ")");
             if (!servicesAreRunning.get()) {
                 simulationService.workOrderProperty().setValue(new SimulationService.WorkOrder(years, world.get()));
             }

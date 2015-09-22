@@ -5,6 +5,7 @@ import ftg.model.relation.Marriage;
 import ftg.model.relation.Widowhood;
 import ftg.model.state.Death;
 import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,6 +45,6 @@ public final class DeathEvent implements Event {
 
         deceased.addState(new Death());
 
-        LOGGER.info("[{}] {} dies at age of {}",date,  deceased, intervalBetween(date, deceased.getBirthDate()).getYears());
+        LOGGER.info("[{}] {} dies at age of {}", TredecimalDateFormat.ISO.format(date), deceased, intervalBetween(date, deceased.getBirthDate()).getYears());
     }
 }

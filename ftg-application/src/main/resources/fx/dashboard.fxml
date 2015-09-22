@@ -50,8 +50,7 @@
                     </value>
                 </ComboBox>
                 <Button mnemonicParsing="false" onAction="#runSimulation" text="Run"/>
-                <Label text="People:"/>
-                <Label fx:id="livingPeopleCount"/>
+                <ProgressBar fx:id="progressBar"/>
             </children>
             <padding>
                 <Insets left="10.0"/>
@@ -69,7 +68,7 @@
                                         <ListView fx:id="livingPeople"/>
                                     </content>
                                 </TitledPane>
-                                <TitledPane animated="false" text="Dead people">
+                                <TitledPane animated="false" text="Dead people" fx:id="deadPeoplePane">
                                     <content>
                                         <ListView fx:id="deadPeople"/>
                                     </content>

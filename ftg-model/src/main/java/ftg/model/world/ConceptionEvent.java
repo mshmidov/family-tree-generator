@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
 import ftg.model.state.Pregnancy;
 import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,7 +53,7 @@ public final class ConceptionEvent implements Event {
         final Person mother = checkedArgument(world.getPerson(motherId), p -> p.getSex() == FEMALE && !p.hasState(Pregnancy.class), "Mother should be non-pregnant female");
         final Person father = checkedArgument(world.getPerson(fatherId), p -> p.getSex() == MALE, "Father should be male");
 
-        LOGGER.info("[{}] {} is pregnant from {}", date, mother, father);
+        LOGGER.info("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(date), mother, father);
         mother.addState(new Pregnancy(date, father, childSex));
     }
 

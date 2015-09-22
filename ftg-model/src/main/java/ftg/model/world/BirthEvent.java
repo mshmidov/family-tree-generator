@@ -7,6 +7,7 @@ import ftg.model.relation.Parentage;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +57,7 @@ public final class BirthEvent implements Event {
 
         world.addPerson(child);
 
-        LOGGER.info("[{}] {} is born of {} and {}", getDate(), child, father, mother);
+        LOGGER.info("[{}] {} is born of {} and {}", TredecimalDateFormat.ISO.format(getDate()), child, father, mother);
     }
 
     @Override

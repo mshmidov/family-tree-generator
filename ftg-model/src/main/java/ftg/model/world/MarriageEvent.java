@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
 import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +45,7 @@ public final class MarriageEvent implements Event {
         checkState(!wife.hasRelation(Marriage.class), "Person can participate in only one marriage at a time");
 
         Marriage.create(husband, wife);
-        LOGGER.info("[{}] {} marries {}", date, husband, wife);
+        LOGGER.info("[{}] {} marries {}", TredecimalDateFormat.ISO.format(date), husband, wife);
         wife.setSurname(husband.getSurnameObject());
     }
 
