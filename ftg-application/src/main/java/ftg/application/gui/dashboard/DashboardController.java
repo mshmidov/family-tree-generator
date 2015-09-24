@@ -11,7 +11,7 @@ import javafx.fxml.FXMLLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DashboardController extends AbstractController<DashboardView> {
+public final class DashboardController extends AbstractController<DashboardView> {
 
     private static final Logger LOGGER = LogManager.getLogger(DashboardController.class);
 
@@ -63,8 +63,6 @@ public class DashboardController extends AbstractController<DashboardView> {
                 simulationService.workOrderProperty().setValue(new SimulationService.WorkOrder(years, world.get()));
             }
         });
-
-
     }
 
 }

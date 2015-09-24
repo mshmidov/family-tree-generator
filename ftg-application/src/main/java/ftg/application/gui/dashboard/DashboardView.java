@@ -1,16 +1,22 @@
 package ftg.application.gui.dashboard;
 
 import com.google.common.collect.Ordering;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import ftg.application.gui.person.PersonController;
 import ftg.commons.Action;
 import ftg.model.person.Person;
+import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import org.fxmisc.easybind.EasyBind;
+import org.reactfx.EventStreams;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -18,11 +24,14 @@ import java.util.function.IntConsumer;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
-public class DashboardView {
+public final class DashboardView {
 
     private static final Ordering<Person> BY_NAME = Ordering
             .from((Person o1, Person o2) -> o1.getSurname().compareTo(o2.getSurname()))
             .compound((o1, o2) -> o1.getName().compareTo(o2.getName()));
+
+
+    private final PersonController selectedPerson;
 
     @FXML
     private VBox root;
@@ -34,7 +43,7 @@ public class DashboardView {
     private ComboBox<Integer> simulationDuration;
 
     @FXML
-    private Label livingPeopleCount;
+    private Accordion rightAccordion;
 
     @FXML
     private TitledPane livingPeoplePane;
@@ -49,6 +58,9 @@ public class DashboardView {
     private ListView<Person> deadPeople;
 
     @FXML
+    private BorderPane contentPane;
+
+    @FXML
     private ProgressBar progressBar;
 
     private Optional<Action> onNewSimulation = Optional.empty();
@@ -57,8 +69,15 @@ public class DashboardView {
 
     private Optional<IntConsumer> onRunSimulation = Optional.empty();
 
+    @Inject
+    public DashboardView(Provider<PersonController> personControllerProvider) {
+        this.selectedPerson = personControllerProvider.get();
+    }
+
     @FXML
     public void initialize() {
+
+        rightAccordion.setExpandedPane(livingPeoplePane);
 
         livingPeoplePane.textProperty().bind(Bindings.format("Living people: %s",
                 EasyBind.select(livingPeople.itemsProperty())
@@ -67,6 +86,17 @@ public class DashboardView {
         deadPeoplePane.textProperty().bind(Bindings.format("Dead people: %s",
                 EasyBind.select(deadPeople.itemsProperty())
                         .selectObject(Bindings::size)));
+
+        contentPane.setCenter(selectedPerson.getViewRoot());
+
+        final Binding<Person> selection = EventStreams.merge(
+                EventStreams.valuesOf(livingPeople.getSelectionModel().selectedItemProperty()),
+                EventStreams.valuesOf(deadPeople.getSelectionModel().selectedItemProperty()))
+                .toBinding(null);
+
+
+        selectedPerson.personProperty().bind(selection);
+
     }
 
     public DoubleProperty progressProperty() {

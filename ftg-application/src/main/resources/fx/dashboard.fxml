@@ -5,8 +5,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="ftg.application.gui.dashboard.DashboardView" fx:id="root">
+<VBox fx:id="root" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ftg.application.gui.dashboard.DashboardView">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="900.0" spacing="10.0">
             <children>
@@ -60,15 +60,15 @@
             <children>
                 <SplitPane dividerPositions="0.7" VBox.vgrow="ALWAYS">
                     <items>
-                        <Pane/>
-                        <Accordion expandedPane="$livingPeoplePane">
+                        <BorderPane fx:id="contentPane" prefHeight="200.0" prefWidth="200.0"/>
+                        <Accordion fx:id="rightAccordion">
                             <panes>
-                                <TitledPane animated="false" text="Living people" fx:id="livingPeoplePane">
+                                <TitledPane fx:id="livingPeoplePane" animated="false" text="Living people">
                                     <content>
                                         <ListView fx:id="livingPeople"/>
                                     </content>
                                 </TitledPane>
-                                <TitledPane animated="false" text="Dead people" fx:id="deadPeoplePane">
+                                <TitledPane fx:id="deadPeoplePane" animated="false" text="Dead people">
                                     <content>
                                         <ListView fx:id="deadPeople"/>
                                     </content>
