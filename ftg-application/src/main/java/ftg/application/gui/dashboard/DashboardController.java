@@ -40,6 +40,7 @@ public final class DashboardController extends AbstractController<DashboardView>
         simulationService.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 newValue.forEach(world.get()::submitEvent);
+                view.currentDateProperty().set(simulationService.getSimulation().getCurrentDate());
                 view.setLivingPeople(world.get().getLivingPersons());
                 view.setDeadPeople(world.get().getDeadPersons());
             }

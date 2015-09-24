@@ -50,6 +50,7 @@
                     </value>
                 </ComboBox>
                 <Button mnemonicParsing="false" onAction="#runSimulation" text="Run"/>
+                <Label fx:id="currentDate" text="current date"/>
                 <ProgressBar fx:id="progressBar"/>
             </children>
             <padding>

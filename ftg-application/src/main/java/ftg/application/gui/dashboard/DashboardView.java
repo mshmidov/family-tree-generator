@@ -6,10 +6,13 @@ import com.google.inject.Provider;
 import ftg.application.gui.person.PersonController;
 import ftg.commons.Action;
 import ftg.model.person.Person;
+import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateFormat;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -31,6 +34,8 @@ public final class DashboardView {
             .compound((o1, o2) -> o1.getName().compareTo(o2.getName()));
 
 
+    private final SimpleObjectProperty<TredecimalDate> currentDateProperty = new SimpleObjectProperty<>();
+
     private final PersonController selectedPerson;
 
     @FXML
@@ -43,16 +48,19 @@ public final class DashboardView {
     private ComboBox<Integer> simulationDuration;
 
     @FXML
+    private Label currentDate;
+
+    @FXML
     private Accordion rightAccordion;
 
     @FXML
     private TitledPane livingPeoplePane;
 
     @FXML
-    private TitledPane deadPeoplePane;
+    private ListView<Person> livingPeople;
 
     @FXML
-    private ListView<Person> livingPeople;
+    private TitledPane deadPeoplePane;
 
     @FXML
     private ListView<Person> deadPeople;
@@ -79,6 +87,10 @@ public final class DashboardView {
 
         rightAccordion.setExpandedPane(livingPeoplePane);
 
+        currentDate.textProperty().bind(EasyBind.monadic(currentDateProperty)
+                .map(TredecimalDateFormat.ISO::format)
+                .orElse(""));
+
         livingPeoplePane.textProperty().bind(Bindings.format("Living people: %s",
                 EasyBind.select(livingPeople.itemsProperty())
                         .selectObject(Bindings::size)));
@@ -94,8 +106,8 @@ public final class DashboardView {
                 EventStreams.valuesOf(deadPeople.getSelectionModel().selectedItemProperty()))
                 .toBinding(null);
 
-
         selectedPerson.personProperty().bind(selection);
+        selectedPerson.currentDateProperty().bind(currentDateProperty);
 
     }
 
@@ -125,6 +137,11 @@ public final class DashboardView {
 
     public void setOnRunSimulation(IntConsumer handler) {
         this.onRunSimulation = Optional.of(handler);
+    }
+
+
+    public SimpleObjectProperty<TredecimalDate> currentDateProperty() {
+        return currentDateProperty;
     }
 
     @FXML

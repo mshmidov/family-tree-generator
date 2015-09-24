@@ -43,7 +43,7 @@ public final class DeathEvent implements Event {
             Widowhood.create(marriage.getHusband(), marriage.getWife());
         });
 
-        deceased.addState(new Death());
+        deceased.addState(new Death(date));
 
         LOGGER.info("[{}] {} dies at age of {}", TredecimalDateFormat.ISO.format(date), deceased, intervalBetween(date, deceased.getBirthDate()).getYears());
     }
