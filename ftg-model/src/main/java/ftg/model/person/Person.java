@@ -5,10 +5,7 @@ import ftg.model.relation.Relation;
 import ftg.model.state.State;
 import ftg.model.time.TredecimalDate;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -81,6 +78,12 @@ public final class Person {
     public <S extends State> S getState(Class<S> stateClass) {
         checkState(hasState(stateClass));
         return stateClass.cast(states.get(stateClass));
+    }
+
+    public <S extends State> Optional<S> getOptionalState(Class<S> stateClass) {
+        return hasState(stateClass)
+                ? Optional.of(stateClass.cast(states.get(stateClass)))
+                : Optional.<S>empty();
     }
 
     public void removeState(Class<? extends State> stateClass) {

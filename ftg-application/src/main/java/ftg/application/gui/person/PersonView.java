@@ -4,27 +4,25 @@ import ftg.model.person.Person;
 import ftg.model.state.Death;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateInterval;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import org.fxmisc.easybind.EasyBind;
-import org.fxmisc.easybind.monadic.MonadicBinding;
+import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
 
-import java.util.Objects;
+import java.util.Optional;
 
-import static ftg.application.gui.support.ReactSupport.selectMonadicObject;
-import static ftg.application.gui.support.ReactSupport.selectMonadicString;
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static ftg.model.time.TredecimalDateFormat.ISO;
+import static org.reactfx.util.Tuples.t;
 
 public final class PersonView {
 
-    private final SimpleObjectProperty<Person> person = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<Person> personProperty = new SimpleObjectProperty<>();
 
-    private final SimpleObjectProperty<TredecimalDate> currentDate = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<TredecimalDate> currentDateProperty = new SimpleObjectProperty<>();
 
     @FXML
     private VBox root;
@@ -41,43 +39,39 @@ public final class PersonView {
     @FXML
     public void initialize() {
 
-        root.visibleProperty().bind(Bindings.isNotNull(person));
+        final TredecimalDate defaultDate = new TredecimalDate(0);
+        final EventStream<TredecimalDate> currentDate = EventStreams.valuesOf(currentDateProperty).map(date -> firstNonNull(date, defaultDate));
 
-        final MonadicBinding<TredecimalDate> currentDateOrZero = EasyBind.monadic(currentDate).orElse(new TredecimalDate(0));
+        root.visibleProperty().bind(Bindings.isNotNull(personProperty));
 
-        final MonadicBinding<String> personName = selectMonadicString(person, Person::getName);
-        final MonadicBinding<String> personSurname = selectMonadicString(person, Person::getSurname);
-        final MonadicBinding<String> personBirthDate = selectMonadicString(person, p -> ISO.format(p.getBirthDate()));
+        final EventStream<Person> person = EventStreams.nonNullValuesOf(personProperty);
 
-        final MonadicBinding<Boolean> personIsDead = selectMonadicObject(person, p -> p.hasState(Death.class), false);
-        final MonadicBinding<TredecimalDate> referenceDate = selectMonadicObject(person,
-                p -> p.hasState(Death.class) ? p.getState(Death.class).getDate() : currentDateOrZero.get(), new TredecimalDate(0));
+        person.mapToBi(p -> t(p.getName(), p.getSurname()))
+                .map((name, surname) -> String.format("Name: %s %s", name, surname))
+                .feedTo(name.textProperty());
+
+        person.map(Person::getBirthDate).map(ISO::format).map(d -> String.format("Birth: %s", d))
+                .feedTo(birthDate.textProperty());
 
 
-        final Binding<Long> personAge = EventStreams
-                .combine(
-                        EventStreams.valuesOf(person).filter(Objects::nonNull).map(Person::getBirthDate),
-                        EventStreams.valuesOf(referenceDate))
+        final EventStream<Optional<Death>> personDeath = person.map(p -> p.getOptionalState(Death.class));
+        final EventStream<TredecimalDate> ageReferenceDate = EventStreams.combine(personDeath, currentDate)
+                .map((death, date) -> death.map(Death::getDate).orElse(date));
+
+        final EventStream<Long> personAge = EventStreams.combine(person.map(Person::getBirthDate), ageReferenceDate)
                 .map(TredecimalDateInterval::intervalBetween)
-                .map(TredecimalDateInterval::getYears)
-                .toBinding(0L);
+                .map(TredecimalDateInterval::getYears);
 
-
-        name.textProperty().bind(Bindings.format("Name: %s %s", personName, personSurname));
-        birthDate.textProperty().bind(Bindings.format("Birth: %s", personBirthDate));
-        age.textProperty().bind(Bindings.format("%s: %s",
-                Bindings.createStringBinding(() -> personIsDead.get() ? "Age at death" : "Age", personIsDead),
-                personAge));
-
-
+        EventStreams.combine(personDeath, personAge)
+                .map((death, age) -> String.format("%s: %s", death.map(d -> "Age at death").orElse("Age"), age))
+                .feedTo(age.textProperty());
     }
 
-
     public SimpleObjectProperty<Person> personProperty() {
-        return person;
+        return personProperty;
     }
 
     public SimpleObjectProperty<TredecimalDate> currentDateProperty() {
-        return currentDate;
+        return currentDateProperty;
     }
 }
