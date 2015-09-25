@@ -4,8 +4,14 @@ import com.google.common.collect.ImmutableList;
 import ftg.model.relation.Relation;
 import ftg.model.state.State;
 import ftg.model.time.TredecimalDate;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -25,7 +31,9 @@ public final class Person {
 
     private final Relations relations = new Relations();
 
-    private final Map<Class<? extends State>, State> states = new HashMap<>();
+    private final ObservableMap<Class<? extends State>, State> states = FXCollections.observableHashMap();
+
+    private final ObservableList<State> stateValues = FXCollections.observableArrayList();
 
     public Person(String id, String name, Surname surname, Sex sex, TredecimalDate birthDate) {
         this.id = id;
@@ -33,6 +41,14 @@ public final class Person {
         this.surnames.add(surname);
         this.sex = sex;
         this.birthDate = birthDate;
+        states.addListener((MapChangeListener<Class<? extends State>, State>) change -> {
+            if (change.wasAdded()) {
+                stateValues.add(change.getValueAdded());
+            }
+            if (change.wasRemoved()) {
+                stateValues.remove(change.getValueRemoved());
+            }
+        });
     }
 
     public String getId() {
@@ -88,6 +104,10 @@ public final class Person {
 
     public void removeState(Class<? extends State> stateClass) {
         states.remove(stateClass);
+    }
+
+    public ObservableList<State> getStates() {
+        return FXCollections.unmodifiableObservableList(stateValues);
     }
 
     public Relations getRelations() {

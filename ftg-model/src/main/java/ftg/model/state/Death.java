@@ -1,5 +1,6 @@
 package ftg.model.state;
 
+import com.google.common.base.MoreObjects;
 import ftg.model.time.TredecimalDate;
 
 public final class Death implements State {
@@ -12,5 +13,12 @@ public final class Death implements State {
 
     public TredecimalDate getDate() {
         return date;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("date", date)
+                .toString();
     }
 }

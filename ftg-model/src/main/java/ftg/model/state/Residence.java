@@ -1,5 +1,7 @@
 package ftg.model.state;
 
+import com.google.common.base.MoreObjects;
+
 public final class Residence implements State {
 
     private final String country;
@@ -10,5 +12,12 @@ public final class Residence implements State {
 
     public String getCountry() {
         return country;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("country", country)
+                .toString();
     }
 }

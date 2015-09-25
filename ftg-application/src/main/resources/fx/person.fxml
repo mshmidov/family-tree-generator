@@ -23,5 +23,7 @@
                 <Label fx:id="age" text="age" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
             </children>
         </GridPane>
+        <ListView fx:id="states" prefHeight="200.0" prefWidth="200.0"/>
+        <ListView fx:id="relations" prefHeight="200.0" prefWidth="200.0"/>
     </children>
 </VBox>

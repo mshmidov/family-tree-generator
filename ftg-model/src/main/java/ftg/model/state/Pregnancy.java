@@ -1,5 +1,6 @@
 package ftg.model.state;
 
+import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
 
@@ -27,5 +28,14 @@ public final class Pregnancy implements State {
 
     public Person.Sex getChildSex() {
         return childSex;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("conceptionDate", conceptionDate)
+                .add("father", father)
+                .add("childSex", childSex)
+                .toString();
     }
 }

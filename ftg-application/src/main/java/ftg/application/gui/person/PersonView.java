@@ -1,13 +1,17 @@
 package ftg.application.gui.person;
 
 import ftg.model.person.Person;
+import ftg.model.person.Relations;
+import ftg.model.relation.Relation;
 import ftg.model.state.Death;
+import ftg.model.state.State;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateInterval;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
@@ -35,6 +39,12 @@ public final class PersonView {
 
     @FXML
     private Label age;
+
+    @FXML
+    private ListView<State> states;
+
+    @FXML
+    private ListView<Relation> relations;
 
     @FXML
     public void initialize() {
@@ -65,6 +75,9 @@ public final class PersonView {
         EventStreams.combine(personDeath, personAge)
                 .map((death, age) -> String.format("%s: %s", death.map(d -> "Age at death").orElse("Age"), age))
                 .feedTo(age.textProperty());
+
+        person.map(Person::getStates).feedTo(states.itemsProperty());
+        person.map(Person::getRelations).map(Relations::getAllRelations).feedTo(relations.itemsProperty());
     }
 
     public SimpleObjectProperty<Person> personProperty() {
