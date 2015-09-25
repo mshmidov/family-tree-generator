@@ -5,7 +5,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
-<VBox fx:id="root" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null"
+<VBox fx:id="root" prefHeight="600.0" prefWidth="900.0" minHeight="200" minWidth="400"
+      xmlns="http://javafx.com/javafx/null"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ftg.application.gui.dashboard.DashboardView">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="900.0" spacing="10.0">
@@ -57,12 +58,12 @@
                 <Insets left="10.0"/>
             </padding>
         </HBox>
-        <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
+        <VBox VBox.vgrow="ALWAYS">
             <children>
-                <SplitPane dividerPositions="0.7" VBox.vgrow="ALWAYS">
+                <SplitPane dividerPositions="0.75" VBox.vgrow="ALWAYS">
                     <items>
-                        <BorderPane fx:id="contentPane" prefHeight="200.0" prefWidth="200.0"/>
-                        <Accordion fx:id="rightAccordion">
+                        <BorderPane fx:id="contentPane" minWidth="200" prefWidth="600.0"/>
+                        <Accordion fx:id="rightAccordion" minWidth="-Infinity" prefWidth="200.0">
                             <panes>
                                 <TitledPane fx:id="livingPeoplePane" animated="false" text="Living people">
                                     <content>

@@ -38,6 +38,8 @@ public class GuiApplication extends Application {
         LOGGER.entry();
         primaryStage.setTitle("Family tree generator");
         primaryStage.setScene(new Scene(dashboardController.getViewRoot(), 800, 600));
+        primaryStage.setMinWidth(400);
+        primaryStage.setMinHeight(200);
         primaryStage.show();
     }
 }
