@@ -3,12 +3,11 @@ package ftg.application.gui.dashboard;
 import com.google.common.collect.Ordering;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import ftg.application.gui.person.PersonController;
+import ftg.application.gui.person.PersonLineageController;
 import ftg.commons.Action;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -16,9 +15,9 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import org.fxmisc.easybind.EasyBind;
+import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
 
 import java.util.Collection;
@@ -33,10 +32,9 @@ public final class DashboardView {
             .from((Person o1, Person o2) -> o1.getSurname().compareTo(o2.getSurname()))
             .compound((o1, o2) -> o1.getName().compareTo(o2.getName()));
 
-
     private final SimpleObjectProperty<TredecimalDate> currentDateProperty = new SimpleObjectProperty<>();
 
-    private final PersonController selectedPerson;
+    private final PersonLineageController personLineage;
 
     @FXML
     private VBox root;
@@ -49,6 +47,9 @@ public final class DashboardView {
 
     @FXML
     private Label currentDate;
+
+    @FXML
+    private SplitPane splitPane;
 
     @FXML
     private Accordion rightAccordion;
@@ -66,9 +67,6 @@ public final class DashboardView {
     private ListView<Person> deadPeople;
 
     @FXML
-    private BorderPane contentPane;
-
-    @FXML
     private ProgressBar progressBar;
 
     private Optional<Action> onNewSimulation = Optional.empty();
@@ -78,12 +76,14 @@ public final class DashboardView {
     private Optional<IntConsumer> onRunSimulation = Optional.empty();
 
     @Inject
-    public DashboardView(Provider<PersonController> personControllerProvider) {
-        this.selectedPerson = personControllerProvider.get();
+    public DashboardView(Provider<PersonLineageController> personLineageProvider) {
+        personLineage = personLineageProvider.get();
     }
 
     @FXML
     public void initialize() {
+
+        splitPane.getItems().add(0, personLineage.getViewRoot());
 
         rightAccordion.setExpandedPane(livingPeoplePane);
 
@@ -99,16 +99,12 @@ public final class DashboardView {
                 EasyBind.select(deadPeople.itemsProperty())
                         .selectObject(Bindings::size)));
 
-        contentPane.setCenter(selectedPerson.getViewRoot());
-
-        final Binding<Person> selection = EventStreams.merge(
+        final EventStream<Person> selection = EventStreams.merge(
                 EventStreams.valuesOf(livingPeople.getSelectionModel().selectedItemProperty()),
-                EventStreams.valuesOf(deadPeople.getSelectionModel().selectedItemProperty()))
-                .toBinding(null);
+                EventStreams.valuesOf(deadPeople.getSelectionModel().selectedItemProperty()));
 
-        selectedPerson.personProperty().bind(selection);
-        selectedPerson.currentDateProperty().bind(currentDateProperty);
-
+        selection.feedTo(personLineage.personProperty());
+        personLineage.currentDateProperty().bind(currentDateProperty);
     }
 
     public DoubleProperty progressProperty() {
@@ -138,7 +134,6 @@ public final class DashboardView {
     public void setOnRunSimulation(IntConsumer handler) {
         this.onRunSimulation = Optional.of(handler);
     }
-
 
     public SimpleObjectProperty<TredecimalDate> currentDateProperty() {
         return currentDateProperty;

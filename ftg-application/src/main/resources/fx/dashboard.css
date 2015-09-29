@@ -1,0 +1,19 @@
+.person-summary {
+    -fx-alignment: center;
+    -fx-min-width: 100;
+    -fx-padding: 5 10;
+    -fx-background-color: lightgoldenrodyellow;
+    -fx-border-color: slategray;
+    -fx-border-radius: 10;
+}
+
+.person-summary .hyperlink {
+}
+
+.persons-flow {
+    -fx-hgap: 15;
+    -fx-vgap: 15;
+    -fx-alignment: top-center;
+    -fx-row-valignment: baseline;
+    -fx-padding: 10;
+}

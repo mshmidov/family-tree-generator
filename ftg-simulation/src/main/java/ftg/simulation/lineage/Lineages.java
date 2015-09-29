@@ -31,17 +31,30 @@ public final class Lineages {
 
     private final Table<Person, Person, Integer> knownRelation = HashBasedTable.create();
 
+    public static Optional<Person> findFather(Person person) {
+        return person.getRelations().get(Parentage.class).stream()
+                .filter(parentage -> parentage.getRole(person) == Role.CHILD)
+                .findFirst()
+                .map(Parentage::getFather);
+    }
+
+    public static Optional<Person> findMother(Person person) {
+        return person.getRelations().get(Parentage.class).stream()
+                .filter(parentage -> parentage.getRole(person) == Role.CHILD)
+                .findFirst()
+                .map(Parentage::getMother);
+    }
+
+    public static List<Person> findChildren(Person person) {
+        return person.getRelations().get(Parentage.class).stream()
+                .filter(parentage -> parentage.getRole(person) != Role.CHILD)
+                .map(Parentage::getChild)
+                .collect(Collectors.toList());
+    }
 
     public Lineages() {
-        kinshipProviders.put(Ancestors.FATHER, p -> p.getRelations().get(Parentage.class).stream()
-                .filter(parentage -> parentage.getRole(p) == Role.CHILD)
-                .findFirst()
-                .map(Parentage::getFather));
-
-        kinshipProviders.put(Ancestors.MOTHER, p -> p.getRelations().get(Parentage.class).stream()
-                .filter(parentage -> parentage.getRole(p) == Role.CHILD)
-                .findFirst()
-                .map(Parentage::getMother));
+        kinshipProviders.put(Ancestors.FATHER, Lineages::findFather);
+        kinshipProviders.put(Ancestors.MOTHER, Lineages::findMother);
 
         kinshipProviders.put(Ancestors.PATERNAL_GRANDFATHER, p -> getFather(p).flatMap(this::getFather));
         kinshipProviders.put(Ancestors.PATERNAL_GRANDMOTHER, p -> getFather(p).flatMap(this::getMother));
@@ -119,8 +132,6 @@ public final class Lineages {
                 .peek(r -> cacheRelation(a, b, r))
                 .min(Integer::compare);
     }
-
-
 
 
     private void cacheRelation(Person a, Person b, Integer relation) {

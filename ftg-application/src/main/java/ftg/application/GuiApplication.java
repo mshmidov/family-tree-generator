@@ -37,7 +37,9 @@ public class GuiApplication extends Application {
     public void start(Stage primaryStage) throws Exception {
         LOGGER.entry();
         primaryStage.setTitle("Family tree generator");
-        primaryStage.setScene(new Scene(dashboardController.getViewRoot(), 800, 600));
+        final Scene dashboardScene = new Scene(dashboardController.getViewRoot(), 800, 600);
+        dashboardScene.getStylesheets().add("fx/dashboard.css");
+        primaryStage.setScene(dashboardScene);
         primaryStage.setMinWidth(400);
         primaryStage.setMinHeight(200);
         primaryStage.show();

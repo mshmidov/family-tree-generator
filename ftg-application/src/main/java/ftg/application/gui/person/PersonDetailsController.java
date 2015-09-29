@@ -7,11 +7,11 @@ import ftg.model.time.TredecimalDate;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
 
-public final class PersonController extends AbstractController<PersonView> {
+public final class PersonDetailsController extends AbstractController<PersonDetailsView> {
 
     @Inject
-    public PersonController(FXMLLoader fxmlLoader) {
-        super(fxmlLoader, "fx/person.fxml");
+    public PersonDetailsController(FXMLLoader fxmlLoader) {
+        super(fxmlLoader, "fx/person-details.fxml");
     }
 
     public SimpleObjectProperty<Person> personProperty() {
