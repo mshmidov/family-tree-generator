@@ -1,11 +1,12 @@
 package ftg.application;
 
+import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import ftg.application.cdi.ApplicationModule;
-import ftg.application.cdi.FxSupportModule;
-import ftg.commons.cdi.PersonCounter;
+import ftg.commons.cdi.Identifier;
 import ftg.commons.range.IntegerRange;
 import ftg.model.time.TredecimalDate;
 import ftg.model.world.PersonIntroductionEvent;
@@ -20,10 +21,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.LongStream;
-
-import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 
 public class CommandLineApplication {
 
@@ -40,28 +39,30 @@ public class CommandLineApplication {
     private Simulation simulation;
 
     @Inject
-    @PersonCounter
-    private AtomicLong personCounter;
+    @Identifier
+    private Supplier<String> identifier;
+
+    @Inject
+    private World world;
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         new CommandLineApplication().runSimulation();
     }
 
     public CommandLineApplication() {
-        injector = Guice.createInjector(new FxSupportModule(), new ApplicationModule());
+        injector = Guice.createInjector(new ApplicationModule());
         injector.injectMembers(this);
     }
 
     public void runSimulation() {
 
-        final World world = new World();
 
-        populate(world, personCounter);
+        populate(world, identifier);
 
         LongStream.range(0, 300 * DAYS_IN_YEAR).forEach(i -> simulation.nextDay(world));
     }
 
-    private void populate(World world, AtomicLong personCounter) {
+    private void populate(World world, Supplier<String> identifier) {
         final IntegerRange age = IntegerRange.inclusive(17, 50);
 
         final TredecimalDate currentDate = new TredecimalDate(0);
@@ -71,8 +72,8 @@ public class CommandLineApplication {
 
             namingSystem.getUniqueSurnames().stream()
                     .limit(100)
-                    .map(surname -> randomModel.newPersonData(personCounter.incrementAndGet(), country, surname, age, currentDate))
-                    .map(personData -> new PersonIntroductionEvent(currentDate, personData))
+                .map(surname -> randomModel.newPersonData(identifier.get(), country, surname, age, currentDate))
+                .map(personData -> new PersonIntroductionEvent(identifier.get(), currentDate, personData))
                     .forEach(world::submitEvent);
         }
     }

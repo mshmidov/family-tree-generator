@@ -1,5 +1,8 @@
 package ftg.model.world;
 
+import static ftg.commons.MorePreconditions.checked;
+import static ftg.model.time.TredecimalDateInterval.intervalBetween;
+
 import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
 import ftg.model.relation.Widowhood;
@@ -9,20 +12,25 @@ import ftg.model.time.TredecimalDateFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static ftg.commons.MorePreconditions.checked;
-import static ftg.model.time.TredecimalDateInterval.intervalBetween;
-
 public final class DeathEvent implements Event {
 
     private static final Logger LOGGER = LogManager.getLogger(DeathEvent.class);
+
+    private final String id;
 
     private final TredecimalDate date;
 
     private final String deceasedId;
 
-    public DeathEvent(TredecimalDate date, String deceasedId) {
+    public DeathEvent(String id, TredecimalDate date, String deceasedId) {
+        this.id = id;
         this.date = date;
         this.deceasedId = deceasedId;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override

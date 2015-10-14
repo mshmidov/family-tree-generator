@@ -15,16 +15,24 @@ public final class BirthEvent implements Event {
 
     private static final Logger LOGGER = LogManager.getLogger(BirthEvent.class);
 
+    private final String id;
+
     private final PersonData childData;
 
     private final String motherId;
 
     private final String fatherId;
 
-    public BirthEvent(PersonData childData, String motherId, String fatherId) {
+    public BirthEvent(String id, PersonData childData, String motherId, String fatherId) {
+        this.id = id;
         this.childData = childData;
         this.motherId = motherId;
         this.fatherId = fatherId;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override

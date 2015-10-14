@@ -1,6 +1,9 @@
 package ftg.model.person;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.collect.ImmutableList;
+import ftg.model.Identified;
 import ftg.model.relation.Relation;
 import ftg.model.state.State;
 import ftg.model.time.TredecimalDate;
@@ -13,9 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkState;
-
-public final class Person {
+public final class Person implements Identified {
 
     public enum Sex {MALE, FEMALE}
 
@@ -51,6 +52,7 @@ public final class Person {
         });
     }
 
+    @Override
     public String getId() {
         return id;
     }

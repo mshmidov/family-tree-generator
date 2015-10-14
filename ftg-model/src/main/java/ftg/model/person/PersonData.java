@@ -1,13 +1,14 @@
 package ftg.model.person;
 
 import com.google.common.base.MoreObjects;
+import ftg.model.Identified;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
 
 import java.util.Objects;
 
-public final class PersonData {
+public final class PersonData implements Identified {
 
     private final String id;
 
@@ -21,7 +22,7 @@ public final class PersonData {
 
     private final Residence residence;
 
-    public PersonData(long personCounter, String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, Residence residence) {
+    public PersonData(String personCounter, String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, Residence residence) {
         this.id = String.format("%s %s %s (%s)", personCounter, name, surname.getForm(sex), TredecimalDateFormat.ISO.format(birthDate));
         this.name = name;
         this.surname = surname;
@@ -30,6 +31,7 @@ public final class PersonData {
         this.residence = residence;
     }
 
+    @Override
     public String getId() {
         return id;
     }

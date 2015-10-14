@@ -1,9 +1,13 @@
 package ftg.simulation;
 
+import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
+import static ftg.model.time.TredecimalDateInterval.intervalBetween;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import ftg.commons.Util;
-import ftg.commons.cdi.PersonCounter;
+import ftg.commons.cdi.Identifier;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
 import ftg.model.person.PersonData;
@@ -11,7 +15,12 @@ import ftg.model.relation.Marriage;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
-import ftg.model.world.*;
+import ftg.model.world.BirthEvent;
+import ftg.model.world.ConceptionEvent;
+import ftg.model.world.DeathEvent;
+import ftg.model.world.Event;
+import ftg.model.world.MarriageEvent;
+import ftg.model.world.World;
 import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.lineage.Lineages;
@@ -22,18 +31,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
-import static ftg.model.time.TredecimalDateInterval.intervalBetween;
-import static java.util.Objects.requireNonNull;
 
 public final class Simulation {
 
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
 
-    private final AtomicLong personCounter;
+    private final Supplier<String> identifier;
 
     private final RandomChoice randomChoice = new RandomChoice();
     private final Lineages lineages = new Lineages();
@@ -46,10 +51,10 @@ public final class Simulation {
     private TredecimalDate currentDate = new TredecimalDate(0);
 
     @Inject
-    public Simulation(Configuration configuration, @PersonCounter AtomicLong personCounter) {
+    public Simulation(Configuration configuration, @Identifier Supplier<String> identifier) {
 
         this.configuration = configuration;
-        this.personCounter = personCounter;
+        this.identifier = identifier;
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
     }
 
@@ -123,7 +128,8 @@ public final class Simulation {
                 // TODO introduce new random female
             } else {
                 int index = randomChoice.fromRangeByGaussian(candidates.size());
-                return Optional.of(new MarriageEvent(currentDate, male.getId(), unmarriedFemales.remove(index).getId()));
+                return Optional.of(
+                    new MarriageEvent(identifier.get(), currentDate, male.getId(), unmarriedFemales.remove(index).getId()));
             }
 
 
@@ -137,7 +143,7 @@ public final class Simulation {
 
             final Person.Sex sex = randomChoice.from(Person.Sex.class);
 
-            return Optional.of(new ConceptionEvent(currentDate,
+            return Optional.of(new ConceptionEvent(identifier.get(), currentDate,
                     female.getRelations().getSingle(Marriage.class).get().getHusband().getId(),
                     female.getId(),
                     sex));
@@ -151,8 +157,7 @@ public final class Simulation {
 
         final String childName = countries.get(residence.getCountry()).getNamingSystem().getNameForNewborn(mother, pregnancy);
 
-        final PersonData childData = new PersonData(
-                personCounter.incrementAndGet(),
+        final PersonData childData = new PersonData(identifier.get(),
                 childName,
                 pregnancy.getFather().getSurnameObject(),
                 pregnancy.getChildSex(),
@@ -160,7 +165,8 @@ public final class Simulation {
                 residence
         );
 
-        return new BirthEvent(childData, mother.getId(), pregnancy.getFather().getId());
+        return new BirthEvent(identifier.get(), childData, mother.getId(),
+            pregnancy.getFather().getId());
     }
 
     private Optional<DeathEvent> decideDeath(Person person) {
@@ -168,6 +174,8 @@ public final class Simulation {
         final Country country = requireNonNull(countries.get(person.getState(Residence.class).getCountry()));
         final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
 
-        return randomChoice.byChance(chance) ? Optional.of(new DeathEvent(currentDate, person.getId())) : Optional.empty();
+        return randomChoice.byChance(chance)
+               ? Optional.of(new DeathEvent(identifier.get(), currentDate, person.getId()))
+               : Optional.empty();
     }
 }
