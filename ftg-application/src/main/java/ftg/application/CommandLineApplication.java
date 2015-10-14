@@ -1,10 +1,11 @@
 package ftg.application;
 
+import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import ftg.application.cdi.ApplicationModule;
-import ftg.application.cdi.FxSupportModule;
 import ftg.commons.cdi.PersonCounter;
 import ftg.commons.range.IntegerRange;
 import ftg.model.time.TredecimalDate;
@@ -22,8 +23,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
-
-import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 
 public class CommandLineApplication {
 
@@ -48,7 +47,7 @@ public class CommandLineApplication {
     }
 
     public CommandLineApplication() {
-        injector = Guice.createInjector(new FxSupportModule(), new ApplicationModule());
+        injector = Guice.createInjector(new ApplicationModule());
         injector.injectMembers(this);
     }
 
