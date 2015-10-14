@@ -1,8 +1,11 @@
 dependencies {
     compile project(':ftg-simulation')
 
-    compile group: 'org.reactfx', name: 'reactfx', version: '1.4.1'
-    compile group: 'org.fxmisc.easybind', name: 'easybind', version: '1.0.3'
+    compile('net.iot-solutions.graphdb:jcypher:2.6.0') {
+        exclude group: 'org.neo4j', module: 'neo4j'
+        exclude group: 'org.neo4j', module: 'neo4j-kernel'
+        exclude group: 'org.neo4j', module: 'neo4j-io'
+    }
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.1'
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-mrbean', version: '2.6.1'
