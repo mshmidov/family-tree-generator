@@ -1,5 +1,9 @@
 package ftg.model.world;
 
+import static ftg.commons.MorePreconditions.checkedArgument;
+import static ftg.model.person.Person.Sex.FEMALE;
+import static ftg.model.person.Person.Sex.MALE;
+
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
 import ftg.model.state.Pregnancy;
@@ -8,13 +12,11 @@ import ftg.model.time.TredecimalDateFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static ftg.commons.MorePreconditions.checkedArgument;
-import static ftg.model.person.Person.Sex.FEMALE;
-import static ftg.model.person.Person.Sex.MALE;
-
 public final class ConceptionEvent implements Event {
 
     private static final Logger LOGGER = LogManager.getLogger(ConceptionEvent.class);
+
+    private final String id;
 
     private final TredecimalDate date;
 
@@ -24,11 +26,17 @@ public final class ConceptionEvent implements Event {
 
     private final Person.Sex childSex;
 
-    public ConceptionEvent(TredecimalDate date, String fatherId, String motherId, Person.Sex childSex) {
+    public ConceptionEvent(String id, TredecimalDate date, String fatherId, String motherId, Person.Sex childSex) {
+        this.id = id;
         this.date = date;
         this.fatherId = fatherId;
         this.motherId = motherId;
         this.childSex = childSex;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override

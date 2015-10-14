@@ -5,13 +5,21 @@ import ftg.model.time.TredecimalDate;
 
 public final class PersonIntroductionEvent implements Event {
 
+    private final String id;
+
     private final TredecimalDate date;
 
     private final PersonData personData;
 
-    public PersonIntroductionEvent(TredecimalDate date, PersonData personData) {
+    public PersonIntroductionEvent(String id, TredecimalDate date, PersonData personData) {
+        this.id = id;
         this.date = date;
         this.personData = personData;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override

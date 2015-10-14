@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @BindingAnnotation
 @Target({ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PersonCounter {
+public @interface Identifier {
 }

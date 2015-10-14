@@ -1,5 +1,8 @@
 package ftg.model.world;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
@@ -8,12 +11,11 @@ import ftg.model.time.TredecimalDateFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-
 public final class MarriageEvent implements Event {
 
     private static final Logger LOGGER = LogManager.getLogger(MarriageEvent.class);
+
+    private final String id;
 
     private final TredecimalDate date;
 
@@ -21,10 +23,16 @@ public final class MarriageEvent implements Event {
 
     private final String wifeId;
 
-    public MarriageEvent(TredecimalDate date, String husbandId, String wifeId) {
+    public MarriageEvent(String id, TredecimalDate date, String husbandId, String wifeId) {
+        this.id = id;
         this.date = date;
         this.husbandId = husbandId;
         this.wifeId = wifeId;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override

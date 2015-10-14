@@ -1,8 +1,9 @@
 package ftg.model.world;
 
+import ftg.model.Identified;
 import ftg.model.time.TredecimalDate;
 
-public interface Event {
+public interface Event extends Identified {
 
     TredecimalDate getDate();
 
