@@ -1,19 +1,18 @@
-package ftg.application.bootstrap;
+package ftg.application.bootstrap.simulation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.module.mrbean.MrBeanModule;
-import ftg.application.bootstrap.configfile.ConfigurationFile;
-import ftg.application.bootstrap.configfile.NamingSystemConfig;
+import static java.util.stream.Collectors.toList;
+
+import ftg.application.bootstrap.AbstractConfigurationLoader;
+import ftg.application.bootstrap.simulation.configfile.NamingSystemConfig;
+import ftg.application.bootstrap.simulation.configfile.SimulationConfigFile;
 import ftg.commons.exception.InitializationError;
-import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
+import ftg.simulation.configuration.SimulationConfiguration;
 import ftg.simulation.configuration.naming.CulturalNaming;
 import ftg.simulation.configuration.naming.NamingLogic;
 import ftg.simulation.configuration.naming.NamingSystem;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -22,29 +21,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-
-public final class ConfigurationLoader {
-
-    private final String path;
-
-    private final ObjectMapper objectMapper;
+public final class SimulationConfigLoader extends AbstractConfigurationLoader {
 
     private final DemographyLoader demographyLoader;
 
-    public ConfigurationLoader(String path) {
-        this.path = path;
+    public SimulationConfigLoader(String path) {
+        super(path);
         this.demographyLoader = new DemographyLoader(path);
-
-        this.objectMapper = new ObjectMapper(new YAMLFactory());
-        this.objectMapper.registerModule(new MrBeanModule());
     }
 
 
-    public Configuration loadConfiguration(String configFile) {
+    public SimulationConfiguration loadConfiguration(String configFile) {
 
-        final ConfigurationFile configurationFile = loadConfigFile(configFile);
-
+        final SimulationConfigFile configurationFile = loadConfigurationClass(configFile, SimulationConfigFile.class);
 
         final List<Country> countries = new ArrayList<>();
 
@@ -55,17 +44,7 @@ public final class ConfigurationLoader {
                         demographyLoader.loadDemography(cfg.getDemography())))
                 .forEach(countries::add);
 
-        return new Configuration(countries);
-    }
-
-    private ConfigurationFile loadConfigFile(String configFile) {
-
-        try (InputStream input = ClassLoader.getSystemResource(path + configFile).openStream()) {
-            return objectMapper.readValue(input, ConfigurationFile.class);
-
-        } catch (IOException e) {
-            throw new InitializationError(e);
-        }
+        return new SimulationConfiguration(countries);
     }
 
     private NamingSystem createNamingSystem(NamingSystemConfig cfg) {

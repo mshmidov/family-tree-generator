@@ -1,4 +1,4 @@
-package ftg.application.bootstrap.configfile;
+package ftg.application.bootstrap.simulation.configfile;
 
 public interface DemographyConfig {
 

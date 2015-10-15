@@ -1,4 +1,4 @@
-package ftg.application.bootstrap.configfile;
+package ftg.application.bootstrap.simulation.configfile;
 
 import java.util.List;
 

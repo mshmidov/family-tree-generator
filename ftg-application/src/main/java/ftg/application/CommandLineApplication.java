@@ -6,6 +6,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import ftg.application.cdi.ApplicationModule;
+import ftg.application.neo4j.cdi.Neo4JSupportModule;
 import ftg.commons.cdi.Identifier;
 import ftg.commons.range.IntegerRange;
 import ftg.model.time.TredecimalDate;
@@ -13,8 +14,8 @@ import ftg.model.world.PersonIntroductionEvent;
 import ftg.model.world.World;
 import ftg.simulation.RandomModel;
 import ftg.simulation.Simulation;
-import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
+import ftg.simulation.configuration.SimulationConfiguration;
 import ftg.simulation.configuration.naming.NamingSystem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +34,7 @@ public class CommandLineApplication {
     private Injector injector;
 
     @Inject
-    private Configuration configuration;
+    private SimulationConfiguration configuration;
 
     @Inject
     private Simulation simulation;
@@ -50,12 +51,11 @@ public class CommandLineApplication {
     }
 
     public CommandLineApplication() {
-        injector = Guice.createInjector(new ApplicationModule());
+        injector = Guice.createInjector(new Neo4JSupportModule(), new ApplicationModule());
         injector.injectMembers(this);
     }
 
     public void runSimulation() {
-
 
         populate(world, identifier);
 

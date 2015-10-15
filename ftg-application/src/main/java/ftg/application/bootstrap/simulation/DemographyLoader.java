@@ -1,7 +1,9 @@
-package ftg.application.bootstrap;
+package ftg.application.bootstrap.simulation;
+
+import static ftg.commons.MorePreconditions.checkedArgument;
 
 import com.google.common.collect.ImmutableList;
-import ftg.application.bootstrap.configfile.DemographyConfig;
+import ftg.application.bootstrap.simulation.configfile.DemographyConfig;
 import ftg.commons.exception.InitializationError;
 import ftg.commons.range.IntegerRange;
 import ftg.model.person.Person;
@@ -18,8 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static ftg.commons.MorePreconditions.checkedArgument;
 
 public final class DemographyLoader {
 

@@ -21,8 +21,8 @@ import ftg.model.world.DeathEvent;
 import ftg.model.world.Event;
 import ftg.model.world.MarriageEvent;
 import ftg.model.world.World;
-import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
+import ftg.simulation.configuration.SimulationConfiguration;
 import ftg.simulation.lineage.Lineages;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,21 +44,21 @@ public final class Simulation {
     private final Lineages lineages = new Lineages();
     private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
 
-    private final Configuration configuration;
+    private final SimulationConfiguration configuration;
 
     private final Map<String, Country> countries;
 
     private TredecimalDate currentDate = new TredecimalDate(0);
 
     @Inject
-    public Simulation(Configuration configuration, @Identifier Supplier<String> identifier) {
+    public Simulation(SimulationConfiguration configuration, @Identifier Supplier<String> identifier) {
 
         this.configuration = configuration;
         this.identifier = identifier;
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
     }
 
-    public Configuration getConfiguration() {
+    public SimulationConfiguration getConfiguration() {
         return configuration;
     }
 

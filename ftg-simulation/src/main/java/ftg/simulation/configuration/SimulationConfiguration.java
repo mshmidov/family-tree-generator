@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
-public final class Configuration {
+public final class SimulationConfiguration {
 
     private final List<Country> countries;
 
-    public Configuration(List<Country> countries) {
+    public SimulationConfiguration(List<Country> countries) {
         this.countries = ImmutableList.copyOf(countries);
     }
 
