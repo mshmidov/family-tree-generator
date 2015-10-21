@@ -7,14 +7,14 @@ import ftg.application.bootstrap.simulation.SimulationConfigLoader;
 import ftg.commons.cdi.Identifier;
 import ftg.simulation.configuration.SimulationConfiguration;
 
-import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 
 public class ApplicationModule extends AbstractModule {
 
-    private final String uniqueIdPart = UUID.randomUUID().toString();
+    private final String uniqueIdPart = String.valueOf(ThreadLocalRandom.current().nextLong(10_000, 100_000));
 
     private final AtomicLong identifier = new AtomicLong(0);
 
