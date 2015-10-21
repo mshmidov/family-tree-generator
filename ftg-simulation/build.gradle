@@ -1,6 +1,6 @@
 dependencies {
     compile project(':ftg-commons')
-    compile project(':ftg-model')
+    compile project(':ftg-graph')
 
     testCompile project(':ftg-commons-test')
 }

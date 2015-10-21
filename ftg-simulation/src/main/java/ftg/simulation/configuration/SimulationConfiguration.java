@@ -6,13 +6,13 @@ import java.util.List;
 
 public final class SimulationConfiguration {
 
-    private final List<Country> countries;
+    private final List<SimulatedCountry> countries;
 
-    public SimulationConfiguration(List<Country> countries) {
+    public SimulationConfiguration(List<SimulatedCountry> countries) {
         this.countries = ImmutableList.copyOf(countries);
     }
 
-    public List<Country> getCountries() {
+    public List<SimulatedCountry> getCountries() {
         return countries;
     }
 }

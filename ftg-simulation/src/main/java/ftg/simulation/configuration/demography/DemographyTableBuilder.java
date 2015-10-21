@@ -1,7 +1,7 @@
 package ftg.simulation.configuration.demography;
 
 import ftg.commons.range.IntegerRange;
-import ftg.model.person.Person;
+import ftg.graph.model.person.Person;
 
 import java.util.HashMap;
 import java.util.Map;

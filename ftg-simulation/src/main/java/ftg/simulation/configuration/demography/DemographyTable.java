@@ -1,12 +1,16 @@
 package ftg.simulation.configuration.demography;
 
-import ftg.commons.range.IntegerRange;
-import ftg.model.person.Person;
-
-import java.util.*;
-
 import static ftg.commons.MorePreconditions.checked;
 import static ftg.commons.MorePreconditions.isNotNull;
+
+import ftg.commons.range.IntegerRange;
+import ftg.graph.model.person.Person;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.TreeSet;
 
 public final class DemographyTable {
 

@@ -7,11 +7,14 @@ import ftg.application.bootstrap.simulation.SimulationConfigLoader;
 import ftg.commons.cdi.Identifier;
 import ftg.simulation.configuration.SimulationConfiguration;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 
 public class ApplicationModule extends AbstractModule {
+
+    private final String uniqueIdPart = UUID.randomUUID().toString();
 
     private final AtomicLong identifier = new AtomicLong(0);
 
@@ -22,11 +25,7 @@ public class ApplicationModule extends AbstractModule {
                 .in(Singleton.class);
 
         bind(new TypeLiteral<Supplier<String>>() {})
-                .annotatedWith(Identifier.class)
-                .toInstance(() -> String.valueOf(identifier.incrementAndGet()));
-
-        bind(new TypeLiteral<Supplier<Long>>() {})
-                .annotatedWith(Identifier.class)
-                .toInstance(identifier::incrementAndGet);
+            .annotatedWith(Identifier.class)
+            .toInstance(() -> uniqueIdPart + String.valueOf(identifier.incrementAndGet()));
     }
 }

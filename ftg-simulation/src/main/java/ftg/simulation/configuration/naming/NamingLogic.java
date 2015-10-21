@@ -1,8 +1,8 @@
 package ftg.simulation.configuration.naming;
 
-import ftg.model.person.Person;
-import ftg.model.person.Surname;
-import ftg.model.state.Pregnancy;
+import ftg.graph.model.person.Person;
+import ftg.graph.model.person.Pregnancy;
+import ftg.graph.model.person.Surname;
 
 public interface NamingLogic {
 

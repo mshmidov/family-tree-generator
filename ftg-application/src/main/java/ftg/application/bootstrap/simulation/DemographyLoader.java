@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import ftg.application.bootstrap.simulation.configfile.DemographyConfig;
 import ftg.commons.exception.InitializationError;
 import ftg.commons.range.IntegerRange;
-import ftg.model.person.Person;
+import ftg.graph.model.person.Person;
 import ftg.simulation.configuration.demography.Demography;
 import ftg.simulation.configuration.demography.DemographyTable;
 import ftg.simulation.configuration.demography.DemographyTableBuilder;

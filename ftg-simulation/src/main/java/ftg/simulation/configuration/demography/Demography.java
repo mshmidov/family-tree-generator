@@ -1,6 +1,7 @@
 package ftg.simulation.configuration.demography;
 
-import ftg.model.person.Person;
+
+import ftg.graph.model.person.Person;
 
 public final class Demography {
 

@@ -2,11 +2,11 @@ package ftg.application.bootstrap.simulation;
 
 import static java.util.stream.Collectors.toList;
 
-import ftg.application.bootstrap.AbstractConfigurationLoader;
 import ftg.application.bootstrap.simulation.configfile.NamingSystemConfig;
 import ftg.application.bootstrap.simulation.configfile.SimulationConfigFile;
+import ftg.commons.bootstrap.AbstractConfigurationLoader;
 import ftg.commons.exception.InitializationError;
-import ftg.simulation.configuration.Country;
+import ftg.simulation.configuration.SimulatedCountry;
 import ftg.simulation.configuration.SimulationConfiguration;
 import ftg.simulation.configuration.naming.CulturalNaming;
 import ftg.simulation.configuration.naming.NamingLogic;
@@ -35,10 +35,10 @@ public final class SimulationConfigLoader extends AbstractConfigurationLoader {
 
         final SimulationConfigFile configurationFile = loadConfigurationClass(configFile, SimulationConfigFile.class);
 
-        final List<Country> countries = new ArrayList<>();
+        final List<SimulatedCountry> countries = new ArrayList<>();
 
         configurationFile.getCountries().stream()
-                .map(cfg -> new Country(
+                .map(cfg -> new SimulatedCountry(
                         cfg.getName(),
                         createNamingSystem(cfg.getNamingSystem()),
                         demographyLoader.loadDemography(cfg.getDemography())))

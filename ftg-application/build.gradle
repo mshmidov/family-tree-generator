@@ -1,9 +1,6 @@
 dependencies {
+    compile project(':ftg-graph')
     compile project(':ftg-simulation')
-
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.1'
-    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-mrbean', version: '2.6.1'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.6.1'
 
     compile 'org.yaml:snakeyaml:1.16'
 
