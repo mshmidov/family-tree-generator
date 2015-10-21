@@ -24,7 +24,8 @@ public class World extends DomainObject {
 
     }
 
-    public World(String generated, Population population) {
+    World(String id, String generated, Population population) {
+        super(id);
         this.generated = generated;
         this.population = population;
     }

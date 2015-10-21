@@ -1,31 +1,32 @@
 package ftg.graph.db;
 
 import com.google.inject.Inject;
-import ftg.graph.model.DomainObjectFactory;
 import ftg.graph.model.event.Event;
+import ftg.graph.model.person.PersonFactory;
 import ftg.graph.model.world.World;
+import ftg.graph.model.world.WorldFactory;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.transaction.Transaction;
 
 public final class SimulatedWorld {
 
-    private final DomainObjectFactory domainObjectFactory;
+    private final WorldFactory worldFactory;
+    private final PersonFactory personFactory;
+
     private final Session session;
+
     private final Queries queries;
     private final Operations operations;
 
     @Inject
-    public SimulatedWorld(DomainObjectFactory domainObjectFactory, Session session) {
-        this.domainObjectFactory = domainObjectFactory;
+    public SimulatedWorld(WorldFactory worldFactory, PersonFactory personFactory, Session session) {
+        this.worldFactory = worldFactory;
+        this.personFactory = personFactory;
         this.session = session;
 
         final World world = createWorldRoot();
         this.queries = new Queries(session, world.getGraphId(), world.getId());
         this.operations = new Operations(session, world.getId(), queries);
-    }
-
-    public DomainObjectFactory getFactory() {
-        return domainObjectFactory;
     }
 
     public Queries getQueries() {
@@ -39,13 +40,13 @@ public final class SimulatedWorld {
     public void submitEvent(Event event) {
         try (final Transaction transaction = session.beginTransaction()) {
             // TODO: store event in db
-            event.apply(this);
+            event.apply(this, personFactory);
             transaction.commit();
         }
     }
 
     private World createWorldRoot() {
-        final World world = domainObjectFactory.newWorld();
+        final World world = worldFactory.newWorld();
 
         try (final Transaction transaction = session.beginTransaction()) {
             session.save(world);

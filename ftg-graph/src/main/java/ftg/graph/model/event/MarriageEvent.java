@@ -7,6 +7,7 @@ import ftg.commons.time.TredecimalDate;
 import ftg.commons.time.TredecimalDateFormat;
 import ftg.graph.db.SimulatedWorld;
 import ftg.graph.model.person.Man;
+import ftg.graph.model.person.PersonFactory;
 import ftg.graph.model.person.Woman;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,14 +20,14 @@ public final class MarriageEvent extends Event {
 
     private String wifeId;
 
-    public MarriageEvent(TredecimalDate date, String husbandId, String wifeId) {
-        super(date);
+    MarriageEvent(String id, TredecimalDate date, String husbandId, String wifeId) {
+        super(id, date);
         this.husbandId = husbandId;
         this.wifeId = wifeId;
     }
 
     @Override
-    public void apply(SimulatedWorld world) {
+    public void apply(SimulatedWorld world, PersonFactory personFactory) {
 
         final Man husband = world.getQueries().getMan(husbandId);
         final Woman wife = world.getQueries().getWoman(wifeId);

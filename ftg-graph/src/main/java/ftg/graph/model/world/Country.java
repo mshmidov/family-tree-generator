@@ -19,7 +19,8 @@ public class Country extends DomainObject {
     public Country() {
     }
 
-    public Country(String name) {
+    Country(String id, String name) {
+        super(id);
         this.name = name;
     }
 

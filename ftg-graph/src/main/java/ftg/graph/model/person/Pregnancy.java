@@ -23,7 +23,8 @@ public final class Pregnancy extends DomainObject {
     public Pregnancy() {
     }
 
-    public Pregnancy(TredecimalDate conceptionDate, Person father, Person.Sex childSex) {
+    Pregnancy(String id, TredecimalDate conceptionDate, Person father, Person.Sex childSex) {
+        super(id);
         this.conceptionDate = conceptionDate;
         this.father = father;
         this.childSex = childSex;

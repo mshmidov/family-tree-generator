@@ -21,8 +21,8 @@ public class Woman extends Person {
     public Woman() {
     }
 
-    public Woman(String name, Surname surname, TredecimalDate birthDate) {
-        super(name, surname, birthDate);
+    public Woman(String id, String name, Surname surname, TredecimalDate birthDate) {
+        super(id, name, surname, birthDate);
         currentSurname = surname;
     }
 

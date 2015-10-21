@@ -9,6 +9,7 @@ import ftg.graph.db.Queries;
 import ftg.graph.db.SimulatedWorld;
 import ftg.graph.model.person.Man;
 import ftg.graph.model.person.Person;
+import ftg.graph.model.person.PersonFactory;
 import ftg.graph.model.person.Woman;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,8 +31,8 @@ public final class ConceptionEvent extends Event {
     public ConceptionEvent() {
     }
 
-    public ConceptionEvent(TredecimalDate date, String fatherId, String motherId, Person.Sex childSex) {
-        super(date);
+    ConceptionEvent(String id, TredecimalDate date, String fatherId, String motherId, Person.Sex childSex) {
+        super(id, date);
         this.fatherId = fatherId;
         this.motherId = motherId;
         this.childSex = childSex;
@@ -50,7 +51,7 @@ public final class ConceptionEvent extends Event {
     }
 
     @Override
-    public void apply(SimulatedWorld world) {
+    public void apply(SimulatedWorld world, PersonFactory personFactory) {
         final Queries queries = world.getQueries();
 
         final Woman mother = checkedArgument(queries.getWoman(motherId), p -> p.getPregnancy() == null, "Mother should be non-pregnant");
@@ -58,7 +59,7 @@ public final class ConceptionEvent extends Event {
 
         LOGGER.info("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(getDate()), mother, father);
 
-        mother.setPregnancy(world.getFactory().newPregnancy(getDate(), father, childSex));
+        mother.setPregnancy(personFactory.newPregnancy(getDate(), father, childSex));
 
         world.getOperations().save(mother, father);
     }

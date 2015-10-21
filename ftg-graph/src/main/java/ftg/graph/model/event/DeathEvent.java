@@ -7,6 +7,7 @@ import ftg.commons.time.TredecimalDate;
 import ftg.commons.time.TredecimalDateFormat;
 import ftg.graph.db.SimulatedWorld;
 import ftg.graph.model.person.Person;
+import ftg.graph.model.person.PersonFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo4j.ogm.annotation.Property;
@@ -21,8 +22,8 @@ public final class DeathEvent extends Event {
     public DeathEvent() {
     }
 
-    public DeathEvent(TredecimalDate date, String deceasedId) {
-        super(date);
+    DeathEvent(String id, TredecimalDate date, String deceasedId) {
+        super(id, date);
         this.deceasedId = deceasedId;
     }
 
@@ -31,7 +32,7 @@ public final class DeathEvent extends Event {
     }
 
     @Override
-    public void apply(SimulatedWorld world) {
+    public void apply(SimulatedWorld world, PersonFactory personFactory) {
         Person deceased = checkedArgument(world.getQueries().getPerson(deceasedId), Person::isAlive);
 
         final Person spouse = deceased.getSpouse();

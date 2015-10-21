@@ -10,7 +10,8 @@ import ftg.application.cdi.Neo4JSupportModule;
 import ftg.commons.range.IntegerRange;
 import ftg.commons.time.TredecimalDate;
 import ftg.graph.db.SimulatedWorld;
-import ftg.graph.model.DomainObjectFactory;
+import ftg.graph.model.event.EventFactory;
+import ftg.graph.model.world.WorldFactory;
 import ftg.simulation.RandomModel;
 import ftg.simulation.Simulation;
 import ftg.simulation.configuration.SimulatedCountry;
@@ -38,6 +39,12 @@ public class CommandLineApplication {
     @Inject
     private SimulatedWorld world;
 
+    @Inject
+    private EventFactory eventFactory;
+
+    @Inject
+    private WorldFactory worldFactory;
+
     public static void main(String[] args) throws IOException, URISyntaxException {
         new CommandLineApplication().runSimulation();
     }
@@ -51,26 +58,25 @@ public class CommandLineApplication {
 
         populate(world);
 
-        LongStream.range(0, 300 * DAYS_IN_YEAR).forEach(i -> simulation.nextDay(world));
+        LongStream.range(0, 300 * DAYS_IN_YEAR).forEach(i -> simulation.nextDay(world, eventFactory));
     }
 
     private void populate(SimulatedWorld world) {
-        final DomainObjectFactory factory = world.getFactory();
-        final RandomModel randomModel = new RandomModel(factory);
+        final RandomModel randomModel = new RandomModel(eventFactory);
 
         final IntegerRange age = IntegerRange.inclusive(17, 50);
 
         final TredecimalDate currentDate = new TredecimalDate(0);
 
         for (SimulatedCountry simulatedCountry : configuration.getCountries()) {
-            world.getOperations().createCountry(factory.newCountry(simulatedCountry.getName()));
+            world.getOperations().createCountry(worldFactory.newCountry(simulatedCountry.getName()));
 
             final NamingSystem namingSystem = simulatedCountry.getNamingSystem();
 
 
             namingSystem.getUniqueSurnames().stream().limit(100)
                 .map(surname -> randomModel.newPersonData(simulatedCountry, surname, age, currentDate))
-                .map(personData -> factory.newPersonIntroductionEvent(currentDate, personData))
+                .map(personData -> eventFactory.newPersonIntroductionEvent(currentDate, personData))
                     .forEach(world::submitEvent);
         }
     }

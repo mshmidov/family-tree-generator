@@ -13,15 +13,18 @@ public abstract class DomainObject {
     @Property
     private String id;
 
+    public DomainObject() {
+    }
+
+    protected DomainObject(String id) {
+        this.id = id;
+    }
+
     public final Long getGraphId() {
         return graphId;
     }
 
     public final String getId() {
         return id;
-    }
-
-    final void setId(String id) {
-        this.id = id;
     }
 }

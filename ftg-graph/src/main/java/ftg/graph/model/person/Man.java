@@ -11,8 +11,8 @@ public class Man extends Person {
     public Man() {
     }
 
-    public Man(String name, Surname surname, TredecimalDate birthDate) {
-        super(name, surname, birthDate);
+    Man(String id, String name, Surname surname, TredecimalDate birthDate) {
+        super(id, name, surname, birthDate);
     }
 
     @Override

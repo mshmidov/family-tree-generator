@@ -12,6 +12,14 @@ public class Population extends DomainObject {
     @Relationship(type = "CONTAINS")
     private Set<Person> persons = new HashSet<>();
 
+    public Population() {
+    }
+
+    Population(String id, Set<Person> persons) {
+        super(id);
+        this.persons = persons;
+    }
+
     public Set<Person> getPersons() {
         return persons;
     }

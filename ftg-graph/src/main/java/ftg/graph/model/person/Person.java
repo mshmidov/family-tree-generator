@@ -45,7 +45,8 @@ public abstract class Person extends DomainObject {
     public Person() {
     }
 
-    public Person(String name, Surname surname, TredecimalDate birthDate) {
+    Person(String id, String name, Surname surname, TredecimalDate birthDate) {
+        super(id);
         this.name = name;
         this.surname = surname;
         this.birthDate = birthDate;

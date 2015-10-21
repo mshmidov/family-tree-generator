@@ -1,10 +1,12 @@
-package ftg.graph.model.person;
+package ftg.graph.model.event;
 
 import com.google.common.base.MoreObjects;
 import ftg.commons.time.TredecimalDate;
 import ftg.graph.db.SurnameConverter;
 import ftg.graph.db.TredecimalDateConverter;
 import ftg.graph.model.DomainObject;
+import ftg.graph.model.person.Person;
+import ftg.graph.model.person.Surname;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 
@@ -32,7 +34,8 @@ public final class PersonData extends DomainObject {
     public PersonData() {
     }
 
-    public PersonData(String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, String residence) {
+    PersonData(String id, String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, String residence) {
+        super(id);
         this.name = name;
         this.surname = surname;
         this.sex = sex;

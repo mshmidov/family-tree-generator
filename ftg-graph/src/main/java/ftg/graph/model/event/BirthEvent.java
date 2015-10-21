@@ -8,7 +8,7 @@ import ftg.graph.db.Queries;
 import ftg.graph.db.SimulatedWorld;
 import ftg.graph.model.person.Man;
 import ftg.graph.model.person.Person;
-import ftg.graph.model.person.PersonData;
+import ftg.graph.model.person.PersonFactory;
 import ftg.graph.model.person.Woman;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,8 +30,8 @@ public final class BirthEvent extends Event {
     public BirthEvent() {
     }
 
-    public BirthEvent(TredecimalDate date, PersonData childData, String motherId, String fatherId) {
-        super(date);
+    BirthEvent(String id, TredecimalDate date, PersonData childData, String motherId, String fatherId) {
+        super(id, date);
         this.childData = childData;
         this.motherId = motherId;
         this.fatherId = fatherId;
@@ -50,7 +50,7 @@ public final class BirthEvent extends Event {
     }
 
     @Override
-    public void apply(SimulatedWorld world) {
+    public void apply(SimulatedWorld world, PersonFactory personFactory) {
 
         final Queries queries = world.getQueries();
         final Operations operations = world.getOperations();
@@ -60,7 +60,7 @@ public final class BirthEvent extends Event {
 
         mother.setPregnancy(null);
 
-        final Person child = world.getFactory().newPerson(childData);
+        final Person child = personFactory.newPerson(childData);
         child.setFather(father);
         child.setMother(mother);
         child.setCountryOfResidence(queries.getCountry(childData.getResidence()));

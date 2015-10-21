@@ -13,9 +13,10 @@ import ftg.graph.db.SimulatedWorld;
 import ftg.graph.model.event.ConceptionEvent;
 import ftg.graph.model.event.DeathEvent;
 import ftg.graph.model.event.Event;
+import ftg.graph.model.event.EventFactory;
 import ftg.graph.model.event.MarriageEvent;
+import ftg.graph.model.event.PersonData;
 import ftg.graph.model.person.Person;
-import ftg.graph.model.person.PersonData;
 import ftg.graph.model.person.Pregnancy;
 import ftg.graph.model.person.Woman;
 import ftg.graph.model.world.Country;
@@ -60,7 +61,7 @@ public final class Simulation {
         return currentDate;
     }
 
-    public List<Event> nextDay(SimulatedWorld world) {
+    public List<Event> nextDay(SimulatedWorld world, EventFactory eventFactory) {
 
         currentDate = currentDate.plusDays(1);
 
@@ -72,7 +73,7 @@ public final class Simulation {
                 .collect(Collectors.toList());
 
         world.getQueries().getUnmarriedMen().stream()
-            .map(male -> decideMarriage(world, male, unmarriedFemales))
+            .map(male -> decideMarriage(eventFactory, male, unmarriedFemales))
                 .flatMap(Util::streamFromOptional)
                 .peek(events::add)
                 .forEach(world::submitEvent);
@@ -81,7 +82,7 @@ public final class Simulation {
         // pregnancies
         world.getQueries().getMarriedNonPregnantWomen().stream()
                 .filter(female -> fertileAge.includes(intervalBetween(female.getBirthDate(), currentDate).getYears()))
-                .map(woman -> decidePregnancyInMarriage(world, woman))
+                .map(woman -> decidePregnancyInMarriage(eventFactory, woman))
                 .flatMap(Util::streamFromOptional)
                 .peek(events::add)
                 .forEach(world::submitEvent);
@@ -89,13 +90,13 @@ public final class Simulation {
         // births
         world.getQueries().getPregnantWomen().stream()
             .filter(woman -> intervalBetween(currentDate, woman.getPregnancy().getConceptionDate()).getDays() == 280)
-                .map(woman -> decideBirth(world, woman))
+                .map(woman -> decideBirth(eventFactory, woman))
                 .peek(events::add)
                 .forEach(world::submitEvent);
 
         // deaths
         world.getQueries().getLivingPersons().stream()
-                .map(person -> decideDeath(world, person))
+                .map(person -> decideDeath(eventFactory, person))
                 .flatMap(Util::streamFromOptional)
                 .peek(events::add)
                 .forEach(world::submitEvent);
@@ -104,7 +105,7 @@ public final class Simulation {
     }
 
 
-    private Optional<MarriageEvent> decideMarriage(SimulatedWorld world, Person male, List<Woman> unmarriedFemales) {
+    private Optional<MarriageEvent> decideMarriage(EventFactory eventFactory, Person male, List<Woman> unmarriedFemales) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (randomChoice.byChance(chance)) {
 
@@ -119,7 +120,7 @@ public final class Simulation {
             } else {
                 int index = randomChoice.fromRangeByGaussian(candidates.size());
                 return Optional.of(
-                    world.getFactory().newMarriageEvent(currentDate, male.getId(), unmarriedFemales.remove(index).getId()));
+                    eventFactory.newMarriageEvent(currentDate, male.getId(), unmarriedFemales.remove(index).getId()));
             }
 
 
@@ -127,13 +128,13 @@ public final class Simulation {
         return Optional.empty();
     }
 
-    private Optional<ConceptionEvent> decidePregnancyInMarriage(SimulatedWorld world, Woman female) {
+    private Optional<ConceptionEvent> decidePregnancyInMarriage(EventFactory eventFactory, Woman female) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (randomChoice.byChance(chance)) {
 
             final Person.Sex sex = randomChoice.from(Person.Sex.class);
 
-            return Optional.of(world.getFactory().newConceptionEvent(
+            return Optional.of(eventFactory.newConceptionEvent(
                 currentDate,
                 female.getSpouse().getId(),
                 female.getId(),
@@ -142,13 +143,13 @@ public final class Simulation {
         return Optional.empty();
     }
 
-    private Event decideBirth(SimulatedWorld world, Woman mother) {
+    private Event decideBirth(EventFactory eventFactory, Woman mother) {
         final Pregnancy pregnancy = mother.getPregnancy();
         final Country country = mother.getCountryOfResidence();
 
         final String childName = countries.get(country.getName()).getNamingSystem().getNameForNewborn(mother, pregnancy);
 
-        final PersonData childData = world.getFactory().newPersonData(
+        final PersonData childData = eventFactory.newPersonData(
             childName,
             pregnancy.getFather().getSurname(),
             pregnancy.getChildSex(),
@@ -156,16 +157,16 @@ public final class Simulation {
             country.getName()
         );
 
-        return world.getFactory().newBirthEvent(currentDate, childData, mother.getId(), pregnancy.getFather().getId());
+        return eventFactory.newBirthEvent(currentDate, childData, mother.getId(), pregnancy.getFather().getId());
     }
 
-    private Optional<DeathEvent> decideDeath(SimulatedWorld world, Person person) {
+    private Optional<DeathEvent> decideDeath(EventFactory eventFactory, Person person) {
         final long age = intervalBetween(person.getBirthDate(), currentDate).getYears();
         final SimulatedCountry simulatedCountry = requireNonNull(countries.get(person.getCountryOfResidence().getName()));
         final double chance = 1 / simulatedCountry.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
 
         return randomChoice.byChance(chance)
-               ? Optional.of(new DeathEvent(currentDate, person.getId()))
+               ? Optional.of(eventFactory.newDeathEvent(currentDate, person.getId()))
                : Optional.empty();
     }
 }
