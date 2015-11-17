@@ -4,14 +4,7 @@ import ftg.model.person.Person;
 
 public final class Marriage extends AbstractRelation implements Relation {
 
-    public static Marriage create(Person husband, Person wife) {
-        final Marriage marriage = new Marriage(husband, wife);
-        husband.addRelation(marriage);
-        wife.addRelation(marriage);
-        return marriage;
-    }
-
-    public Marriage(Person husband, Person wife) {
+    Marriage(Person husband, Person wife) {
         super(Role.HUSBAND, husband, Role.WIFE, wife);
     }
 

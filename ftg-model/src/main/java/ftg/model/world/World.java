@@ -12,6 +12,7 @@ import ftg.model.event.Event;
 import ftg.model.event.PersonIntroductionEvent;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
+import ftg.model.relation.RelationFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +25,8 @@ import java.util.Set;
 public final class World {
 
     private final PersonFactory personFactory;
+
+    private final RelationFactory relationFactory;
 
     private final Map<String, Person> persons = new HashMap<>();
 
@@ -38,8 +41,9 @@ public final class World {
     private final Set<Person> deadPersons = new HashSet<>();
 
     @Inject
-    public World(PersonFactory personFactory) {
+    public World(PersonFactory personFactory, RelationFactory relationFactory) {
         this.personFactory = personFactory;
+        this.relationFactory = relationFactory;
     }
 
     public Person getPerson(String id) {
@@ -72,7 +76,7 @@ public final class World {
 
     public void submitEvent(Event event) {
         events.add(event);
-        event.apply(this, personFactory);
+        event.apply(this, personFactory, relationFactory);
 
         if (event instanceof BirthEvent) {
             final String id = ((BirthEvent) event).getChildData().getId();

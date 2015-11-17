@@ -7,17 +7,16 @@ import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.relation.Marriage;
+import ftg.model.relation.RelationFactory;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class MarriageEvent implements Event {
+public final class MarriageEvent extends Event {
 
     private static final Logger LOGGER = LogManager.getLogger(MarriageEvent.class);
-
-    private final String id;
 
     private final TredecimalDate date;
 
@@ -26,24 +25,14 @@ public final class MarriageEvent implements Event {
     private final String wifeId;
 
     MarriageEvent(String id, TredecimalDate date, String husbandId, String wifeId) {
-        this.id = id;
+        super(id, date);
         this.date = date;
         this.husbandId = husbandId;
         this.wifeId = wifeId;
     }
 
     @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public TredecimalDate getDate() {
-        return date;
-    }
-
-    @Override
-    public void apply(World world, PersonFactory personFactory) {
+    public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
 
         final Person husband = world.getPerson(husbandId);
         final Person wife = world.getPerson(wifeId);
@@ -54,7 +43,7 @@ public final class MarriageEvent implements Event {
         shouldNotPresent(husband.relations(Marriage.class).findAny(), () -> new IllegalStateException("Person can participate in only one marriage at a time"));
         shouldNotPresent(wife.relations(Marriage.class).findAny(), () -> new IllegalStateException("Person can participate in only one marriage at a time"));
 
-        Marriage.create(husband, wife);
+        relationFactory.createMarriage(husband, wife);
         LOGGER.info("[{}] {} marries {}", TredecimalDateFormat.ISO.format(date), husband, wife);
         wife.setSurname(husband.getSurnameObject());
     }

@@ -1,31 +1,20 @@
 package ftg.model.event;
 
 import ftg.model.person.PersonFactory;
+import ftg.model.relation.RelationFactory;
 import ftg.model.time.TredecimalDate;
 import ftg.model.world.World;
 
-public final class PersonIntroductionEvent implements Event {
-
-    private final String id;
+public final class PersonIntroductionEvent extends Event {
 
     private final TredecimalDate date;
 
     private final PersonData personData;
 
     PersonIntroductionEvent(String id, TredecimalDate date, PersonData personData) {
-        this.id = id;
+        super(id, date);
         this.date = date;
         this.personData = personData;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public TredecimalDate getDate() {
-        return date;
     }
 
     public PersonData getPersonData() {
@@ -33,7 +22,7 @@ public final class PersonIntroductionEvent implements Event {
     }
 
     @Override
-    public void apply(World world, PersonFactory personFactory) {
+    public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
         world.addPerson(personFactory.newPerson(personData));
     }
 }

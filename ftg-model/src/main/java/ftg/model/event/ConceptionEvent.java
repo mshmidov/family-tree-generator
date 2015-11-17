@@ -7,6 +7,7 @@ import static ftg.model.person.Person.Sex.MALE;
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
+import ftg.model.relation.RelationFactory;
 import ftg.model.state.Pregnancy;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
@@ -14,11 +15,9 @@ import ftg.model.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class ConceptionEvent implements Event {
+public final class ConceptionEvent extends Event {
 
     private static final Logger LOGGER = LogManager.getLogger(ConceptionEvent.class);
-
-    private final String id;
 
     private final TredecimalDate date;
 
@@ -29,21 +28,11 @@ public final class ConceptionEvent implements Event {
     private final Person.Sex childSex;
 
     ConceptionEvent(String id, TredecimalDate date, String fatherId, String motherId, Person.Sex childSex) {
-        this.id = id;
+        super(id, date);
         this.date = date;
         this.fatherId = fatherId;
         this.motherId = motherId;
         this.childSex = childSex;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public TredecimalDate getDate() {
-        return date;
     }
 
     public String getFatherId() {
@@ -59,7 +48,7 @@ public final class ConceptionEvent implements Event {
     }
 
     @Override
-    public void apply(World world, PersonFactory personFactory) {
+    public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
         final Person mother = checkedArgument(world.getPerson(motherId), p -> p.getSex() == FEMALE && !p.state(Pregnancy.class).isPresent(), "Mother should be non-pregnant female");
         final Person father = checkedArgument(world.getPerson(fatherId), p -> p.getSex() == MALE, "Father should be male");
 

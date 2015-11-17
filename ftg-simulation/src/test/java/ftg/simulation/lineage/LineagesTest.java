@@ -9,9 +9,9 @@ import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.person.Surname;
 import ftg.model.relation.Parentage;
+import ftg.model.relation.RelationFactory;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
-import ftg.simulation.RandomModel;
 import org.junit.Test;
 import org.junit.experimental.theories.Theories;
 import org.junit.runner.RunWith;
@@ -27,13 +27,13 @@ public class LineagesTest {
 
     private final EventFactory eventFactory = new EventFactory(() -> String.valueOf(personCounter.incrementAndGet()));
     private final PersonFactory personFactory = new PersonFactory(() -> String.valueOf(personCounter.incrementAndGet()));
-    private final RandomModel randomModel = new RandomModel(eventFactory);
+    private final RelationFactory relationFactory = new RelationFactory();
 
     @Test
     public void shouldFindFather() {
 
         // given
-        final Parentage parentage = Parentage.create(newMale("F"), newFemale("M"), newMale("P"));
+        final Parentage parentage = relationFactory.createParentage(newMale("F"), newFemale("M"), newMale("P"));
 
         // when
         final Optional<Person> result = new Lineages().getFather(parentage.getChild());
@@ -47,7 +47,7 @@ public class LineagesTest {
     public void shouldFindMother() {
 
         // given
-        final Parentage parentage = Parentage.create(newMale("F"), newFemale("M"), newMale("P"));
+        final Parentage parentage = relationFactory.createParentage(newMale("F"), newFemale("M"), newMale("P"));
 
         // when
         final Optional<Person> result = new Lineages().getMother(parentage.getChild());
@@ -77,15 +77,15 @@ public class LineagesTest {
         final Person child1 = newMale("child1");
         final Person child2 = newFemale("child2");
 
-        Parentage.create(grandfather1, grandmother1, father1);
+        relationFactory.createParentage(grandfather1, grandmother1, father1);
 
-        Parentage.create(grandfather2, grandmother2, mother1);
-        Parentage.create(grandfather2, grandmother2, father2);
+        relationFactory.createParentage(grandfather2, grandmother2, mother1);
+        relationFactory.createParentage(grandfather2, grandmother2, father2);
 
-        Parentage.create(grandfather3, grandmother3, mother2);
+        relationFactory.createParentage(grandfather3, grandmother3, mother2);
 
-        Parentage.create(father1, mother1, child1);
-        Parentage.create(father2, mother2, child2);
+        relationFactory.createParentage(father1, mother1, child1);
+        relationFactory.createParentage(father2, mother2, child2);
 
         final Lineages lineages = new Lineages();
 
@@ -114,15 +114,15 @@ public class LineagesTest {
         final Person child1 = newMale("child1");
         final Person child2 = newFemale("child2");
 
-        Parentage.create(grandfather1, grandmother1, father1);
+        relationFactory.createParentage(grandfather1, grandmother1, father1);
 
-        Parentage.create(grandfather2, grandmother2, mother1);
-        Parentage.create(grandfather2, grandmother2, father2);
+        relationFactory.createParentage(grandfather2, grandmother2, mother1);
+        relationFactory.createParentage(grandfather2, grandmother2, father2);
 
-        Parentage.create(grandfather3, grandmother3, mother2);
+        relationFactory.createParentage(grandfather3, grandmother3, mother2);
 
-        Parentage.create(father1, mother1, child1);
-        Parentage.create(father2, mother2, child2);
+        relationFactory.createParentage(father1, mother1, child1);
+        relationFactory.createParentage(father2, mother2, child2);
 
         final Lineages lineages = new Lineages();
 
