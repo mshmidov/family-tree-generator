@@ -1,7 +1,9 @@
-package ftg.model.person;
+package ftg.model.event;
 
 import com.google.common.base.MoreObjects;
 import ftg.model.Identified;
+import ftg.model.person.Person;
+import ftg.model.person.Surname;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
@@ -22,7 +24,7 @@ public final class PersonData implements Identified {
 
     private final Residence residence;
 
-    public PersonData(String personCounter, String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, Residence residence) {
+    PersonData(String personCounter, String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, Residence residence) {
         this.id = String.format("%s %s %s (%s)", personCounter, name, surname.getForm(sex), TredecimalDateFormat.ISO.format(birthDate));
         this.name = name;
         this.surname = surname;
@@ -54,19 +56,6 @@ public final class PersonData implements Identified {
 
     public Residence getResidence() {
         return residence;
-    }
-
-    public Person newPerson() {
-        final Person person = new Person(
-                id,
-                name,
-                surname,
-                sex,
-                birthDate);
-
-        person.addState(residence);
-
-        return person;
     }
 
     @Override

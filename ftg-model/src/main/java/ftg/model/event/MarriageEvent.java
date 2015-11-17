@@ -1,13 +1,15 @@
-package ftg.model.world;
+package ftg.model.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
+import ftg.model.person.PersonFactory;
 import ftg.model.relation.Marriage;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
+import ftg.model.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +25,7 @@ public final class MarriageEvent implements Event {
 
     private final String wifeId;
 
-    public MarriageEvent(String id, TredecimalDate date, String husbandId, String wifeId) {
+    MarriageEvent(String id, TredecimalDate date, String husbandId, String wifeId) {
         this.id = id;
         this.date = date;
         this.husbandId = husbandId;
@@ -41,7 +43,7 @@ public final class MarriageEvent implements Event {
     }
 
     @Override
-    public void apply(World world) {
+    public void apply(World world, PersonFactory personFactory) {
 
         final Person husband = world.getPerson(husbandId);
         final Person wife = world.getPerson(wifeId);

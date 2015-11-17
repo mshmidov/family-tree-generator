@@ -8,8 +8,8 @@ import com.google.inject.Injector;
 import ftg.application.cdi.ApplicationModule;
 import ftg.commons.cdi.Identifier;
 import ftg.commons.range.IntegerRange;
+import ftg.model.event.EventFactory;
 import ftg.model.time.TredecimalDate;
-import ftg.model.world.PersonIntroductionEvent;
 import ftg.model.world.World;
 import ftg.simulation.RandomModel;
 import ftg.simulation.Simulation;
@@ -28,8 +28,6 @@ public class CommandLineApplication {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandLineApplication.class);
 
-    private final RandomModel randomModel = new RandomModel();
-
     private Injector injector;
 
     @Inject
@@ -37,6 +35,9 @@ public class CommandLineApplication {
 
     @Inject
     private Simulation simulation;
+
+    @Inject
+    private EventFactory eventFactory;
 
     @Inject
     @Identifier
@@ -59,11 +60,13 @@ public class CommandLineApplication {
 
         populate(world, identifier);
 
-        LongStream.range(0, 300 * DAYS_IN_YEAR).forEach(i -> simulation.nextDay(world));
+        LongStream.range(0, 300 * DAYS_IN_YEAR).forEach(i -> simulation.nextDay(world, eventFactory));
     }
 
     private void populate(World world, Supplier<String> identifier) {
         final IntegerRange age = IntegerRange.inclusive(17, 50);
+
+        final RandomModel randomModel = new RandomModel(eventFactory);
 
         final TredecimalDate currentDate = new TredecimalDate(0);
 
@@ -72,8 +75,8 @@ public class CommandLineApplication {
 
             namingSystem.getUniqueSurnames().stream()
                     .limit(100)
-                .map(surname -> randomModel.newPersonData(identifier.get(), country, surname, age, currentDate))
-                .map(personData -> new PersonIntroductionEvent(identifier.get(), currentDate, personData))
+                .map(surname -> randomModel.newPersonData(country, surname, age, currentDate))
+                .map(personData -> eventFactory.newPersonIntroductionEvent(currentDate, personData))
                     .forEach(world::submitEvent);
         }
     }

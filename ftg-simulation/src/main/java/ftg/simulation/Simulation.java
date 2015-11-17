@@ -9,17 +9,17 @@ import com.google.inject.Inject;
 import ftg.commons.Util;
 import ftg.commons.cdi.Identifier;
 import ftg.commons.range.IntegerRange;
+import ftg.model.event.ConceptionEvent;
+import ftg.model.event.DeathEvent;
+import ftg.model.event.Event;
+import ftg.model.event.EventFactory;
+import ftg.model.event.MarriageEvent;
+import ftg.model.event.PersonData;
 import ftg.model.person.Person;
-import ftg.model.person.PersonData;
 import ftg.model.relation.Marriage;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
-import ftg.model.world.BirthEvent;
-import ftg.model.world.ConceptionEvent;
-import ftg.model.world.DeathEvent;
-import ftg.model.world.Event;
-import ftg.model.world.MarriageEvent;
 import ftg.model.world.World;
 import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
@@ -66,7 +66,7 @@ public final class Simulation {
         return currentDate;
     }
 
-    public List<Event> nextDay(World world) {
+    public List<Event> nextDay(World world, EventFactory eventFactory) {
 
         currentDate = currentDate.plusDays(1);
 
@@ -80,7 +80,7 @@ public final class Simulation {
 
         world.getLivingMales().stream()
                 .filter(male -> !male.hasRelation(Marriage.class))
-                .map(male -> decideMarriage(male, unmarriedFemales))
+                .map(male -> decideMarriage(male, unmarriedFemales, eventFactory))
                 .flatMap(Util::streamFromOptional)
                 .peek(events::add)
                 .forEach(world::submitEvent);
@@ -91,7 +91,7 @@ public final class Simulation {
                 .filter(female -> !female.hasState(Pregnancy.class))
                 .filter(female -> female.getRelations().getSingle(Marriage.class).isPresent())
                 .filter(female -> fertileAge.includes(intervalBetween(female.getBirthDate(), currentDate).getYears()))
-                .map(this::decidePregnancyInMarriage)
+                .map(female -> decidePregnancyInMarriage(female, eventFactory))
                 .flatMap(Util::streamFromOptional)
                 .peek(events::add)
                 .forEach(world::submitEvent);
@@ -100,13 +100,13 @@ public final class Simulation {
         world.getLivingFemales().stream()
                 .filter(person -> person.hasState(Pregnancy.class))
                 .filter(person -> intervalBetween(currentDate, person.getState(Pregnancy.class).getConceptionDate()).getDays() == 280)
-                .map(this::decideBirth)
+                .map(person -> decideBirth(person, eventFactory))
                 .peek(events::add)
                 .forEach(world::submitEvent);
 
         // deaths
         world.getLivingPersons().stream()
-                .map(this::decideDeath)
+                .map(person -> decideDeath(person, eventFactory))
                 .flatMap(Util::streamFromOptional)
                 .peek(events::add)
                 .forEach(world::submitEvent);
@@ -114,7 +114,7 @@ public final class Simulation {
         return events;
     }
 
-    private Optional<MarriageEvent> decideMarriage(Person male, List<Person> unmarriedFemales) {
+    private Optional<MarriageEvent> decideMarriage(Person male, List<Person> unmarriedFemales, EventFactory eventFactory) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (randomChoice.byChance(chance)) {
 
@@ -128,8 +128,7 @@ public final class Simulation {
                 // TODO introduce new random female
             } else {
                 int index = randomChoice.fromRangeByGaussian(candidates.size());
-                return Optional.of(
-                    new MarriageEvent(identifier.get(), currentDate, male.getId(), unmarriedFemales.remove(index).getId()));
+                return Optional.of(eventFactory.newMarriageEvent(currentDate, male.getId(), unmarriedFemales.remove(index).getId()));
             }
 
 
@@ -137,45 +136,44 @@ public final class Simulation {
         return Optional.empty();
     }
 
-    private Optional<ConceptionEvent> decidePregnancyInMarriage(Person female) {
+    private Optional<ConceptionEvent> decidePregnancyInMarriage(Person female, EventFactory eventFactory) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (randomChoice.byChance(chance)) {
 
             final Person.Sex sex = randomChoice.from(Person.Sex.class);
 
-            return Optional.of(new ConceptionEvent(identifier.get(), currentDate,
-                    female.getRelations().getSingle(Marriage.class).get().getHusband().getId(),
-                    female.getId(),
-                    sex));
+            return Optional.of(eventFactory.newConceptionEvent(currentDate,
+                                                               female.getRelations().getSingle(Marriage.class).get().getHusband().getId(),
+                                                               female.getId(),
+                                                               sex));
         }
         return Optional.empty();
     }
 
-    private Event decideBirth(Person mother) {
+    private Event decideBirth(Person mother, EventFactory eventFactory) {
         final Pregnancy pregnancy = mother.getState(Pregnancy.class);
         final Residence residence = mother.getState(Residence.class);
 
         final String childName = countries.get(residence.getCountry()).getNamingSystem().getNameForNewborn(mother, pregnancy);
 
-        final PersonData childData = new PersonData(identifier.get(),
-                childName,
-                pregnancy.getFather().getSurnameObject(),
-                pregnancy.getChildSex(),
-                currentDate,
-                residence
+        final PersonData childData = eventFactory.newPersonData(
+            childName,
+            pregnancy.getFather().getSurnameObject(),
+            pregnancy.getChildSex(),
+            currentDate,
+            residence
         );
 
-        return new BirthEvent(identifier.get(), childData, mother.getId(),
-            pregnancy.getFather().getId());
+        return eventFactory.newBirthEvent(currentDate, childData, mother.getId(), pregnancy.getFather().getId());
     }
 
-    private Optional<DeathEvent> decideDeath(Person person) {
+    private Optional<DeathEvent> decideDeath(Person person, EventFactory eventFactory) {
         final long age = intervalBetween(person.getBirthDate(), currentDate).getYears();
         final Country country = requireNonNull(countries.get(person.getState(Residence.class).getCountry()));
         final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
 
         return randomChoice.byChance(chance)
-               ? Optional.of(new DeathEvent(identifier.get(), currentDate, person.getId()))
+               ? Optional.of(eventFactory.newDeathEvent(currentDate, person.getId()))
                : Optional.empty();
     }
 }

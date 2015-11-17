@@ -1,13 +1,14 @@
-package ftg.model.world;
+package ftg.model.event;
 
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
-import ftg.model.person.PersonData;
+import ftg.model.person.PersonFactory;
 import ftg.model.relation.Parentage;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
+import ftg.model.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +24,7 @@ public final class BirthEvent implements Event {
 
     private final String fatherId;
 
-    public BirthEvent(String id, PersonData childData, String motherId, String fatherId) {
+    BirthEvent(String id, PersonData childData, String motherId, String fatherId) {
         this.id = id;
         this.childData = childData;
         this.motherId = motherId;
@@ -53,13 +54,13 @@ public final class BirthEvent implements Event {
     }
 
     @Override
-    public void apply(World world) {
+    public void apply(World world, PersonFactory personFactory) {
 
         final Person mother = world.getPerson(motherId);
         final Person father = world.getPerson(fatherId);
 
         mother.removeState(Pregnancy.class);
-        final Person child = childData.newPerson();
+        final Person child = personFactory.newPerson(childData);
         Parentage.create(father, mother, child);
         child.addState(mother.getState(Residence.class));
 

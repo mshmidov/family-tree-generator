@@ -1,9 +1,17 @@
 package ftg.simulation.lineage;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import ftg.model.event.EventFactory;
 import ftg.model.person.Person;
+import ftg.model.person.PersonFactory;
 import ftg.model.person.Surname;
 import ftg.model.relation.Parentage;
+import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
+import ftg.simulation.RandomModel;
 import org.junit.Test;
 import org.junit.experimental.theories.Theories;
 import org.junit.runner.RunWith;
@@ -11,15 +19,15 @@ import org.junit.runner.RunWith;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 
 @RunWith(Theories.class)
 public class LineagesTest {
 
     private final AtomicLong personCounter = new AtomicLong(0);
+
+    private final EventFactory eventFactory = new EventFactory(() -> String.valueOf(personCounter.incrementAndGet()));
+    private final PersonFactory personFactory = new PersonFactory(() -> String.valueOf(personCounter.incrementAndGet()));
+    private final RandomModel randomModel = new RandomModel(eventFactory);
 
     @Test
     public void shouldFindFather() {
@@ -128,10 +136,10 @@ public class LineagesTest {
     }
 
     private Person newMale(String name) {
-        return new Person(String.valueOf(personCounter.incrementAndGet()), name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0));
+        return personFactory.newPerson(eventFactory.newPersonData(name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0), new Residence("country")));
     }
 
     private Person newFemale(String name) {
-        return new Person(String.valueOf(personCounter.incrementAndGet()), name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0));
+        return personFactory.newPerson(eventFactory.newPersonData(name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0), new Residence("country")));
     }
 }

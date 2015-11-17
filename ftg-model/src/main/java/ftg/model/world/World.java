@@ -1,15 +1,29 @@
 package ftg.model.world;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import ftg.model.person.Person;
-
-import java.util.*;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static ftg.commons.MorePreconditions.checked;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import ftg.model.event.BirthEvent;
+import ftg.model.event.DeathEvent;
+import ftg.model.event.Event;
+import ftg.model.event.PersonIntroductionEvent;
+import ftg.model.person.Person;
+import ftg.model.person.PersonFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 public final class World {
+
+    private final PersonFactory personFactory;
 
     private final Map<String, Person> persons = new HashMap<>();
 
@@ -23,11 +37,9 @@ public final class World {
 
     private final Set<Person> deadPersons = new HashSet<>();
 
-    public World() {
-    }
-
-    public World(World other) {
-        other.getEvents().forEach(this::submitEvent);
+    @Inject
+    public World(PersonFactory personFactory) {
+        this.personFactory = personFactory;
     }
 
     public Person getPerson(String id) {
@@ -60,7 +72,7 @@ public final class World {
 
     public void submitEvent(Event event) {
         events.add(event);
-        event.apply(this);
+        event.apply(this, personFactory);
 
         if (event instanceof BirthEvent) {
             final String id = ((BirthEvent) event).getChildData().getId();
@@ -83,7 +95,7 @@ public final class World {
         }
     }
 
-    void addPerson(Person person) {
+    public void addPerson(Person person) {
         checkArgument(!persons.containsKey(person.getId()));
         persons.put(person.getId(), person);
     }

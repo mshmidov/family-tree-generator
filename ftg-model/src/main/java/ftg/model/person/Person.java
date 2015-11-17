@@ -36,7 +36,7 @@ public final class Person implements Identified {
 
     private final ObservableList<State> stateValues = FXCollections.observableArrayList();
 
-    public Person(String id, String name, Surname surname, Sex sex, TredecimalDate birthDate) {
+    Person(String id, String name, Surname surname, Sex sex, TredecimalDate birthDate) {
         this.id = id;
         this.name = name;
         this.surnames.add(surname);

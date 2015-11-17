@@ -1,14 +1,16 @@
-package ftg.model.world;
+package ftg.model.event;
 
 import static ftg.commons.MorePreconditions.checked;
 import static ftg.model.time.TredecimalDateInterval.intervalBetween;
 
 import ftg.model.person.Person;
+import ftg.model.person.PersonFactory;
 import ftg.model.relation.Marriage;
 import ftg.model.relation.Widowhood;
 import ftg.model.state.Death;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
+import ftg.model.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +24,7 @@ public final class DeathEvent implements Event {
 
     private final String deceasedId;
 
-    public DeathEvent(String id, TredecimalDate date, String deceasedId) {
+    DeathEvent(String id, TredecimalDate date, String deceasedId) {
         this.id = id;
         this.date = date;
         this.deceasedId = deceasedId;
@@ -43,7 +45,7 @@ public final class DeathEvent implements Event {
     }
 
     @Override
-    public void apply(World world) {
+    public void apply(World world, PersonFactory personFactory) {
         final Person deceased = checked(world.getPerson(deceasedId), p -> !p.hasState(Death.class), IllegalArgumentException::new);
 
         deceased.getRelations().getSingle(Marriage.class).ifPresent(marriage -> {

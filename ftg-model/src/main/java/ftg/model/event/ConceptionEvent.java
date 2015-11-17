@@ -1,4 +1,4 @@
-package ftg.model.world;
+package ftg.model.event;
 
 import static ftg.commons.MorePreconditions.checkedArgument;
 import static ftg.model.person.Person.Sex.FEMALE;
@@ -6,9 +6,11 @@ import static ftg.model.person.Person.Sex.MALE;
 
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
+import ftg.model.person.PersonFactory;
 import ftg.model.state.Pregnancy;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
+import ftg.model.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,7 +28,7 @@ public final class ConceptionEvent implements Event {
 
     private final Person.Sex childSex;
 
-    public ConceptionEvent(String id, TredecimalDate date, String fatherId, String motherId, Person.Sex childSex) {
+    ConceptionEvent(String id, TredecimalDate date, String fatherId, String motherId, Person.Sex childSex) {
         this.id = id;
         this.date = date;
         this.fatherId = fatherId;
@@ -57,7 +59,7 @@ public final class ConceptionEvent implements Event {
     }
 
     @Override
-    public void apply(World world) {
+    public void apply(World world, PersonFactory personFactory) {
         final Person mother = checkedArgument(world.getPerson(motherId), p -> p.getSex() == FEMALE && !p.hasState(Pregnancy.class), "Mother should be non-pregnant female");
         final Person father = checkedArgument(world.getPerson(fatherId), p -> p.getSex() == MALE, "Father should be male");
 
