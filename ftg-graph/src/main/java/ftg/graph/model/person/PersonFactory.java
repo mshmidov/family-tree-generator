@@ -2,6 +2,7 @@ package ftg.graph.model.person;
 
 import com.google.inject.Inject;
 import ftg.commons.cdi.Identifier;
+import ftg.commons.cdi.Namespace;
 import ftg.commons.time.TredecimalDate;
 import ftg.commons.time.TredecimalDateFormat;
 import ftg.graph.model.event.PersonData;
@@ -11,20 +12,22 @@ import java.util.function.Supplier;
 public final class PersonFactory {
 
     private final Supplier<String> id;
+    private final String namespace;
 
     @Inject
-    public PersonFactory(@Identifier Supplier<String> id) {
+    public PersonFactory(@Identifier Supplier<String> id, @Namespace String namespace) {
         this.id = id;
+        this.namespace = namespace;
     }
 
-    public Person newPerson(PersonData personData) {
+    public Person newPerson(PersonData personData, Family family) {
         return (personData.getSex() == Person.Sex.MALE)
-               ? new Man(newPersonId(personData), personData.getName(), personData.getSurname(), personData.getBirthDate())
-               : new Woman(newPersonId(personData), personData.getName(), personData.getSurname(), personData.getBirthDate());
+               ? new Man(newPersonId(personData), namespace, personData.getName(), family, personData.getBirthDate())
+               : new Woman(newPersonId(personData), namespace, personData.getName(), family, personData.getBirthDate());
     }
 
     public Pregnancy newPregnancy(TredecimalDate date, Man father, Person.Sex childSex) {
-        return new Pregnancy(id.get(), date, father, childSex);
+        return new Pregnancy(id.get(), namespace, date, father, childSex);
     }
 
     private String newPersonId(PersonData personData) {

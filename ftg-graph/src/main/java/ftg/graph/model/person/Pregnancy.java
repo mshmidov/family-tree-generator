@@ -4,10 +4,12 @@ import com.google.common.base.MoreObjects;
 import ftg.commons.time.TredecimalDate;
 import ftg.graph.db.TredecimalDateConverter;
 import ftg.graph.model.DomainObject;
+import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 
+@NodeEntity
 public final class Pregnancy extends DomainObject {
 
     @Property
@@ -23,8 +25,8 @@ public final class Pregnancy extends DomainObject {
     public Pregnancy() {
     }
 
-    Pregnancy(String id, TredecimalDate conceptionDate, Person father, Person.Sex childSex) {
-        super(id);
+    Pregnancy(String id, String namespace, TredecimalDate conceptionDate, Person father, Person.Sex childSex) {
+        super(id,namespace);
         this.conceptionDate = conceptionDate;
         this.father = father;
         this.childSex = childSex;

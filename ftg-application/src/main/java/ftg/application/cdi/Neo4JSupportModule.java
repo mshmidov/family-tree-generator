@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import ftg.graph.config.Neo4jConfigLoader;
 import ftg.graph.config.Neo4jConfiguration;
-import ftg.graph.db.Neo4jRepository;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 
@@ -17,7 +16,6 @@ public class Neo4JSupportModule extends AbstractModule {
         bind(Neo4jConfiguration.class).toInstance(neo4jConfiguration);
 
         bind(SessionFactory.class).toInstance(new SessionFactory("ftg.graph.model"));
-        bind(Neo4jRepository.class);
     }
 
     @Provides

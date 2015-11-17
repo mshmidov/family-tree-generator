@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo4j.ogm.annotation.Property;
 
-public final class BirthEvent extends Event {
+public final class BirthEvent extends Event<Person> {
 
     private static final Logger LOGGER = LogManager.getLogger(BirthEvent.class);
 
@@ -30,8 +30,8 @@ public final class BirthEvent extends Event {
     public BirthEvent() {
     }
 
-    BirthEvent(String id, TredecimalDate date, PersonData childData, String motherId, String fatherId) {
-        super(id, date);
+    BirthEvent(String id, String namespace, TredecimalDate date, PersonData childData, String motherId, String fatherId) {
+        super(id, namespace, date);
         this.childData = childData;
         this.motherId = motherId;
         this.fatherId = fatherId;
@@ -50,7 +50,7 @@ public final class BirthEvent extends Event {
     }
 
     @Override
-    public void apply(SimulatedWorld world, PersonFactory personFactory) {
+    public Person apply(SimulatedWorld world, PersonFactory personFactory) {
 
         final Queries queries = world.getQueries();
         final Operations operations = world.getOperations();
@@ -58,9 +58,7 @@ public final class BirthEvent extends Event {
         final Woman mother = queries.getWoman(motherId);
         final Man father = queries.getMan(fatherId);
 
-        mother.setPregnancy(null);
-
-        final Person child = personFactory.newPerson(childData);
+        final Person child = personFactory.newPerson(childData, operations.getOrCreateFamily(childData.getSurname()));
         child.setFather(father);
         child.setMother(mother);
         child.setCountryOfResidence(queries.getCountry(childData.getResidence()));
@@ -71,9 +69,10 @@ public final class BirthEvent extends Event {
         mother.getChildren().add(savedChild);
 
         operations.save(father, mother);
+        operations.removePregnancy(mother);
 
         LOGGER.info("[{}] {} is born of {} and {}", TredecimalDateFormat.ISO.format(getDate()), child, father, mother);
-
+        return child;
     }
 
     @Override

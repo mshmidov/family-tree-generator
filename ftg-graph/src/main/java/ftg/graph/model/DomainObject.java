@@ -4,6 +4,7 @@ import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 
+
 @NodeEntity
 public abstract class DomainObject {
 
@@ -13,11 +14,15 @@ public abstract class DomainObject {
     @Property
     private String id;
 
+    @Property
+    private String namespace;
+
     public DomainObject() {
     }
 
-    protected DomainObject(String id) {
+    protected DomainObject(String id, String namespace) {
         this.id = id;
+        this.namespace = namespace;
     }
 
     public final Long getGraphId() {
@@ -26,5 +31,9 @@ public abstract class DomainObject {
 
     public final String getId() {
         return id;
+    }
+
+    public final String getNamespace() {
+        return namespace;
     }
 }

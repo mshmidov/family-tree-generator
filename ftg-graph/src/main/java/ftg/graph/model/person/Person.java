@@ -1,7 +1,7 @@
 package ftg.graph.model.person;
 
 import ftg.commons.time.TredecimalDate;
-import ftg.graph.db.SurnameConverter;
+import ftg.commons.time.TredecimalDateInterval;
 import ftg.graph.db.TredecimalDateConverter;
 import ftg.graph.model.DomainObject;
 import ftg.graph.model.world.Country;
@@ -19,9 +19,8 @@ public abstract class Person extends DomainObject {
     @Property
     private String name;
 
-    @Property
-    @Convert(SurnameConverter.class)
-    private Surname surname;
+    @Relationship
+    private Family family;
 
     @Property
     @Convert(TredecimalDateConverter.class)
@@ -45,10 +44,10 @@ public abstract class Person extends DomainObject {
     public Person() {
     }
 
-    Person(String id, String name, Surname surname, TredecimalDate birthDate) {
-        super(id);
+    Person(String id, String namespace, String name, Family family, TredecimalDate birthDate) {
+        super(id, namespace);
         this.name = name;
-        this.surname = surname;
+        this.family = family;
         this.birthDate = birthDate;
     }
 
@@ -62,12 +61,16 @@ public abstract class Person extends DomainObject {
         return name;
     }
 
-    public Surname getSurname() {
-        return surname;
+    public Family getFamily() {
+        return family;
     }
 
     public TredecimalDate getBirthDate() {
         return birthDate;
+    }
+
+    public TredecimalDateInterval getAgeAt(TredecimalDate date) {
+        return TredecimalDateInterval.intervalBetween(date, birthDate);
     }
 
     public Man getFather() {

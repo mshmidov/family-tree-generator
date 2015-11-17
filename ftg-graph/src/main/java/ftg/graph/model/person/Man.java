@@ -11,8 +11,8 @@ public class Man extends Person {
     public Man() {
     }
 
-    Man(String id, String name, Surname surname, TredecimalDate birthDate) {
-        super(id, name, surname, birthDate);
+    Man(String id, String namespace, String name, Family family, TredecimalDate birthDate) {
+        super(id, namespace, name, family, birthDate);
     }
 
     @Override
@@ -29,6 +29,8 @@ public class Man extends Person {
     public void setSpouse(Person spouse) {
         if(spouse instanceof Woman) {
             wife = (Woman) spouse;
+        } else if (spouse == null) {
+            wife = null;
         } else {
             throw new IllegalArgumentException("Man's spouse should be a woman");
         }
@@ -40,5 +42,10 @@ public class Man extends Person {
 
     public void setWife(Woman wife) {
         this.wife = wife;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " " + getFamily().getSurname().getMaleForm();
     }
 }

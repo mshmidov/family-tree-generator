@@ -1,7 +1,7 @@
 package ftg.graph.model.world;
 
 import ftg.graph.model.DomainObject;
-import ftg.graph.model.person.Person;
+import ftg.graph.model.person.Family;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
@@ -10,18 +10,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 @NodeEntity
-public class Country extends DomainObject {
+public final class FamilyGroup extends DomainObject {
 
     @Property
     private String name;
 
-    @Relationship(type = "LIVES_IN", direction = Relationship.INCOMING)
-    private Set<Person> population = new HashSet<>();
+    @Relationship(type = "CONTAINS")
+    private Set<Family> families = new HashSet<>();
 
-    public Country() {
+    public FamilyGroup() {
     }
 
-    Country(String id, String namespace, String name) {
+    public FamilyGroup(String id, String namespace, String name) {
         super(id, namespace);
         this.name = name;
     }
@@ -30,7 +30,7 @@ public class Country extends DomainObject {
         return name;
     }
 
-    public Set<Person> getPopulation() {
-        return population;
+    public Set<Family> getFamilies() {
+        return families;
     }
 }

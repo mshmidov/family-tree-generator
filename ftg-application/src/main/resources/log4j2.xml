@@ -14,6 +14,7 @@
         </Root>
 
         <AsyncLogger name="ftg" level="trace" />
+        <AsyncLogger name="org.neo4j.ogm" level="INFO" />
 
     </Loggers>
 </Configuration>

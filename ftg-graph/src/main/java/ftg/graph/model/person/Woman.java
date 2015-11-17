@@ -1,19 +1,17 @@
 package ftg.graph.model.person;
 
 import ftg.commons.time.TredecimalDate;
-import ftg.graph.db.SurnameConverter;
-import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.typeconversion.Convert;
+
+import java.util.Objects;
 
 public class Woman extends Person {
 
     @Relationship(type = "MARRIED", direction = Relationship.UNDIRECTED)
     private Man husband;
 
-    @Property
-    @Convert(SurnameConverter.class)
-    private Surname currentSurname;
+    @Relationship
+    private Family currentFamily;
 
     @Relationship(type = "PREGNANT")
     private Pregnancy pregnancy;
@@ -21,9 +19,9 @@ public class Woman extends Person {
     public Woman() {
     }
 
-    public Woman(String id, String name, Surname surname, TredecimalDate birthDate) {
-        super(id, name, surname, birthDate);
-        currentSurname = surname;
+    public Woman(String id, String namespace, String name, Family family, TredecimalDate birthDate) {
+        super(id, namespace, name, family, birthDate);
+        currentFamily = family;
     }
 
     @Override
@@ -40,6 +38,8 @@ public class Woman extends Person {
     public void setSpouse(Person spouse) {
         if(spouse instanceof Man) {
             husband = (Man) spouse;
+        } else if (spouse == null) {
+            husband = null;
         } else {
             throw new IllegalArgumentException("Woman's spouse should be a man");
         }
@@ -53,12 +53,12 @@ public class Woman extends Person {
         this.husband = husband;
     }
 
-    public Surname getCurrentSurname() {
-        return currentSurname;
+    public Family getCurrentFamily() {
+        return currentFamily;
     }
 
-    public void setCurrentSurname(Surname currentSurname) {
-        this.currentSurname = currentSurname;
+    public void setCurrentFamily(Family currentFamily) {
+        this.currentFamily = currentFamily;
     }
 
     public Pregnancy getPregnancy() {
@@ -67,5 +67,13 @@ public class Woman extends Person {
 
     public void setPregnancy(Pregnancy pregnancy) {
         this.pregnancy = pregnancy;
+    }
+
+    @Override
+    public String toString() {
+        return (Objects.equals(getCurrentFamily(), getFamily()))
+               ? getName() + " " + getFamily().getSurname().getFemaleForm()
+               : String.format("%s %s (%s)", getName(), getCurrentFamily().getSurname().getFemaleForm(), getFamily().getSurname().getFemaleForm());
+
     }
 }

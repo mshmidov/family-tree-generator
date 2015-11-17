@@ -1,7 +1,6 @@
 rootProject.name = 'family-tree-generator'
 include 'ftg-commons'
 include 'ftg-commons-test'
-include 'ftg-model'
 include 'ftg-simulation'
 include 'ftg-application'
 include 'ftg-graph'

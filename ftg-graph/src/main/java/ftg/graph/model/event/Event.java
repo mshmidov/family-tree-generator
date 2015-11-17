@@ -10,19 +10,19 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 
 @NodeEntity
-public abstract class Event extends DomainObject {
+public abstract class Event<T> extends DomainObject {
 
     @Property
     @Convert(TredecimalDateConverter.class)
     private TredecimalDate date;
 
-    public abstract void apply(SimulatedWorld simulatedWorld, PersonFactory personFactory);
+    public abstract T apply(SimulatedWorld simulatedWorld, PersonFactory personFactory);
 
     public Event() {
     }
 
-    Event(String id, TredecimalDate date) {
-        super(id);
+    Event(String id, String namespace, TredecimalDate date) {
+        super(id, namespace);
         this.date = date;
     }
 

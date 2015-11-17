@@ -12,7 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo4j.ogm.annotation.Property;
 
-public final class DeathEvent extends Event {
+public final class DeathEvent extends Event<Person> {
 
     private static final Logger LOGGER = LogManager.getLogger(DeathEvent.class);
 
@@ -22,8 +22,8 @@ public final class DeathEvent extends Event {
     public DeathEvent() {
     }
 
-    DeathEvent(String id, TredecimalDate date, String deceasedId) {
-        super(id, date);
+    DeathEvent(String id, String namespace, TredecimalDate date, String deceasedId) {
+        super(id, namespace, date);
         this.deceasedId = deceasedId;
     }
 
@@ -32,8 +32,8 @@ public final class DeathEvent extends Event {
     }
 
     @Override
-    public void apply(SimulatedWorld world, PersonFactory personFactory) {
-        Person deceased = checkedArgument(world.getQueries().getPerson(deceasedId), Person::isAlive);
+    public Person apply(SimulatedWorld world, PersonFactory personFactory) {
+        Person deceased = checkedArgument(world.getQueries().getPerson(deceasedId), Person::isAlive, "Only alive person can die");
 
         final Person spouse = deceased.getSpouse();
         if (spouse != null) {
@@ -50,5 +50,7 @@ public final class DeathEvent extends Event {
             TredecimalDateFormat.ISO.format(getDate()),
             deceased,
             intervalBetween(getDate(), deceased.getBirthDate()).getYears());
+
+        return deceased;
     }
 }

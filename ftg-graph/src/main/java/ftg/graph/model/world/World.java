@@ -5,29 +5,27 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @NodeEntity(label = "World")
 public class World extends DomainObject {
 
     @Property
     private String generated;
 
-    @Relationship(type = "POPULATED_BY")
+    @Relationship(type = "CONTAINS")
     private Population population;
 
     @Relationship(type = "CONTAINS")
-    private Set<Country> countries = new HashSet<>();
+    private Geography geography;
 
     public World() {
 
     }
 
-    World(String id, String generated, Population population) {
-        super(id);
+    World(String id, String generated, Population population, Geography geography) {
+        super(id, id);
         this.generated = generated;
         this.population = population;
+        this.geography = geography;
     }
 
     public String getGenerated() {
@@ -38,7 +36,7 @@ public class World extends DomainObject {
         return population;
     }
 
-    public Set<Country> getCountries() {
-        return countries;
+    public Geography getGeography() {
+        return geography;
     }
 }

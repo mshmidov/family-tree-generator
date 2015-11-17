@@ -7,11 +7,13 @@ import ftg.graph.db.TredecimalDateConverter;
 import ftg.graph.model.DomainObject;
 import ftg.graph.model.person.Person;
 import ftg.graph.model.person.Surname;
+import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 
 import java.util.Objects;
 
+@NodeEntity
 public final class PersonData extends DomainObject {
 
     @Property
@@ -34,8 +36,8 @@ public final class PersonData extends DomainObject {
     public PersonData() {
     }
 
-    PersonData(String id, String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, String residence) {
-        super(id);
+    PersonData(String id, String namespace, String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, String residence) {
+        super(id, namespace);
         this.name = name;
         this.surname = surname;
         this.sex = sex;
