@@ -17,6 +17,7 @@ import ftg.model.event.MarriageEvent;
 import ftg.model.event.PersonData;
 import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
+import ftg.model.state.Death;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
@@ -73,12 +74,16 @@ public final class Simulation {
         final List<Event> events = new ArrayList<>();
 
         // marriages
-        final List<Person> unmarriedFemales = world.getLivingFemales().stream()
+        final List<Person> unmarriedFemales = world.persons()
+            .filter(person -> !person.state(Death.class).isPresent())
+            .filter(person -> person.getSex() == Person.Sex.FEMALE)
             .filter(female -> female.relations(Marriage.class).count() == 0)
             .sorted((o1, o2) -> o1.getBirthDate().compareTo(o2.getBirthDate()))
             .collect(Collectors.toList());
 
-        world.getLivingMales().stream()
+        world.persons()
+            .filter(person -> !person.state(Death.class).isPresent())
+            .filter(person -> person.getSex() == Person.Sex.MALE)
             .filter(male -> male.relations(Marriage.class).count() == 0)
             .map(male -> decideMarriage(male, unmarriedFemales, eventFactory))
             .flatMap(Util::streamFromOptional)
@@ -87,7 +92,9 @@ public final class Simulation {
 
 
         // pregnancies
-        world.getLivingFemales().stream()
+        world.persons()
+            .filter(person -> !person.state(Death.class).isPresent())
+            .filter(person -> person.getSex() == Person.Sex.FEMALE)
             .filter(female -> !female.state(Pregnancy.class).isPresent())
             .filter(female -> female.relations(Marriage.class).count() > 0)
             .filter(female -> fertileAge.includes(intervalBetween(female.getBirthDate(), currentDate).getYears()))
@@ -97,19 +104,22 @@ public final class Simulation {
             .forEach(world::submitEvent);
 
         // births
-        world.getLivingFemales().stream()
+        world.persons()
+            .filter(person -> !person.state(Death.class).isPresent())
+            .filter(person -> person.getSex() == Person.Sex.FEMALE)
             .filter(person -> person.state(Pregnancy.class).isPresent())
             .filter(person -> intervalBetween(currentDate, person.state(Pregnancy.class).get().getConceptionDate()).getDays() == 280)
-                .map(person -> decideBirth(person, eventFactory))
-                .peek(events::add)
-                .forEach(world::submitEvent);
+            .map(person -> decideBirth(person, eventFactory))
+            .peek(events::add)
+            .forEach(world::submitEvent);
 
         // deaths
-        world.getLivingPersons().stream()
-                .map(person -> decideDeath(person, eventFactory))
-                .flatMap(Util::streamFromOptional)
-                .peek(events::add)
-                .forEach(world::submitEvent);
+        world.persons()
+            .filter(person -> !person.state(Death.class).isPresent())
+            .map(person -> decideDeath(person, eventFactory))
+            .flatMap(Util::streamFromOptional)
+            .peek(events::add)
+            .forEach(world::submitEvent);
 
         return events;
     }

@@ -83,10 +83,6 @@ public final class Person implements Identified {
     }
 
     public void addState(State state) {
-        state(state.getClass()).ifPresent(o -> {
-            throw new IllegalArgumentException(o.getClass().getSimpleName() + " is already present");
-        });
-
         states.put(state.getClass(), state);
     }
 
