@@ -19,10 +19,10 @@ public final class RelationFactory {
         return parentage;
     }
 
-    public Widowhood createWidowhood(Person widower, Person widow) {
-        final Widowhood widowhood = new Widowhood(widower, widow);
+    public Widowhood createWidowhood(Person deceased, Person widow) {
+        final Widowhood widowhood = new Widowhood(deceased, widow);
 
-        widower.addRelation(widowhood);
+        deceased.addRelation(widowhood);
         widow.addRelation(widowhood);
 
         return widowhood;

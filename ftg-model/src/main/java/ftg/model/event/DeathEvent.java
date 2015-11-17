@@ -37,12 +37,13 @@ public final class DeathEvent extends Event {
 
         final Person deceased = checked(world.getPerson(deceasedId), p -> !p.state(Death.class).isPresent(), IllegalArgumentException::new);
 
+        deceased.addState(new Death(date));
+
         deceased.relations(Marriage.class).forEach(marriage -> {
-                marriage.remove();
-                relationFactory.createWidowhood(marriage.getHusband(), marriage.getWife());
+            marriage.remove();
+            relationFactory.createWidowhood(deceased, marriage.getOther(deceased));
         });
 
-        deceased.addState(new Death(date));
 
         LOGGER.info("[{}] {} dies at age of {}", TredecimalDateFormat.ISO.format(date), deceased, intervalBetween(date, deceased.getBirthDate()).getYears());
     }

@@ -16,6 +16,10 @@ public final class Marriage extends AbstractRelation implements Relation {
         return getParticipant(Role.WIFE);
     }
 
+    public Person getOther(Person participant) {
+        return (getRole(participant) == Role.HUSBAND) ? getWife() : getHusband();
+    }
+
     public void remove() {
         getHusband().removeRelation(this);
         getWife().removeRelation(this);

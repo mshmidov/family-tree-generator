@@ -4,7 +4,7 @@ import ftg.model.person.Person;
 
 public final class Widowhood extends AbstractRelation implements Relation {
 
-    Widowhood(Person widower, Person widow) {
-        super(Role.WIDOWER, widower, Role.WIDOW, widow);
+    Widowhood(Person deceased, Person widow) {
+        super(Role.DECEASED, deceased, Role.WIDOW, widow);
     }
 }

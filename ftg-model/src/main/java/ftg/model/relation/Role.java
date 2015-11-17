@@ -2,6 +2,7 @@ package ftg.model.relation;
 
 import ftg.commons.MorePreconditions;
 import ftg.model.person.Person;
+import ftg.model.state.Death;
 
 import java.util.function.Predicate;
 
@@ -11,8 +12,8 @@ public enum Role {
     CHILD(p -> true),
     HUSBAND(p -> p.getSex() == Person.Sex.MALE),
     WIFE(p -> p.getSex() == Person.Sex.FEMALE),
-    WIDOWER(p -> p.getSex() == Person.Sex.MALE),
-    WIDOW(p -> p.getSex() == Person.Sex.FEMALE);
+    DECEASED(p -> p.state(Death.class).isPresent()),
+    WIDOW(p -> !p.state(Death.class).isPresent());
 
     public final Predicate<Person> acceptable;
 
