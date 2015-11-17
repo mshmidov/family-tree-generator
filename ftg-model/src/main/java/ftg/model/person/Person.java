@@ -1,20 +1,19 @@
 package ftg.model.person;
 
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import ftg.model.Identified;
 import ftg.model.relation.Relation;
 import ftg.model.state.State;
 import ftg.model.time.TredecimalDate;
-import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class Person implements Identified {
 
@@ -30,11 +29,9 @@ public final class Person implements Identified {
 
     private final TredecimalDate birthDate;
 
-    private final Relations relations = new Relations();
+    private final Multimap<Class<? extends Relation>, Relation> relations = HashMultimap.create();
 
-    private final ObservableMap<Class<? extends State>, State> states = FXCollections.observableHashMap();
-
-    private final ObservableList<State> stateValues = FXCollections.observableArrayList();
+    private final Map<Class<? extends State>, State> states = new HashMap<>();
 
     Person(String id, String name, Surname surname, Sex sex, TredecimalDate birthDate) {
         this.id = id;
@@ -42,14 +39,6 @@ public final class Person implements Identified {
         this.surnames.add(surname);
         this.sex = sex;
         this.birthDate = birthDate;
-        states.addListener((MapChangeListener<Class<? extends State>, State>) change -> {
-            if (change.wasAdded()) {
-                stateValues.add(change.getValueAdded());
-            }
-            if (change.wasRemoved()) {
-                stateValues.remove(change.getValueRemoved());
-            }
-        });
     }
 
     @Override
@@ -85,39 +74,32 @@ public final class Person implements Identified {
         return birthDate;
     }
 
-    public boolean hasState(Class<? extends State> stateClass) {
-        return states.containsKey(stateClass);
+    public <S extends State> Optional<S> state(Class<S> stateClass) {
+        return Optional.ofNullable(states.get(stateClass)).map(stateClass::cast);
+    }
+
+    public <R extends Relation> Stream<R> relations(Class<R> relationClass) {
+        return ImmutableList.copyOf(relations.get(relationClass)).stream().map(relationClass::cast);
     }
 
     public void addState(State state) {
+        state(state.getClass()).ifPresent(o -> {
+            throw new IllegalArgumentException(o.getClass().getSimpleName() + " is already present");
+        });
+
         states.put(state.getClass(), state);
-    }
-
-    public <S extends State> S getState(Class<S> stateClass) {
-        checkState(hasState(stateClass));
-        return stateClass.cast(states.get(stateClass));
-    }
-
-    public <S extends State> Optional<S> getOptionalState(Class<S> stateClass) {
-        return hasState(stateClass)
-                ? Optional.of(stateClass.cast(states.get(stateClass)))
-                : Optional.<S>empty();
     }
 
     public void removeState(Class<? extends State> stateClass) {
         states.remove(stateClass);
     }
 
-    public ObservableList<State> getStates() {
-        return FXCollections.unmodifiableObservableList(stateValues);
+    public void addRelation(Relation relation) {
+        relations.put(relation.getClass(), relation);
     }
 
-    public Relations getRelations() {
-        return relations;
-    }
-
-    public <R extends Relation> boolean hasRelation(Class<R> relationClass) {
-        return relations.contains(relationClass);
+    public void removeRelation(Relation relation) {
+        relations.remove(relation.getClass(), relation);
     }
 
     @Override

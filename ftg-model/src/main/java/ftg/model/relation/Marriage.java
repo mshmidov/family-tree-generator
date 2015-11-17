@@ -6,8 +6,8 @@ public final class Marriage extends AbstractRelation implements Relation {
 
     public static Marriage create(Person husband, Person wife) {
         final Marriage marriage = new Marriage(husband, wife);
-        husband.getRelations().add(marriage);
-        wife.getRelations().add(marriage);
+        husband.addRelation(marriage);
+        wife.addRelation(marriage);
         return marriage;
     }
 
@@ -24,7 +24,7 @@ public final class Marriage extends AbstractRelation implements Relation {
     }
 
     public void remove() {
-        getHusband().getRelations().remove(this);
-        getWife().getRelations().remove(this);
+        getHusband().removeRelation(this);
+        getWife().removeRelation(this);
     }
 }

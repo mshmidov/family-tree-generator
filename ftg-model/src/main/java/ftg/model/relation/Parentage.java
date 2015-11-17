@@ -6,9 +6,9 @@ public class Parentage extends AbstractRelation implements Relation {
 
     public static Parentage create(Person father, Person mother, Person child) {
         final Parentage parentage = new Parentage(father, mother, child);
-        father.getRelations().add(parentage);
-        mother.getRelations().add(parentage);
-        child.getRelations().add(parentage);
+        father.addRelation(parentage);
+        mother.addRelation(parentage);
+        child.addRelation(parentage);
         return parentage;
     }
 

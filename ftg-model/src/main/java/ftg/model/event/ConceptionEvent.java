@@ -60,7 +60,7 @@ public final class ConceptionEvent implements Event {
 
     @Override
     public void apply(World world, PersonFactory personFactory) {
-        final Person mother = checkedArgument(world.getPerson(motherId), p -> p.getSex() == FEMALE && !p.hasState(Pregnancy.class), "Mother should be non-pregnant female");
+        final Person mother = checkedArgument(world.getPerson(motherId), p -> p.getSex() == FEMALE && !p.state(Pregnancy.class).isPresent(), "Mother should be non-pregnant female");
         final Person father = checkedArgument(world.getPerson(fatherId), p -> p.getSex() == MALE, "Father should be male");
 
         LOGGER.info("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(date), mother, father);

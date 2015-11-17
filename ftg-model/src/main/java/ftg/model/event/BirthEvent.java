@@ -62,7 +62,7 @@ public final class BirthEvent implements Event {
         mother.removeState(Pregnancy.class);
         final Person child = personFactory.newPerson(childData);
         Parentage.create(father, mother, child);
-        child.addState(mother.getState(Residence.class));
+        mother.state(Residence.class).ifPresent(child::addState);
 
         world.addPerson(child);
 

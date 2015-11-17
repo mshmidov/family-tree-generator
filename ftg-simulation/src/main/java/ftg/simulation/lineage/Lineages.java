@@ -1,5 +1,9 @@
 package ftg.simulation.lineage;
 
+import static com.google.common.base.Preconditions.checkState;
+import static ftg.commons.Util.streamFromOptional;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -17,10 +21,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkState;
-import static ftg.commons.Util.streamFromOptional;
-import static java.util.Objects.requireNonNull;
-
 public final class Lineages {
 
     private static final ImmutableSet<Ancestors> PARENTS = ImmutableSet.of(Ancestors.FATHER, Ancestors.MOTHER);
@@ -32,21 +32,21 @@ public final class Lineages {
     private final Table<Person, Person, Integer> knownRelation = HashBasedTable.create();
 
     public static Optional<Person> findFather(Person person) {
-        return person.getRelations().get(Parentage.class).stream()
+        return person.relations(Parentage.class)
                 .filter(parentage -> parentage.getRole(person) == Role.CHILD)
                 .findFirst()
                 .map(Parentage::getFather);
     }
 
     public static Optional<Person> findMother(Person person) {
-        return person.getRelations().get(Parentage.class).stream()
+        return person.relations(Parentage.class)
                 .filter(parentage -> parentage.getRole(person) == Role.CHILD)
                 .findFirst()
                 .map(Parentage::getMother);
     }
 
     public static List<Person> findChildren(Person person) {
-        return person.getRelations().get(Parentage.class).stream()
+        return person.relations(Parentage.class)
                 .filter(parentage -> parentage.getRole(person) != Role.CHILD)
                 .map(Parentage::getChild)
                 .collect(Collectors.toList());

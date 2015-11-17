@@ -1,7 +1,7 @@
 package ftg.model.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
+import static ftg.commons.MorePreconditions.shouldNotPresent;
 
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
@@ -51,8 +51,8 @@ public final class MarriageEvent implements Event {
         checkArgument(husband.getSex() == Person.Sex.MALE, "Husband should be male");
         checkArgument(wife.getSex() == Person.Sex.FEMALE, "Wife should be female");
 
-        checkState(!husband.hasRelation(Marriage.class), "Person can participate in only one marriage at a time");
-        checkState(!wife.hasRelation(Marriage.class), "Person can participate in only one marriage at a time");
+        shouldNotPresent(husband.relations(Marriage.class).findAny(), () -> new IllegalStateException("Person can participate in only one marriage at a time"));
+        shouldNotPresent(wife.relations(Marriage.class).findAny(), () -> new IllegalStateException("Person can participate in only one marriage at a time"));
 
         Marriage.create(husband, wife);
         LOGGER.info("[{}] {} marries {}", TredecimalDateFormat.ISO.format(date), husband, wife);

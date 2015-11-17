@@ -46,11 +46,12 @@ public final class DeathEvent implements Event {
 
     @Override
     public void apply(World world, PersonFactory personFactory) {
-        final Person deceased = checked(world.getPerson(deceasedId), p -> !p.hasState(Death.class), IllegalArgumentException::new);
 
-        deceased.getRelations().getSingle(Marriage.class).ifPresent(marriage -> {
-            marriage.remove();
-            Widowhood.create(marriage.getHusband(), marriage.getWife());
+        final Person deceased = checked(world.getPerson(deceasedId), p -> !p.state(Death.class).isPresent(), IllegalArgumentException::new);
+
+        deceased.relations(Marriage.class).forEach(marriage -> {
+                marriage.remove();
+                Widowhood.create(marriage.getHusband(), marriage.getWife());
         });
 
         deceased.addState(new Death(date));

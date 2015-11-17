@@ -7,8 +7,8 @@ public final class Widowhood extends AbstractRelation implements Relation {
     public static Widowhood create(Person widower, Person widow) {
         final Widowhood widowhood = new Widowhood(widower, widow);
 
-        widower.getRelations().add(widowhood);
-        widow.getRelations().add(widowhood);
+        widower.addRelation(widowhood);
+        widow.addRelation(widowhood);
 
         return widowhood;
     }

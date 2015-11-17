@@ -1,6 +1,7 @@
 package ftg.commons;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -30,6 +31,12 @@ public final class MorePreconditions {
         return argument;
     }
 
+    public static <T> void shouldNotPresent(Optional<T> optional, Supplier<? extends RuntimeException> thrower) {
+        if (optional.isPresent()) {
+            throw thrower.get();
+        }
+    }
+
     public static <T extends Comparable<T>> Predicate<T> between(T a, T b) {
         return x -> ((a.compareTo(x) < 0) && (x.compareTo(b) < 0));
     }
@@ -37,4 +44,6 @@ public final class MorePreconditions {
     public static <T> Predicate<T> isNotNull() {
         return (T x) -> !Objects.isNull(x);
     }
+
+
 }
