@@ -4,6 +4,7 @@ import ftg.model.Identified;
 import ftg.model.relation.Relation;
 import ftg.model.state.State;
 import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateInterval;
 import javaslang.collection.HashMap;
 import javaslang.collection.HashSet;
 import javaslang.collection.List;
@@ -38,13 +39,25 @@ public final class Person implements Identified {
     }
 
     @Override
-    public String getId() {return id;}
+    public String getId() {
+        return id;
+    }
 
-    public TredecimalDate getBirthDate() { return birthDate; }
+    public TredecimalDate getBirthDate() {
+        return birthDate;
+    }
 
-    public Sex getSex() { return sex; }
+    public TredecimalDateInterval getAge(TredecimalDate now) {
+        return TredecimalDateInterval.intervalBetween(now, birthDate);
+    }
 
-    public String getName() { return name;}
+    public Sex getSex() {
+        return sex;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public List<Surname> getSurnames() {
         return surnames;

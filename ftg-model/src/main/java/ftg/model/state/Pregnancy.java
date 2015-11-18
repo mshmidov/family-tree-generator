@@ -3,6 +3,7 @@ package ftg.model.state;
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;
 import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateInterval;
 
 public final class Pregnancy implements State {
 
@@ -20,6 +21,10 @@ public final class Pregnancy implements State {
 
     public TredecimalDate getConceptionDate() {
         return conceptionDate;
+    }
+
+    public TredecimalDateInterval getAge(TredecimalDate now) {
+        return TredecimalDateInterval.intervalBetween(now, conceptionDate);
     }
 
     public Person getFather() {

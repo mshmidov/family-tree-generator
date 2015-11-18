@@ -1,5 +1,6 @@
 package ftg.simulation;
 
+import static ftg.commons.functional.BooleanLogic.not;
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 import static ftg.model.time.TredecimalDateInterval.intervalBetween;
 import static java.util.Objects.requireNonNull;
@@ -24,6 +25,7 @@ import ftg.simulation.configuration.Country;
 import ftg.simulation.lineage.Lineages;
 import javaslang.Value;
 import javaslang.collection.Seq;
+import javaslang.collection.Set;
 import javaslang.control.Option;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,11 +33,17 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class Simulation {
 
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
+
+    private final Predicate<Person> isMarried = (Person person) -> person.relations(Marriage.class).isDefined();
+    private final Predicate<Person> isMale = (Person person) -> person.getSex() == Person.Sex.MALE;
+    private final Predicate<Person> isFemale = (Person person) -> person.getSex() == Person.Sex.FEMALE;
+    private final Predicate<Person> isPregnant = (Person person) -> person.state(Pregnancy.class).isDefined();
 
     private final RandomChoice randomChoice = new RandomChoice();
     private final Lineages lineages = new Lineages();
@@ -67,38 +75,35 @@ public final class Simulation {
 
         final List<Event> events = new ArrayList<>();
 
+        final Set<Person> males = world.alivePersons().filter(isMale);
+        final Set<Person> females = world.alivePersons().filter(isFemale);
+
         // marriages
-        final Seq<Person> unmarriedFemales = world.alivePersons()
-            .filter(person -> person.getSex() == Person.Sex.FEMALE)
-            .filter(female -> female.relations(Marriage.class).isEmpty())
+        final Seq<Person> unmarriedFemales = females
+            .filter(not(isMarried))
             .toVector()
             .sortBy(Person::getBirthDate);
 
-        world.alivePersons()
-            .filter(person -> person.getSex() == Person.Sex.MALE)
-            .filter(male -> male.relations(Marriage.class).isEmpty())
-            .map(male -> decideMarriage(male, unmarriedFemales, eventFactory))
+        males
+            .filter(not(isMarried))
+            .map(male -> decideMarriage(male, unmarriedFemales, eventFactory)) // TODO this is wrong, unmarriedFemales should be changed after every call
             .flatMap(Value::toSet)
             .peek(events::add)
             .forEach(world::submitEvent);
 
-
         // pregnancies
-        world.alivePersons()
-            .filter(person -> person.getSex() == Person.Sex.FEMALE)
-            .filter(female -> female.state(Pregnancy.class).isEmpty())
-            .filter(female -> female.relations(Marriage.class).isDefined())
-            .filter(female -> fertileAge.includes(intervalBetween(female.getBirthDate(), currentDate).getYears()))
+        females
+            .filter(not(isPregnant))
+            .filter(isMarried)
+            .filter(female -> fertileAge.includes(female.getAge(currentDate).getYears()))
             .map(female -> decidePregnancyInMarriage(female, eventFactory))
             .flatMap(Value::toSet)
             .peek(events::add)
             .forEach(world::submitEvent);
 
         // births
-        world.alivePersons()
-            .filter(person -> person.getSex() == Person.Sex.FEMALE)
-            .filter(person -> person.state(Pregnancy.class).isDefined())
-            .filter(person -> intervalBetween(currentDate, person.state(Pregnancy.class).get().getConceptionDate()).getDays() == 280)
+        females
+            .filter(person -> person.state(Pregnancy.class).map(pregnancy -> pregnancy.getAge(currentDate).getDays()).orElse(0L) == 280)
             .map(person -> decideBirth(person, eventFactory))
             .peek(events::add)
             .forEach(world::submitEvent);

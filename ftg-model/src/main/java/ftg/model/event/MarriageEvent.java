@@ -9,7 +9,6 @@ import ftg.model.relation.RelationFactory;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
-import javaslang.Function2;
 import javaslang.collection.Array;
 import javaslang.collection.Set;
 import org.apache.logging.log4j.LogManager;
@@ -38,8 +37,8 @@ public final class MarriageEvent extends Event {
         final Person husband = world.getPerson(husbandId);
         final Person wife = world.getPerson(wifeId);
 
-        Checked.argument(husband.getSex(), Function2.of(Object::equals).apply(Person.Sex.MALE), "Husband should be male");
-        Checked.argument(wife.getSex(), Function2.of(Object::equals).apply(Person.Sex.FEMALE), "Wife should be female");
+        Checked.argument(husband.getSex(), Person.Sex.MALE::equals, "Husband should be male");
+        Checked.argument(wife.getSex(), Person.Sex.FEMALE::equals, "Wife should be female");
 
         Array.ofAll(husband, wife).forEach(person -> Checked.argument(person.relations(Marriage.class), Set::isEmpty,
                                                                       "Person can participate in only one marriage at a time"));
