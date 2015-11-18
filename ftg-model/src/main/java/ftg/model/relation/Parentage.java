@@ -1,11 +1,16 @@
 package ftg.model.relation;
 
 import ftg.model.person.Person;
+import javaslang.Tuple;
+import javaslang.collection.HashMap;
 
 public class Parentage extends AbstractRelation implements Relation {
 
     Parentage(Person father, Person mother, Person child) {
-        super(Role.FATHER, father, Role.MOTHER, mother, Role.CHILD, child);
+        super(HashMap.ofAll(
+            Tuple.of(Role.FATHER, father),
+            Tuple.of(Role.MOTHER, mother),
+            Tuple.of(Role.CHILD, child)));
     }
 
     public Person getFather() {

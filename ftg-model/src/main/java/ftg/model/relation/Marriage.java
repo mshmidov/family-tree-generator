@@ -1,11 +1,15 @@
 package ftg.model.relation;
 
 import ftg.model.person.Person;
+import javaslang.Tuple;
+import javaslang.collection.HashMap;
 
 public final class Marriage extends AbstractRelation implements Relation {
 
     Marriage(Person husband, Person wife) {
-        super(Role.HUSBAND, husband, Role.WIFE, wife);
+        super(HashMap.ofAll(
+            Tuple.of(Role.HUSBAND, husband),
+            Tuple.of(Role.WIFE, wife)));
     }
 
     public Person getHusband() {

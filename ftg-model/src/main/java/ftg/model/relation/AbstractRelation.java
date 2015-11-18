@@ -1,88 +1,74 @@
 package ftg.model.relation;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableSet;
+import ftg.commons.functional.Checked;
+import ftg.commons.functional.ReverseTuple;
 import ftg.model.person.Person;
+import javaslang.collection.HashMap;
+import javaslang.collection.Map;
+import javaslang.collection.Seq;
+import javaslang.collection.Set;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.function.Predicate;
 
 abstract class AbstractRelation implements Relation {
 
-    private final ImmutableSet<Role> possibleRoles;
-    protected final ImmutableBiMap<Role, Person> participants;
+    private static final Predicate<Seq<Person>> NO_DUPLICATES = values -> values.distinct().equals(values);
 
-    protected AbstractRelation(Role r1, Person p1, Role r2, Person p2) {
-        checkArgument(!Objects.equals(p1, p2), "Person cannot be related to himself");
+    private final Map<Role, Person> participants;
+    private final Map<Person, Role> reverseParticipants;
 
-        this.possibleRoles = ImmutableSet.of(r1, r2);
-        this.participants = ImmutableBiMap.of(r1, r1.check(p1), r2, r2.check(p2));
-    }
+    protected AbstractRelation(Map<Role, Person> participants) {
+        Checked.argument(participants.values(), NO_DUPLICATES, "Person cannot be related to himself");
 
-    protected AbstractRelation(Role r1, Person p1, Role r2, Person p2, Role r3, Person p3) {
-        checkArgument(!Objects.equals(p1, p2), "Person cannot be related to himself");
-        checkArgument(!Objects.equals(p1, p3), "Person cannot be related to himself");
-        checkArgument(!Objects.equals(p2, p3), "Person cannot be related to himself");
-
-        this.possibleRoles = ImmutableSet.of(r1, r2, r3);
-        this.participants = ImmutableBiMap.of(r1, r1.check(p1), r2, r2.check(p2), r3, r3.check(p3));
+        this.participants = participants;
+        this.reverseParticipants = HashMap.ofAll(participants.map(ReverseTuple::of2));
     }
 
     @Override
-    public final Set<Role> possibleRoles() {
-        return possibleRoles;
+    public final Set<Role> roles() {
+        return participants.keySet();
     }
 
     @Override
     public final Set<Person> participants() {
-        return ImmutableSet.copyOf(participants.values());
+        return reverseParticipants.keySet();
     }
 
     @Override
     public final Role getRole(Person person) {
-        if (participants.containsValue(person)) {
-            return participants.inverse().get(person);
-        }
-
-        throw new IllegalArgumentException(String.format("%s does not participate in %s", person, this.getClass().getSimpleName()));
+        return reverseParticipants.get(person)
+            .orElseThrow(() -> new IllegalArgumentException(String.format("%s does not participate in %s", person, this.getClass().getSimpleName())));
     }
 
     @Override
     public Person getParticipant(Role role) {
-        if (possibleRoles.contains(role)) {
-            return participants.get(role);
-        }
-
-        throw new IllegalArgumentException(String.format("%s is not valid role for %s", role, this.getClass().getSimpleName()));
-    }
-
-    @Override
-    public List<Participant> getParticipants() {
-        return null;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AbstractRelation that = (AbstractRelation) o;
-        return Objects.equals(possibleRoles, that.possibleRoles) &&
-                Objects.equals(participants, that.participants);
+        return participants.get(role)
+            .orElseThrow(() -> new IllegalArgumentException(String.format("%s is not valid role for %s", role, this.getClass().getSimpleName())));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(possibleRoles, participants);
+        return Objects.hash(participants);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AbstractRelation that = (AbstractRelation) o;
+        return Objects.equals(participants, that.participants);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("participants", participants)
+            .add("participants", participants)
                 .toString();
     }
 }

@@ -1,19 +1,15 @@
 package ftg.model.relation;
 
 import ftg.model.person.Person;
-
-import java.util.List;
-import java.util.Set;
+import javaslang.collection.Set;
 
 public interface Relation {
 
-    Set<Role> possibleRoles();
+    Set<Role> roles();
 
     Set<Person> participants();
 
     Role getRole(Person person);
 
     Person getParticipant(Role role);
-
-    List<Participant> getParticipants();
 }
