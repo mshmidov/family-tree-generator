@@ -1,5 +1,7 @@
 package ftg.model.relation;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
@@ -15,11 +17,17 @@ abstract class AbstractRelation implements Relation {
     protected final ImmutableBiMap<Role, Person> participants;
 
     protected AbstractRelation(Role r1, Person p1, Role r2, Person p2) {
+        checkArgument(!Objects.equals(p1, p2), "Person cannot be related to himself");
+
         this.possibleRoles = ImmutableSet.of(r1, r2);
         this.participants = ImmutableBiMap.of(r1, r1.check(p1), r2, r2.check(p2));
     }
 
     protected AbstractRelation(Role r1, Person p1, Role r2, Person p2, Role r3, Person p3) {
+        checkArgument(!Objects.equals(p1, p2), "Person cannot be related to himself");
+        checkArgument(!Objects.equals(p1, p3), "Person cannot be related to himself");
+        checkArgument(!Objects.equals(p2, p3), "Person cannot be related to himself");
+
         this.possibleRoles = ImmutableSet.of(r1, r2, r3);
         this.participants = ImmutableBiMap.of(r1, r1.check(p1), r2, r2.check(p2), r3, r3.check(p3));
     }
