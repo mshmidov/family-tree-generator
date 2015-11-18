@@ -1,9 +1,7 @@
 package ftg.model.event;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static ftg.commons.MorePreconditions.shouldNotPresent;
-
 import com.google.common.base.MoreObjects;
+import ftg.commons.functional.Checked;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.relation.Marriage;
@@ -11,6 +9,9 @@ import ftg.model.relation.RelationFactory;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
+import javaslang.Function2;
+import javaslang.collection.Array;
+import javaslang.collection.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,11 +38,11 @@ public final class MarriageEvent extends Event {
         final Person husband = world.getPerson(husbandId);
         final Person wife = world.getPerson(wifeId);
 
-        checkArgument(husband.getSex() == Person.Sex.MALE, "Husband should be male");
-        checkArgument(wife.getSex() == Person.Sex.FEMALE, "Wife should be female");
+        Checked.argument(husband.getSex(), Function2.of(Object::equals).apply(Person.Sex.MALE), "Husband should be male");
+        Checked.argument(wife.getSex(), Function2.of(Object::equals).apply(Person.Sex.FEMALE), "Wife should be female");
 
-        shouldNotPresent(husband.relations(Marriage.class).findAny(), () -> new IllegalStateException("Person can participate in only one marriage at a time"));
-        shouldNotPresent(wife.relations(Marriage.class).findAny(), () -> new IllegalStateException("Person can participate in only one marriage at a time"));
+        Array.ofAll(husband, wife).forEach(person -> Checked.argument(person.relations(Marriage.class), Set::isEmpty,
+                                                                      "Person can participate in only one marriage at a time"));
 
         relationFactory.createMarriage(husband, wife);
         LOGGER.info("[{}] {} marries {}", TredecimalDateFormat.ISO.format(date), husband, wife);

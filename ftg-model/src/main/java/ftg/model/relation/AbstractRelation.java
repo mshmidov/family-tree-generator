@@ -10,11 +10,11 @@ import javaslang.collection.Seq;
 import javaslang.collection.Set;
 
 import java.util.Objects;
-import java.util.function.Predicate;
+import java.util.function.Function;
 
 abstract class AbstractRelation implements Relation {
 
-    private static final Predicate<Seq<Person>> NO_DUPLICATES = values -> values.distinct().equals(values);
+    private static final Function<Seq<Person>, Boolean> NO_DUPLICATES = values -> values.distinct().equals(values);
 
     private final Map<Role, Person> participants;
     private final Map<Person, Role> reverseParticipants;

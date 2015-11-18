@@ -1,8 +1,8 @@
 package ftg.model.event;
 
-import static ftg.commons.MorePreconditions.checked;
 import static ftg.model.time.TredecimalDateInterval.intervalBetween;
 
+import ftg.commons.functional.Checked;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.relation.Marriage;
@@ -35,7 +35,8 @@ public final class DeathEvent extends Event {
     @Override
     public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
 
-        final Person deceased = checked(world.getPerson(deceasedId), p -> !p.state(Death.class).isPresent(), IllegalArgumentException::new);
+        final Person deceased = Checked.argument(world.getPerson(deceasedId), p -> p.state(Death.class).isEmpty(),
+                                                 "With strange aeons even death may die. But this is not the case ;)");
 
         deceased.addState(new Death(date));
 

@@ -12,6 +12,7 @@ import ftg.model.relation.Parentage;
 import ftg.model.relation.RelationFactory;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
+import javaslang.control.Option;
 import org.junit.Test;
 import org.junit.experimental.theories.Theories;
 import org.junit.runner.RunWith;
@@ -36,7 +37,7 @@ public class LineagesTest {
         final Parentage parentage = relationFactory.createParentage(newMale("F"), newFemale("M"), newMale("P"));
 
         // when
-        final Optional<Person> result = new Lineages().getFather(parentage.getChild());
+        final Option<Person> result = Lineages.findFather(parentage.getChild());
 
 
         // then
@@ -50,7 +51,7 @@ public class LineagesTest {
         final Parentage parentage = relationFactory.createParentage(newMale("F"), newFemale("M"), newMale("P"));
 
         // when
-        final Optional<Person> result = new Lineages().getMother(parentage.getChild());
+        final Option<Person> result = Lineages.findMother(parentage.getChild());
 
 
         // then

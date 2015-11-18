@@ -1,10 +1,10 @@
 package ftg.model.event;
 
-import static ftg.commons.MorePreconditions.checkedArgument;
 import static ftg.model.person.Person.Sex.FEMALE;
 import static ftg.model.person.Person.Sex.MALE;
 
 import com.google.common.base.MoreObjects;
+import ftg.commons.functional.Checked;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.relation.RelationFactory;
@@ -49,8 +49,8 @@ public final class ConceptionEvent extends Event {
 
     @Override
     public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
-        final Person mother = checkedArgument(world.getPerson(motherId), p -> p.getSex() == FEMALE && !p.state(Pregnancy.class).isPresent(), "Mother should be non-pregnant female");
-        final Person father = checkedArgument(world.getPerson(fatherId), p -> p.getSex() == MALE, "Father should be male");
+        final Person mother = Checked.argument(world.getPerson(motherId), p -> p.getSex() == FEMALE && p.state(Pregnancy.class).isEmpty(), "Mother should be non-pregnant female");
+        final Person father = Checked.argument(world.getPerson(fatherId), p -> p.getSex() == MALE, "Father should be male");
 
         LOGGER.info("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(date), mother, father);
         mother.addState(new Pregnancy(date, father, childSex));

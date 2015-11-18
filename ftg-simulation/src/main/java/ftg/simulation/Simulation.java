@@ -6,8 +6,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import ftg.commons.Util;
-import ftg.commons.cdi.Identifier;
 import ftg.commons.range.IntegerRange;
 import ftg.model.event.ConceptionEvent;
 import ftg.model.event.DeathEvent;
@@ -25,21 +23,20 @@ import ftg.model.world.World;
 import ftg.simulation.configuration.Configuration;
 import ftg.simulation.configuration.Country;
 import ftg.simulation.lineage.Lineages;
+import javaslang.Value;
+import javaslang.collection.Seq;
+import javaslang.control.Option;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class Simulation {
 
     private static final Logger LOGGER = LogManager.getLogger(Simulation.class);
-
-    private final Supplier<String> identifier;
 
     private final RandomChoice randomChoice = new RandomChoice();
     private final Lineages lineages = new Lineages();
@@ -52,10 +49,8 @@ public final class Simulation {
     private TredecimalDate currentDate = new TredecimalDate(0);
 
     @Inject
-    public Simulation(Configuration configuration, @Identifier Supplier<String> identifier) {
-
+    public Simulation(Configuration configuration) {
         this.configuration = configuration;
-        this.identifier = identifier;
         this.countries = ImmutableMap.copyOf(configuration.getCountries().stream().collect(Collectors.toMap(Country::getName, c -> c)));
     }
 
@@ -74,40 +69,39 @@ public final class Simulation {
         final List<Event> events = new ArrayList<>();
 
         // marriages
-        final List<Person> unmarriedFemales = world.persons()
-            .filter(person -> !person.state(Death.class).isPresent())
+        final Seq<Person> unmarriedFemales = world.persons()
+            .filter(person -> person.state(Death.class).isEmpty())
             .filter(person -> person.getSex() == Person.Sex.FEMALE)
-            .filter(female -> female.relations(Marriage.class).count() == 0)
-            .sorted((o1, o2) -> o1.getBirthDate().compareTo(o2.getBirthDate()))
-            .collect(Collectors.toList());
+            .filter(female -> female.relations(Marriage.class).isEmpty())
+            .sortBy(Person::getBirthDate);
 
         world.persons()
-            .filter(person -> !person.state(Death.class).isPresent())
+            .filter(person -> person.state(Death.class).isEmpty())
             .filter(person -> person.getSex() == Person.Sex.MALE)
-            .filter(male -> male.relations(Marriage.class).count() == 0)
+            .filter(male -> male.relations(Marriage.class).isEmpty())
             .map(male -> decideMarriage(male, unmarriedFemales, eventFactory))
-            .flatMap(Util::streamFromOptional)
+            .flatMap(Value::toSet)
             .peek(events::add)
             .forEach(world::submitEvent);
 
 
         // pregnancies
         world.persons()
-            .filter(person -> !person.state(Death.class).isPresent())
+            .filter(person -> person.state(Death.class).isEmpty())
             .filter(person -> person.getSex() == Person.Sex.FEMALE)
-            .filter(female -> !female.state(Pregnancy.class).isPresent())
-            .filter(female -> female.relations(Marriage.class).count() > 0)
+            .filter(female -> female.state(Pregnancy.class).isEmpty())
+            .filter(female -> female.relations(Marriage.class).isDefined())
             .filter(female -> fertileAge.includes(intervalBetween(female.getBirthDate(), currentDate).getYears()))
             .map(female -> decidePregnancyInMarriage(female, eventFactory))
-            .flatMap(Util::streamFromOptional)
+            .flatMap(Value::toSet)
             .peek(events::add)
             .forEach(world::submitEvent);
 
         // births
         world.persons()
-            .filter(person -> !person.state(Death.class).isPresent())
+            .filter(person -> person.state(Death.class).isEmpty())
             .filter(person -> person.getSex() == Person.Sex.FEMALE)
-            .filter(person -> person.state(Pregnancy.class).isPresent())
+            .filter(person -> person.state(Pregnancy.class).isDefined())
             .filter(person -> intervalBetween(currentDate, person.state(Pregnancy.class).get().getConceptionDate()).getDays() == 280)
             .map(person -> decideBirth(person, eventFactory))
             .peek(events::add)
@@ -115,49 +109,49 @@ public final class Simulation {
 
         // deaths
         world.persons()
-            .filter(person -> !person.state(Death.class).isPresent())
+            .filter(person -> person.state(Death.class).isEmpty())
             .map(person -> decideDeath(person, eventFactory))
-            .flatMap(Util::streamFromOptional)
+            .flatMap(Value::toSet)
             .peek(events::add)
             .forEach(world::submitEvent);
 
         return events;
     }
 
-    private Optional<MarriageEvent> decideMarriage(Person male, List<Person> unmarriedFemales, EventFactory eventFactory) {
+    private Option<MarriageEvent> decideMarriage(Person male, Seq<Person> unmarriedFemales, EventFactory eventFactory) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (randomChoice.byChance(chance)) {
 
-            final List<Person> candidates = unmarriedFemales.stream()
-                    .filter(f -> !lineages.findClosestAncestry(male, f).isPresent()) // male is not descendant of female
-                    .filter(f -> !lineages.findClosestAncestry(f, male).isPresent()) // female is not descendant of male
-                    .filter(f -> lineages.findClosestRelation(male, f, 2).orElse(2) >= 2) // no siblings
-                    .collect(Collectors.toList());
+            final Seq<Person> candidates = unmarriedFemales
+                    .filter(f -> lineages.findClosestAncestry(male, f).isEmpty()) // male is not descendant of female
+                    .filter(f -> lineages.findClosestAncestry(f, male).isEmpty()) // female is not descendant of male
+                    .filter(f -> lineages.findClosestRelation(male, f, 2).orElse(2) >= 2); // no siblings
 
             if (candidates.isEmpty()) {
                 // TODO introduce new random female
             } else {
-                int index = randomChoice.fromRangeByGaussian(candidates.size());
-                return Optional.of(eventFactory.newMarriageEvent(currentDate, male.getId(), unmarriedFemales.remove(index).getId()));
+                int index = randomChoice.fromRangeByGaussian(candidates.length());
+                return Option.of(eventFactory.newMarriageEvent(currentDate, male.getId(), unmarriedFemales.get(index).getId()));
             }
 
 
         }
-        return Optional.empty();
+
+        return Option.none();
     }
 
-    private Optional<ConceptionEvent> decidePregnancyInMarriage(Person female, EventFactory eventFactory) {
+    private Option<ConceptionEvent> decidePregnancyInMarriage(Person female, EventFactory eventFactory) {
         final double chance = 60D / 1000D / DAYS_IN_YEAR;
         if (randomChoice.byChance(chance)) {
 
             final Person.Sex sex = randomChoice.from(Person.Sex.class);
 
-            return Optional.of(eventFactory.newConceptionEvent(currentDate,
-                                                               female.relations(Marriage.class).findAny().get().getHusband().getId(),
+            return Option.of(eventFactory.newConceptionEvent(currentDate,
+                                                               female.relations(Marriage.class).head().getHusband().getId(),
                                                                female.getId(),
                                                                sex));
         }
-        return Optional.empty();
+        return Option.none();
     }
 
     private Event decideBirth(Person mother, EventFactory eventFactory) {
@@ -177,13 +171,13 @@ public final class Simulation {
         return eventFactory.newBirthEvent(currentDate, childData, mother.getId(), pregnancy.getFather().getId());
     }
 
-    private Optional<DeathEvent> decideDeath(Person person, EventFactory eventFactory) {
+    private Option<DeathEvent> decideDeath(Person person, EventFactory eventFactory) {
         final long age = intervalBetween(person.getBirthDate(), currentDate).getYears();
         final Country country = requireNonNull(countries.get(person.state(Residence.class).get().getCountry()));
         final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
 
         return randomChoice.byChance(chance)
-               ? Optional.of(eventFactory.newDeathEvent(currentDate, person.getId()))
-               : Optional.empty();
+               ? Option.of(eventFactory.newDeathEvent(currentDate, person.getId()))
+               : Option.none();
     }
 }

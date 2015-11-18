@@ -49,7 +49,7 @@ public final class BirthEvent extends Event {
         mother.removeState(Pregnancy.class);
         final Person child = personFactory.newPerson(childData);
         relationFactory.createParentage(father, mother, child);
-        mother.state(Residence.class).ifPresent(child::addState);
+        mother.state(Residence.class).peek(child::addState);
 
         world.addPerson(child);
 

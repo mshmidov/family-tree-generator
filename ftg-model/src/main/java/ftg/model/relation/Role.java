@@ -12,8 +12,8 @@ public enum Role {
     CHILD(p -> true),
     HUSBAND(p -> p.getSex() == Person.Sex.MALE),
     WIFE(p -> p.getSex() == Person.Sex.FEMALE),
-    DECEASED(p -> p.state(Death.class).isPresent()),
-    WIDOW(p -> !p.state(Death.class).isPresent());
+    DECEASED(p -> p.state(Death.class).isDefined()),
+    WIDOW(p -> p.state(Death.class).isEmpty());
 
     public final Predicate<Person> acceptable;
 

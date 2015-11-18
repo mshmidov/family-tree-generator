@@ -1,136 +1,102 @@
 package ftg.simulation.lineage;
 
 import static com.google.common.base.Preconditions.checkState;
-import static ftg.commons.Util.streamFromOptional;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
-import ftg.commons.UniquePairs;
-import ftg.commons.Util;
 import ftg.model.person.Person;
 import ftg.model.relation.Parentage;
 import ftg.model.relation.Role;
+import javaslang.Value;
+import javaslang.collection.HashSet;
+import javaslang.collection.List;
+import javaslang.collection.Set;
+import javaslang.control.Match;
+import javaslang.control.Option;
 
-import java.util.EnumMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public final class Lineages {
 
-    private static final ImmutableSet<Ancestors> PARENTS = ImmutableSet.of(Ancestors.FATHER, Ancestors.MOTHER);
-
-    private final EnumMap<Ancestors, Function<Person, Optional<Person>>> kinshipProviders = new EnumMap<>(Ancestors.class);
-
-    private final Table<Person, Ancestors, Person> knownKinship = HashBasedTable.create();
+    private static final Set<Ancestors> PARENTS = HashSet.ofAll(Ancestors.FATHER, Ancestors.MOTHER);
 
     private final Table<Person, Person, Integer> knownRelation = HashBasedTable.create();
 
-    public static Optional<Person> findFather(Person person) {
+    public static Option<Person> findFather(Person person) {
         return person.relations(Parentage.class)
-                .filter(parentage -> parentage.getRole(person) == Role.CHILD)
-                .findFirst()
-                .map(Parentage::getFather);
+            .findFirst(parentage -> parentage.getRole(person) == Role.CHILD)
+            .map(Parentage::getFather);
     }
 
-    public static Optional<Person> findMother(Person person) {
+    public static Option<Person> findMother(Person person) {
         return person.relations(Parentage.class)
-                .filter(parentage -> parentage.getRole(person) == Role.CHILD)
-                .findFirst()
-                .map(Parentage::getMother);
+            .findFirst(parentage -> parentage.getRole(person) == Role.CHILD)
+            .map(Parentage::getMother);
     }
 
-    public static List<Person> findChildren(Person person) {
+    public static Set<Person> findChildren(Person person) {
         return person.relations(Parentage.class)
-                .filter(parentage -> parentage.getRole(person) != Role.CHILD)
-                .map(Parentage::getChild)
-                .collect(Collectors.toList());
+            .filter(parentage -> parentage.getRole(person) != Role.CHILD)
+            .map(Parentage::getChild);
     }
 
-    public Lineages() {
-        kinshipProviders.put(Ancestors.FATHER, Lineages::findFather);
-        kinshipProviders.put(Ancestors.MOTHER, Lineages::findMother);
-
-        kinshipProviders.put(Ancestors.PATERNAL_GRANDFATHER, p -> getFather(p).flatMap(this::getFather));
-        kinshipProviders.put(Ancestors.PATERNAL_GRANDMOTHER, p -> getFather(p).flatMap(this::getMother));
-        kinshipProviders.put(Ancestors.MATERNAL_GRANDFATHER, p -> getMother(p).flatMap(this::getFather));
-        kinshipProviders.put(Ancestors.MATERNAL_GRANDMOTHER, p -> getMother(p).flatMap(this::getMother));
+    public Option<Person> getAncestor(Person person, Ancestors ancestor) {
+        return Match.of(ancestor)
+            .whenIs(Ancestors.FATHER).then(findFather(person))
+            .whenIs(Ancestors.MOTHER).then(findMother(person))
+            .orElseThrow(IllegalArgumentException::new);
     }
 
-    public Optional<Person> getAncestor(Person person, Ancestors ancestor) {
-        final Optional<Person> knownKin = Optional.ofNullable(knownKinship.get(person, ancestor));
-        if (knownKin.isPresent()) {
-            return knownKin;
-        }
-
-        final Optional<Person> kin = kinshipProviders.get(ancestor).apply(person);
-        kin.ifPresent(k -> knownKinship.put(person, ancestor, k));
-
-        return kin;
-    }
-
-    public Optional<Person> getFather(Person person) {
-        return getAncestor(person, Ancestors.FATHER);
-    }
-
-    public Optional<Person> getMother(Person person) {
-        return getAncestor(person, Ancestors.MOTHER);
-    }
-
-    public Optional<Integer> findClosestAncestry(Person person, Person ancestor) {
+    public Option<Integer> findClosestAncestry(Person person, Person ancestor) {
         if (knownRelation.contains(person, ancestor)) {
-            return Optional.of(knownRelation.get(person, ancestor));
+            return Option.of(knownRelation.get(person, ancestor));
         }
 
         if (Objects.equals(person, ancestor)) {
-            return Optional.of(0);
+            return Option.of(0);
         }
 
-        return PARENTS.stream()
-                .flatMap(parent -> streamFromOptional(getAncestor(person, parent)))
-                .flatMap(parent -> streamFromOptional(findClosestAncestry(parent, ancestor)))
-                .map(r -> r + 1)
-                .peek(r -> cacheRelation(person, ancestor, r))
-                .min(Integer::compare);
-
+        return PARENTS
+            .flatMap(parent -> getAncestor(person, parent))
+            .flatMap(parent -> findClosestAncestry(parent, ancestor))
+            .map(r -> r + 1)
+            .peek(r -> cacheRelation(person, ancestor, r))
+            .min();
     }
 
-    public Optional<Integer> findClosestRelation(Person a, Person b, int depthLimit) {
+    public Option<Integer> findClosestRelation(Person a, Person b, int depthLimit) {
 
         checkState(!Objects.equals(requireNonNull(a), requireNonNull(b)), "Both arguments are same person");
 
         return recursiveFindClosestRelation(a, b, 0, depthLimit);
     }
 
-    private Optional<Integer> recursiveFindClosestRelation(Person a, Person b, int depth, int depthLimit) {
+    private Option<Integer> recursiveFindClosestRelation(Person a, Person b, int depth, int depthLimit) {
         if (depth > depthLimit) {
-            return Optional.empty();
+            return Option.none();
         }
 
         if (knownRelation.contains(a, b)) {
-            return Optional.of(knownRelation.get(a, b));
+            return Option.of(knownRelation.get(a, b));
         }
 
         if (Objects.equals(requireNonNull(a), requireNonNull(b))) {
-            return Optional.of(0);
+            return Option.of(0);
         }
 
-        final List<Person> ancestors = UniquePairs.of(ImmutableList.of(a, b), PARENTS).stream()
-                .map(pair -> getAncestor(pair.getLeft(), pair.getRight()))
-                .flatMap(Util::streamFromOptional)
-                .collect(Collectors.toList());
 
-        return UniquePairs.of(ancestors).stream()
-                .map(pair -> recursiveFindClosestRelation(pair.get(0), pair.get(1), depth + 1, depthLimit))
-                .flatMap(Util::streamFromOptional)
-                .map(r -> r + 1)
-                .peek(r -> cacheRelation(a, b, r))
-                .min(Integer::compare);
+        final List<Person> ancestors = List.ofAll(a, b).crossProduct(PARENTS)
+            .map(pair -> getAncestor(pair._1, pair._2))
+            .flatMap(Value::toSet);
+
+        return ancestors.combinations(2)
+            .map(pair -> recursiveFindClosestRelation(pair.get(0), pair.get(1), depth + 1, depthLimit))
+            .flatMap(Value::toSet)
+            .map(r -> r + 1)
+            .peek(r -> cacheRelation(a, b, r))
+            .min();
     }
 
 
