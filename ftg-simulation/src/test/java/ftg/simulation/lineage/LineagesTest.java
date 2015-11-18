@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.junit.experimental.theories.Theories;
 import org.junit.runner.RunWith;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -91,7 +90,7 @@ public class LineagesTest {
         final Lineages lineages = new Lineages();
 
         // then
-        assertThat(lineages.findClosestRelation(child1, child2, 10), is(equalTo(Optional.of(2))));
+        assertThat(lineages.findClosestRelation(child1, child2, 10), is(equalTo(Option.of(2))));
 
     }
 
@@ -128,11 +127,11 @@ public class LineagesTest {
         final Lineages lineages = new Lineages();
 
         // then
-        assertThat(lineages.findClosestAncestry(child1, grandfather1), is(equalTo(Optional.of(2))));
-        assertThat(lineages.findClosestAncestry(child1, grandmother2), is(equalTo(Optional.of(2))));
-        assertThat(lineages.findClosestAncestry(child1, grandmother3), is(equalTo(Optional.empty())));
-        assertThat(lineages.findClosestAncestry(child1, father1), is(equalTo(Optional.of(1))));
-        assertThat(lineages.findClosestAncestry(child1, mother1), is(equalTo(Optional.of(1))));
+        assertThat(lineages.findClosestAncestry(child1, grandfather1), is(equalTo(Option.of(2))));
+        assertThat(lineages.findClosestAncestry(child1, grandmother2), is(equalTo(Option.of(2))));
+        assertThat(lineages.findClosestAncestry(child1, grandmother3), is(equalTo(Option.none())));
+        assertThat(lineages.findClosestAncestry(child1, father1), is(equalTo(Option.of(1))));
+        assertThat(lineages.findClosestAncestry(child1, mother1), is(equalTo(Option.of(1))));
 
     }
 

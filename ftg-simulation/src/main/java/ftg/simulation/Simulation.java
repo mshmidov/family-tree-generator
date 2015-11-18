@@ -15,7 +15,6 @@ import ftg.model.event.MarriageEvent;
 import ftg.model.event.PersonData;
 import ftg.model.person.Person;
 import ftg.model.relation.Marriage;
-import ftg.model.state.Death;
 import ftg.model.state.Pregnancy;
 import ftg.model.state.Residence;
 import ftg.model.time.TredecimalDate;
@@ -69,14 +68,13 @@ public final class Simulation {
         final List<Event> events = new ArrayList<>();
 
         // marriages
-        final Seq<Person> unmarriedFemales = world.persons()
-            .filter(person -> person.state(Death.class).isEmpty())
+        final Seq<Person> unmarriedFemales = world.alivePersons()
             .filter(person -> person.getSex() == Person.Sex.FEMALE)
             .filter(female -> female.relations(Marriage.class).isEmpty())
+            .toVector()
             .sortBy(Person::getBirthDate);
 
-        world.persons()
-            .filter(person -> person.state(Death.class).isEmpty())
+        world.alivePersons()
             .filter(person -> person.getSex() == Person.Sex.MALE)
             .filter(male -> male.relations(Marriage.class).isEmpty())
             .map(male -> decideMarriage(male, unmarriedFemales, eventFactory))
@@ -86,8 +84,7 @@ public final class Simulation {
 
 
         // pregnancies
-        world.persons()
-            .filter(person -> person.state(Death.class).isEmpty())
+        world.alivePersons()
             .filter(person -> person.getSex() == Person.Sex.FEMALE)
             .filter(female -> female.state(Pregnancy.class).isEmpty())
             .filter(female -> female.relations(Marriage.class).isDefined())
@@ -98,8 +95,7 @@ public final class Simulation {
             .forEach(world::submitEvent);
 
         // births
-        world.persons()
-            .filter(person -> person.state(Death.class).isEmpty())
+        world.alivePersons()
             .filter(person -> person.getSex() == Person.Sex.FEMALE)
             .filter(person -> person.state(Pregnancy.class).isDefined())
             .filter(person -> intervalBetween(currentDate, person.state(Pregnancy.class).get().getConceptionDate()).getDays() == 280)
@@ -108,8 +104,7 @@ public final class Simulation {
             .forEach(world::submitEvent);
 
         // deaths
-        world.persons()
-            .filter(person -> person.state(Death.class).isEmpty())
+        world.alivePersons()
             .map(person -> decideDeath(person, eventFactory))
             .flatMap(Value::toSet)
             .peek(events::add)
