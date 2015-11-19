@@ -12,22 +12,22 @@ import javaslang.collection.Map;
 import javaslang.collection.Set;
 import javaslang.control.Option;
 
+import java.util.function.Consumer;
+
 public final class Person implements Identified {
 
     public enum Sex {MALE, FEMALE}
 
+
     private final String id;
-
     private final TredecimalDate birthDate;
-
     private final Sex sex;
-
     private final String name;
 
+    private Set<Consumer<Person>> listeners = HashSet.empty();
+
     private List<Surname> surnames;
-
     private Map<Class<? extends State>, State> states = HashMap.empty();
-
     private Map<Class<? extends Relation>, Set<Relation>> relations = HashMap.empty();
 
     Person(String id, String name, Surname surname, Sex sex, TredecimalDate birthDate) {
@@ -36,6 +36,14 @@ public final class Person implements Identified {
         this.surnames = List.of(surname);
         this.sex = sex;
         this.birthDate = birthDate;
+    }
+
+    public void addListener(Consumer<Person> listener) {
+        listeners = listeners.add(listener);
+    }
+
+    public void removeListener(Consumer<Person> listener) {
+        listeners = listeners.remove(listener);
     }
 
     @Override
@@ -69,6 +77,7 @@ public final class Person implements Identified {
 
     public void setSurname(Surname surname) {
         surnames = surnames.append(surname);
+        listeners.forEach(listener -> listener.accept(this));
     }
 
     public Surname getSurnameObject() {
@@ -85,20 +94,26 @@ public final class Person implements Identified {
 
     public void addState(State state) {
         states = states.put(state.getClass(), state);
+        listeners.forEach(listener -> listener.accept(this));
     }
 
     public void removeState(Class<? extends State> stateClass) {
         states = states.remove(stateClass);
+        listeners.forEach(listener -> listener.accept(this));
     }
 
     public void addRelation(Relation relation) {
         relations = relations.put(relation.getClass(),
                                   relations.get(relation.getClass()).orElse(HashSet.empty()).add(relation));
+
+        listeners.forEach(listener -> listener.accept(this));
     }
 
     public void removeRelation(Relation relation) {
         relations = relations.put(relation.getClass(),
                                   relations.get(relation.getClass()).orElse(HashSet.empty()).remove(relation));
+
+        listeners.forEach(listener -> listener.accept(this));
     }
 
     @Override
