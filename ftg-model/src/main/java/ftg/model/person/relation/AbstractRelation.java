@@ -1,4 +1,4 @@
-package ftg.model.relation;
+package ftg.model.person.relation;
 
 import com.google.common.base.MoreObjects;
 import ftg.commons.functional.Checked;

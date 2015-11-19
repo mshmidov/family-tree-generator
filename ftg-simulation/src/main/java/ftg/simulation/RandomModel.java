@@ -7,7 +7,7 @@ import ftg.model.event.EventFactory;
 import ftg.model.event.PersonData;
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
-import ftg.model.state.Residence;
+import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
 import ftg.simulation.configuration.Country;
 

@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects;
 import ftg.model.Identified;
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
-import ftg.model.state.Residence;
+import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
 

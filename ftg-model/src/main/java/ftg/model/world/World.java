@@ -8,7 +8,7 @@ import ftg.commons.functional.Checked;
 import ftg.model.event.Event;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
-import ftg.model.relation.RelationFactory;
+import ftg.model.person.relation.RelationFactory;
 import javaslang.Tuple;
 import javaslang.collection.Array;
 import javaslang.collection.HashMap;

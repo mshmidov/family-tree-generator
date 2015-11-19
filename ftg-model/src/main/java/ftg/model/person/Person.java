@@ -1,8 +1,8 @@
 package ftg.model.person;
 
 import ftg.model.Identified;
-import ftg.model.relation.Relation;
-import ftg.model.state.State;
+import ftg.model.person.relation.Relation;
+import ftg.model.person.state.State;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateInterval;
 import javaslang.collection.HashMap;

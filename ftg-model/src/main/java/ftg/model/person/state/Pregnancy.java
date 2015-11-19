@@ -1,4 +1,4 @@
-package ftg.model.state;
+package ftg.model.person.state;
 
 import com.google.common.base.MoreObjects;
 import ftg.model.person.Person;

@@ -1,9 +1,14 @@
 package ftg.simulation.configuration.naming;
 
-import ftg.commons.generator.*;
+import ftg.commons.generator.Generator;
+import ftg.commons.generator.LimitedGenerator;
+import ftg.commons.generator.RandomElementGenerator;
+import ftg.commons.generator.RandomUniqueElementGenerator;
+import ftg.commons.generator.TransformingGenerator;
+import ftg.commons.generator.TransformingLimitedGenerator;
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
-import ftg.model.state.Pregnancy;
+import ftg.model.person.state.Pregnancy;
 
 import java.util.List;
 

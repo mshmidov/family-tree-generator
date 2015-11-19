@@ -2,7 +2,7 @@ package ftg.simulation.configuration.naming;
 
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
-import ftg.model.state.Pregnancy;
+import ftg.model.person.state.Pregnancy;
 
 public interface NamingLogic {
 

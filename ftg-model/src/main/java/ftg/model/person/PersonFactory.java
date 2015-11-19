@@ -3,7 +3,7 @@ package ftg.model.person;
 import com.google.inject.Inject;
 import ftg.commons.cdi.Identifier;
 import ftg.model.event.PersonData;
-import ftg.model.state.Pregnancy;
+import ftg.model.person.state.Pregnancy;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
 

@@ -1,8 +1,8 @@
-package ftg.model.relation;
+package ftg.model.person.relation;
 
 import ftg.commons.MorePreconditions;
 import ftg.model.person.Person;
-import ftg.model.state.Death;
+import ftg.model.person.state.Death;
 
 import java.util.function.Predicate;
 

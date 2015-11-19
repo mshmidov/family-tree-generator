@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import ftg.commons.cdi.Identifier;
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
-import ftg.model.state.Residence;
+import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
 
 import java.util.function.Supplier;

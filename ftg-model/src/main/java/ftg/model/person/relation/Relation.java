@@ -1,4 +1,4 @@
-package ftg.model.relation;
+package ftg.model.person.relation;
 
 import ftg.model.person.Person;
 import javaslang.collection.Set;

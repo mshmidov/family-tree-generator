@@ -1,8 +1,8 @@
 package ftg.model.person;
 
-import ftg.model.relation.Marriage;
-import ftg.model.state.Death;
-import ftg.model.state.Pregnancy;
+import ftg.model.person.relation.Marriage;
+import ftg.model.person.state.Death;
+import ftg.model.person.state.Pregnancy;
 
 import java.util.function.Predicate;
 
