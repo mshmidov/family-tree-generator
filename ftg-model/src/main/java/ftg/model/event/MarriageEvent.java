@@ -18,15 +18,11 @@ public final class MarriageEvent extends Event {
 
     private static final Logger LOGGER = LogManager.getLogger(MarriageEvent.class);
 
-    private final TredecimalDate date;
-
     private final String husbandId;
-
     private final String wifeId;
 
     MarriageEvent(String id, TredecimalDate date, String husbandId, String wifeId) {
         super(id, date);
-        this.date = date;
         this.husbandId = husbandId;
         this.wifeId = wifeId;
     }
@@ -44,15 +40,16 @@ public final class MarriageEvent extends Event {
                                                                       "Person can participate in only one marriage at a time"));
 
         relationFactory.createMarriage(husband, wife);
-        LOGGER.info("[{}] {} marries {}", TredecimalDateFormat.ISO.format(date), husband, wife);
+        LOGGER.info("[{}] {} marries {}", TredecimalDateFormat.ISO.format(getDate()), husband, wife);
         wife.setSurname(husband.getSurnameObject());
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("husbandId", husbandId)
-                .add("wifeId", wifeId)
-                .toString();
+            .addValue("[" + getId() + "," + getDate() + "]")
+            .add("husbandId", husbandId)
+            .add("wifeId", wifeId)
+            .toString();
     }
 }

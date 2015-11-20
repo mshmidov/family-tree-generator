@@ -15,7 +15,6 @@ import ftg.model.event.DeathEvent;
 import ftg.model.event.Event;
 import ftg.model.event.EventFactory;
 import ftg.model.event.MarriageEvent;
-import ftg.model.event.PersonData;
 import ftg.model.person.Person;
 import ftg.model.person.relation.Marriage;
 import ftg.model.person.state.Pregnancy;
@@ -128,20 +127,11 @@ public final class Simulation {
 
     private Event decideBirth(Person mother, EventFactory eventFactory) {
         final Pregnancy pregnancy = mother.state(Pregnancy.class).get();
-        final Residence residence = mother.state(Residence.class).get();
 
         final Country country = mother.state(Residence.class).get().getCountry();
         final String childName = country.getNativeNames().childName(mother, pregnancy);
 
-        final PersonData childData = eventFactory.newPersonData(
-            childName,
-            pregnancy.getFather().getSurnameObject(),
-            pregnancy.getChildSex(),
-            currentDate,
-            residence
-        );
-
-        return eventFactory.newBirthEvent(currentDate, childData, mother.getId(), pregnancy.getFather().getId());
+        return eventFactory.newBirthEvent(currentDate, mother.getId(), childName, pregnancy.getFather().getSurnameObject(), pregnancy.getChildSex());
     }
 
     private Option<DeathEvent> decideDeath(Person person, EventFactory eventFactory) {

@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import ftg.model.event.EventFactory;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.person.Surname;
@@ -24,7 +23,6 @@ public class LineagesTest {
 
     private final AtomicLong personCounter = new AtomicLong(0);
 
-    private final EventFactory eventFactory = new EventFactory(() -> String.valueOf(personCounter.incrementAndGet()));
     private final PersonFactory personFactory = new PersonFactory(() -> String.valueOf(personCounter.incrementAndGet()));
     private final RelationFactory relationFactory = new RelationFactory();
 
@@ -135,10 +133,10 @@ public class LineagesTest {
     }
 
     private Person newMale(String name) {
-        return personFactory.newPerson(eventFactory.newPersonData(name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0), null));
+        return personFactory.newPerson(name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0), null);
     }
 
     private Person newFemale(String name) {
-        return personFactory.newPerson(eventFactory.newPersonData(name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0), null));
+        return personFactory.newPerson(name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0), null);
     }
 }

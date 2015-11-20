@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import ftg.commons.cdi.Identifier;
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
-import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
+import ftg.model.world.country.Country;
 
 import java.util.function.Supplier;
 
@@ -18,12 +18,8 @@ public final class EventFactory {
         this.id = id;
     }
 
-    public PersonData newPersonData(String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, Residence residence) {
-        return new PersonData(id.get(), name, surname, sex, birthDate, residence);
-    }
-
-    public PersonIntroductionEvent newPersonIntroductionEvent(TredecimalDate date, PersonData personData) {
-        return new PersonIntroductionEvent(id.get(), date, personData);
+    public PersonIntroductionEvent newPersonIntroductionEvent(TredecimalDate date, String name, Surname surname, Person.Sex sex, TredecimalDate birthDate, Country country) {
+        return new PersonIntroductionEvent(id.get(), date, name, surname, sex, birthDate, country);
     }
 
     public MarriageEvent newMarriageEvent(TredecimalDate date, String husbandId, String wifeId) {
@@ -34,8 +30,8 @@ public final class EventFactory {
         return new ConceptionEvent(id.get(),date, fatherId, motherId, childSex);
     }
 
-    public BirthEvent newBirthEvent(TredecimalDate date, PersonData childData, String motherId, String fatherId) {
-        return new BirthEvent(id.get(),childData, motherId, fatherId);
+    public BirthEvent newBirthEvent(TredecimalDate date, String motherId, String childName, Surname childSurname, Person.Sex childSex) {
+        return new BirthEvent(id.get(), date, motherId, childName, childSurname, childSex);
     }
 
     public DeathEvent newDeathEvent(TredecimalDate date, String deceasedId) {

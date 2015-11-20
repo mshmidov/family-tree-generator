@@ -20,7 +20,7 @@ public final class Marriage extends AbstractRelation implements Relation {
         return getParticipant(Role.WIFE);
     }
 
-    public Person getOther(Person participant) {
+    public Person getSpouse(Person participant) {
         return (getRole(participant) == Role.HUSBAND) ? getWife() : getHusband();
     }
 

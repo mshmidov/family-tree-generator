@@ -19,17 +19,12 @@ public final class ConceptionEvent extends Event {
 
     private static final Logger LOGGER = LogManager.getLogger(ConceptionEvent.class);
 
-    private final TredecimalDate date;
-
     private final String fatherId;
-
     private final String motherId;
-
     private final Person.Sex childSex;
 
     ConceptionEvent(String id, TredecimalDate date, String fatherId, String motherId, Person.Sex childSex) {
         super(id, date);
-        this.date = date;
         this.fatherId = fatherId;
         this.motherId = motherId;
         this.childSex = childSex;
@@ -49,20 +44,21 @@ public final class ConceptionEvent extends Event {
 
     @Override
     public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
-        final Person mother = Checked.argument(world.getPerson(motherId), p -> p.getSex() == FEMALE && p.state(Pregnancy.class).isEmpty(), "Mother should be non-pregnant female");
+        final Person mother = Checked
+            .argument(world.getPerson(motherId), p -> p.getSex() == FEMALE && p.state(Pregnancy.class).isEmpty(), "Mother should be non-pregnant female");
         final Person father = Checked.argument(world.getPerson(fatherId), p -> p.getSex() == MALE, "Father should be male");
 
-        LOGGER.info("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(date), mother, father);
-        mother.addState(new Pregnancy(date, father, childSex));
+        LOGGER.info("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(getDate()), mother, father);
+        mother.addState(new Pregnancy(getDate(), father, childSex));
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("conceptionDate", date)
-                .add("fatherId", fatherId)
-                .add("motherId", motherId)
-                .add("childSex", childSex)
-                .toString();
+            .addValue("[" + getId() + "," + getDate() + "]")
+            .add("fatherId", fatherId)
+            .add("motherId", motherId)
+            .add("childSex", childSex)
+            .toString();
     }
 }

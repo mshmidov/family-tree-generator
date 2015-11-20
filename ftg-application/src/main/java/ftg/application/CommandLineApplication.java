@@ -54,8 +54,7 @@ public class CommandLineApplication {
 
             randomNobleSurnames
                 .take(100)
-                .map(surname -> randomModel.newPersonData(country, surname, age, currentDate))
-                .map(personData -> eventFactory.newPersonIntroductionEvent(currentDate, personData))
+                .map(surname -> randomModel.introduceRandomPerson(country, surname, age, currentDate))
                 .forEach(world::submitEvent);
         }
 
