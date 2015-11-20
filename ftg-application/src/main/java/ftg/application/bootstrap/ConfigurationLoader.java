@@ -3,14 +3,19 @@ package ftg.application.bootstrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
-import ftg.application.bootstrap.configfile.ConfigurationFile;
-import ftg.application.bootstrap.configfile.NamingSystemConfig;
+import ftg.application.bootstrap.configfile.ConfigurationYAML;
+import ftg.application.bootstrap.configfile.CountryYAML;
+import ftg.application.bootstrap.configfile.NamingSystemYAML;
 import ftg.commons.exception.InitializationError;
-import ftg.simulation.configuration.Configuration;
-import ftg.simulation.configuration.Country;
+import ftg.model.world.country.Country;
+import ftg.model.world.country.Names;
 import ftg.simulation.configuration.naming.CulturalNaming;
-import ftg.simulation.configuration.naming.NamingLogic;
-import ftg.simulation.configuration.naming.NamingSystem;
+import ftg.simulation.configuration.naming.NamesImpl;
+import javaslang.Tuple;
+import javaslang.collection.Array;
+import javaslang.collection.HashMap;
+import javaslang.collection.HashSet;
+import javaslang.collection.Seq;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +23,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 public final class ConfigurationLoader {
 
@@ -35,7 +36,6 @@ public final class ConfigurationLoader {
     public ConfigurationLoader(String path) {
         this.path = path;
         this.demographyLoader = new DemographyLoader(path);
-
         this.objectMapper = new ObjectMapper(new YAMLFactory());
         this.objectMapper.registerModule(new MrBeanModule());
     }
@@ -43,40 +43,41 @@ public final class ConfigurationLoader {
 
     public Configuration loadConfiguration(String configFile) {
 
-        final ConfigurationFile configurationFile = loadConfigFile(configFile);
+        final ConfigurationYAML configurationYAML = loadConfigFile(configFile);
 
+        final HashMap<Country, Seq<String>> countriesAndSurnames = HashMap.ofAll(
+            HashSet.ofAll(configurationYAML.getCountries())
+                .map(cfg -> Tuple.of(
+                    loadCountry(cfg),
+                    cfg.getNamingSystem().getUniqueSurnames().stream().flatMap(this::loadLines).collect(Array.collector()))));
 
-        final List<Country> countries = new ArrayList<>();
-
-        configurationFile.getCountries().stream()
-                .map(cfg -> new Country(
-                        cfg.getName(),
-                        createNamingSystem(cfg.getNamingSystem()),
-                        demographyLoader.loadDemography(cfg.getDemography())))
-                .forEach(countries::add);
-
-        return new Configuration(countries);
+        return new Configuration(countriesAndSurnames.keySet(), countriesAndSurnames);
     }
 
-    private ConfigurationFile loadConfigFile(String configFile) {
+    private ConfigurationYAML loadConfigFile(String configFile) {
 
         try (InputStream input = ClassLoader.getSystemResource(path + configFile).openStream()) {
-            return objectMapper.readValue(input, ConfigurationFile.class);
+            return objectMapper.readValue(input, ConfigurationYAML.class);
 
         } catch (IOException e) {
             throw new InitializationError(e);
         }
     }
 
-    private NamingSystem createNamingSystem(NamingSystemConfig cfg) {
-        final NamingLogic namingLogic = CulturalNaming.valueOf(cfg.getNamingLogic().toUpperCase()).getNamingLogic();
+    private Country loadCountry(CountryYAML yaml) {
+        return new Country(yaml.getName(),
+                           createNamingSystem(yaml.getNamingSystem()),
+                           demographyLoader.loadDemography(yaml.getDemography()));
+    }
 
-        final List<String> maleNames = cfg.getMaleNames().stream().flatMap(this::loadLines).collect(toList());
-        final List<String> femaleNames = cfg.getFemaleNames().stream().flatMap(this::loadLines).collect(toList());
-        final List<String> commonSurnames = cfg.getCommonSurnames().stream().flatMap(this::loadLines).collect(toList());
-        final List<String> uniqueSurnames = cfg.getUniqueSurnames().stream().flatMap(this::loadLines).collect(toList());
+    private Names createNamingSystem(NamingSystemYAML yaml) {
 
-        return new NamingSystem(namingLogic, maleNames, femaleNames, commonSurnames, uniqueSurnames);
+        final Array<String> maleNames = yaml.getMaleNames().stream().flatMap(this::loadLines).collect(Array.collector());
+        final Array<String> femaleNames = yaml.getFemaleNames().stream().flatMap(this::loadLines).collect(Array.collector());
+        final Array<String> commonSurnames = yaml.getCommonSurnames().stream().flatMap(this::loadLines).collect(Array.collector());
+
+        return new NamesImpl(CulturalNaming.valueOf(yaml.getNamingLogic().toUpperCase()).namingLogic,
+                             maleNames, femaleNames, commonSurnames);
     }
 
 
@@ -87,6 +88,5 @@ public final class ConfigurationLoader {
             throw new InitializationError(e);
         }
     }
-
 
 }

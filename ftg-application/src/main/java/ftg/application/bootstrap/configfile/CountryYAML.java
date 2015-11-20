@@ -1,10 +1,10 @@
 package ftg.application.bootstrap.configfile;
 
-public interface CountryConfig {
+public interface CountryYAML {
 
     String getName();
 
-    NamingSystemConfig getNamingSystem();
+    NamingSystemYAML getNamingSystem();
 
     DemographyConfig getDemography();
 

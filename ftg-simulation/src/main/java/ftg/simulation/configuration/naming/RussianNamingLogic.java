@@ -3,18 +3,21 @@ package ftg.simulation.configuration.naming;
 import ftg.model.person.Person;
 import ftg.model.person.Surname;
 import ftg.model.person.state.Pregnancy;
+import ftg.model.person.state.Residence;
+import ftg.model.world.country.Country;
 
 public final class RussianNamingLogic implements NamingLogic {
 
     @Override
-    public Surname newSurname(String surname) {
-        return new Surname(surname, calculateFemaleSurname(surname));
+    public Surname newSurname(String canonicalForm) {
+        return new Surname(canonicalForm, calculateFemaleSurname(canonicalForm));
     }
 
     @Override
-    public String getNameForNewborn(Person mother, Pregnancy pregnancy, NamingSystem namingSystem) {
+    public String getNameForNewborn(Person mother, Pregnancy pregnancy) {
         // primitive implementation
-        return namingSystem.getNames(pregnancy.getChildSex()).get();
+        final Country birthCountry = mother.state(Residence.class).get().getCountry();
+        return birthCountry.getNativeNames().randomNames(pregnancy.getChildSex()).take(1).get();
     }
 
     private String calculateFemaleSurname(String maleForm) {

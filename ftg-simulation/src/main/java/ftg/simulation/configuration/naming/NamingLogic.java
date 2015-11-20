@@ -6,7 +6,7 @@ import ftg.model.person.state.Pregnancy;
 
 public interface NamingLogic {
 
-    Surname newSurname(String surname);
+    Surname newSurname(String canonicalForm);
 
-    String getNameForNewborn(Person mother, Pregnancy pregnancy, NamingSystem namingSystem);
+    String getNameForNewborn(Person mother, Pregnancy pregnancy);
 }

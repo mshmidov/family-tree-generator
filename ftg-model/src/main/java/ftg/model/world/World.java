@@ -2,13 +2,13 @@ package ftg.model.world;
 
 import static ftg.commons.functional.BooleanLogic.not;
 
-import com.google.inject.Inject;
 import ftg.commons.Bucket;
 import ftg.commons.functional.Checked;
 import ftg.model.event.Event;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.person.relation.RelationFactory;
+import ftg.model.world.country.Country;
 import javaslang.Tuple;
 import javaslang.collection.Array;
 import javaslang.collection.HashMap;
@@ -23,17 +23,22 @@ public final class World {
     private final HashMap<PersonBucket, Bucket<Person>> buckets = HashMap.ofAll(
         Array.ofAll(PersonBucket.values()).map(personBucket -> Tuple.of(personBucket, new Bucket<>(personBucket.criteria, personBucket.orderBy))));
 
+    private final Set<Country> countries;
     private final PersonFactory personFactory;
     private final RelationFactory relationFactory;
 
     private Vector<Event> events = Vector.empty();
     private Map<String, Person> persons = HashMap.empty();
 
-    @Inject
-    public World(PersonFactory personFactory, RelationFactory relationFactory) {
+
+    public World(Set<Country> countries, PersonFactory personFactory, RelationFactory relationFactory) {
+        this.countries = countries;
         this.personFactory = personFactory;
         this.relationFactory = relationFactory;
+    }
 
+    public Set<Country> countries() {
+        return countries;
     }
 
     public Seq<Event> events() {

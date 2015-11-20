@@ -10,7 +10,6 @@ import ftg.model.person.PersonFactory;
 import ftg.model.person.Surname;
 import ftg.model.person.relation.Parentage;
 import ftg.model.person.relation.RelationFactory;
-import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
 import javaslang.control.Option;
 import org.junit.Test;
@@ -136,10 +135,10 @@ public class LineagesTest {
     }
 
     private Person newMale(String name) {
-        return personFactory.newPerson(eventFactory.newPersonData(name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0), new Residence("country")));
+        return personFactory.newPerson(eventFactory.newPersonData(name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0), null));
     }
 
     private Person newFemale(String name) {
-        return personFactory.newPerson(eventFactory.newPersonData(name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0), new Residence("country")));
+        return personFactory.newPerson(eventFactory.newPersonData(name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0), null));
     }
 }

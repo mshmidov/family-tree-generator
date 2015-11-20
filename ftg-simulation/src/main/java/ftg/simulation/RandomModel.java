@@ -9,11 +9,9 @@ import ftg.model.person.Person;
 import ftg.model.person.Surname;
 import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
-import ftg.simulation.configuration.Country;
+import ftg.model.world.country.Country;
 
 public final class RandomModel {
-
-    private final RandomChoice randomChoice = new RandomChoice();
 
     private final EventFactory eventFactory;
 
@@ -23,16 +21,16 @@ public final class RandomModel {
 
     public PersonData newPersonData(Country country, Surname surname, IntegerRange age, TredecimalDate currentDate) {
 
-        final Person.Sex sex = randomChoice.from(Person.Sex.class);
-        final int days = randomChoice.between(age.getFirst() * DAYS_IN_YEAR, age.getLast() * DAYS_IN_YEAR);
+        final Person.Sex sex = RandomChoice.from(Person.Sex.class);
+        final int days = RandomChoice.between(age.getFirst() * DAYS_IN_YEAR, age.getLast() * DAYS_IN_YEAR);
 
 
         return eventFactory.newPersonData(
-            country.getNamingSystem().getNames(sex).get(),
+            country.getNativeNames().randomNames(sex).get(),
             surname,
             sex,
             currentDate.minusDays(days),
-            new Residence(country.getName()));
+            new Residence(country));
     }
 
 }

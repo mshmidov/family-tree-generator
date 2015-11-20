@@ -3,9 +3,9 @@ package ftg.application.cdi;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import ftg.application.bootstrap.Configuration;
 import ftg.application.bootstrap.ConfigurationLoader;
 import ftg.commons.cdi.Identifier;
-import ftg.simulation.configuration.Configuration;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
