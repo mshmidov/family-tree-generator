@@ -47,7 +47,7 @@ public final class ConceptionEvent extends Event<Pregnancy> {
     public Pregnancy apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
         final Person mother = Checked.argument(world.getPerson(motherId), FEMALE.and(PREGNANT.negate()), "Mother should be non-pregnant female");
         final Person father = Checked.argument(world.getPerson(fatherId), MALE, "Father should be male");
-        LOGGER.info("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(getDate()), mother, father);
+        LOGGER.debug("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(getDate()), mother, father);
 
         final Pregnancy pregnancy = new Pregnancy(getDate(), father, childSex);
         mother.addState(pregnancy);

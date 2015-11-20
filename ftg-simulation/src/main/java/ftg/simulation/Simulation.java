@@ -43,6 +43,8 @@ public final class Simulation {
 
     private TredecimalDate currentDate = new TredecimalDate(0);
 
+    private Stats stats = new Stats();
+
     @Inject
     public Simulation(EventFactory eventFactory) {
         this.eventFactory = eventFactory;
@@ -56,6 +58,11 @@ public final class Simulation {
 
         currentDate = currentDate.plusDays(1);
 
+        if (currentDate.isZeroDay()) {
+            LOGGER.info(stats.toString() + String.format(", total alive: %s", world.persons(ALL_LIVING).length()));
+            stats = new Stats();
+        }
+
         final List<Event> events = new ArrayList<>();
 
         // marriages
@@ -63,6 +70,7 @@ public final class Simulation {
             .map(male -> decideMarriage(male, world.persons(SINGLE_FEMALES).toVector(), eventFactory))
             .flatMap(Value::toSet)
             .peek(events::add)
+            .peek(event -> stats.marriages++)
             .forEach(world::submitEvent);
 
         // pregnancies
@@ -78,6 +86,7 @@ public final class Simulation {
             .filter(person -> person.state(Pregnancy.class).map(pregnancy -> pregnancy.getAge(currentDate).getDays()).orElse(0L) == 280)
             .map(person -> decideBirth(person, eventFactory))
             .peek(events::add)
+            .peek(event -> stats.peopleBorn++)
             .forEach(world::submitEvent);
 
         // deaths
@@ -85,6 +94,7 @@ public final class Simulation {
             .map(person -> decideDeath(person, eventFactory))
             .flatMap(Value::toSet)
             .peek(events::add)
+            .peek(event -> stats.peopleDied++)
             .forEach(world::submitEvent);
 
         return events;
@@ -142,5 +152,17 @@ public final class Simulation {
         return RandomChoice.byChance(chance)
                ? Option.of(eventFactory.newDeathEvent(currentDate, person.getId()))
                : Option.none();
+    }
+
+    private static final class Stats {
+
+        private long peopleBorn = 0;
+        private long peopleDied = 0;
+        private long marriages = 0;
+
+        @Override
+        public String toString() {
+            return String.format("born: %s, died: %s, marriages: %s", peopleBorn, peopleDied, marriages);
+        }
     }
 }

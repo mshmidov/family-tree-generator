@@ -48,7 +48,7 @@ public final class DeathEvent extends Event<Tuple2<Death, Set<Widowhood>>> {
         });
 
 
-        LOGGER.info("[{}] {} dies at age of {}", TredecimalDateFormat.ISO.format(getDate()), deceased,
+        LOGGER.debug("[{}] {} dies at age of {}", TredecimalDateFormat.ISO.format(getDate()), deceased,
                     intervalBetween(getDate(), deceased.getBirthDate()).getYears());
 
         return Tuple.of(death, widowhoods);

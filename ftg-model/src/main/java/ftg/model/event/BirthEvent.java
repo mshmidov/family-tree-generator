@@ -40,7 +40,7 @@ public final class BirthEvent extends Event<Parentage> {
         final Person child = world.addPerson(
             personFactory.newPerson(childName, childSurname, pregnancy.getChildSex(), getDate(), mother.state(Residence.class).get()));
 
-        LOGGER.info("[{}] {} is born of {} and {}", TredecimalDateFormat.ISO.format(getDate()), child, father, mother);
+        LOGGER.debug("[{}] {} is born of {} and {}", TredecimalDateFormat.ISO.format(getDate()), child, father, mother);
 
         return relationFactory.createParentage(father, mother, child);
     }

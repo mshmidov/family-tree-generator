@@ -39,7 +39,7 @@ public final class MarriageEvent extends Event<Marriage> {
         Array.ofAll(husband, wife).forEach(person -> Checked.argument(person.relations(Marriage.class), Set::isEmpty,
                                                                       "Person can participate in only one marriage at a time"));
 
-        LOGGER.info("[{}] {} marries {}", TredecimalDateFormat.ISO.format(getDate()), husband, wife);
+        LOGGER.debug("[{}] {} marries {}", TredecimalDateFormat.ISO.format(getDate()), husband, wife);
         wife.setSurname(husband.getSurnameObject());
         return relationFactory.createMarriage(husband, wife);
     }
