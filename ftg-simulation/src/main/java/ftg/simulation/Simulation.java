@@ -131,7 +131,7 @@ public final class Simulation {
         final Country country = mother.state(Residence.class).get().getCountry();
         final String childName = country.getNativeNames().childName(mother, pregnancy);
 
-        return eventFactory.newBirthEvent(currentDate, mother.getId(), childName, pregnancy.getFather().getSurnameObject(), pregnancy.getChildSex());
+        return eventFactory.newBirthEvent(currentDate, mother.getId(), childName, pregnancy.getFather().getSurnameObject());
     }
 
     private Option<DeathEvent> decideDeath(Person person, EventFactory eventFactory) {

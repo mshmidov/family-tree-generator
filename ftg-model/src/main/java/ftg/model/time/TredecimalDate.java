@@ -1,12 +1,15 @@
 package ftg.model.time;
 
+import static com.google.common.base.Preconditions.checkState;
+import static ftg.commons.MorePreconditions.checkedArgument;
+import static ftg.model.time.TredecimalCalendar.DAYS_IN_MONTH;
+import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
+import static ftg.model.time.TredecimalCalendar.MONTH_DAYS;
+import static ftg.model.time.TredecimalCalendar.YEAR_DAYS;
+
 import com.google.common.base.MoreObjects;
 
 import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkState;
-import static ftg.commons.MorePreconditions.checkedArgument;
-import static ftg.model.time.TredecimalCalendar.*;
 
 public final class TredecimalDate implements Comparable<TredecimalDate> {
 
@@ -92,7 +95,7 @@ public final class TredecimalDate implements Comparable<TredecimalDate> {
         return new TredecimalDate(year + plusYears, dayOfYear + plusMonths * DAYS_IN_MONTH);
     }
 
-    public TredecimalDate plusYears(int years) {
+    public TredecimalDate plusYears(long years) {
         if (years == 0) {
             return this;
         }

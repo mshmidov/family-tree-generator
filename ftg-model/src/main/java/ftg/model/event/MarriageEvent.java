@@ -14,7 +14,7 @@ import javaslang.collection.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class MarriageEvent extends Event {
+public final class MarriageEvent extends Event<Marriage> {
 
     private static final Logger LOGGER = LogManager.getLogger(MarriageEvent.class);
 
@@ -28,7 +28,7 @@ public final class MarriageEvent extends Event {
     }
 
     @Override
-    public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
+    public Marriage apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
 
         final Person husband = world.getPerson(husbandId);
         final Person wife = world.getPerson(wifeId);
@@ -39,9 +39,9 @@ public final class MarriageEvent extends Event {
         Array.ofAll(husband, wife).forEach(person -> Checked.argument(person.relations(Marriage.class), Set::isEmpty,
                                                                       "Person can participate in only one marriage at a time"));
 
-        relationFactory.createMarriage(husband, wife);
         LOGGER.info("[{}] {} marries {}", TredecimalDateFormat.ISO.format(getDate()), husband, wife);
         wife.setSurname(husband.getSurnameObject());
+        return relationFactory.createMarriage(husband, wife);
     }
 
     @Override

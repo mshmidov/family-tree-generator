@@ -10,7 +10,7 @@ import ftg.model.time.TredecimalDate;
 import ftg.model.world.World;
 import ftg.model.world.country.Country;
 
-public final class PersonIntroductionEvent extends Event {
+public final class PersonIntroductionEvent extends Event<Person> {
 
     private final String name;
     private final Surname surname;
@@ -31,8 +31,10 @@ public final class PersonIntroductionEvent extends Event {
     }
 
     @Override
-    public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
-        world.addPerson(personFactory.newPerson(name, surname, sex, birthDate, new Residence(country)));
+    public Person apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
+        final Person person = personFactory.newPerson(name, surname, sex, birthDate, new Residence(country));
+        world.addPerson(person);
+        return person;
     }
 
     @Override

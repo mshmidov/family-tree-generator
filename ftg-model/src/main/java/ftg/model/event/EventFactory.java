@@ -30,8 +30,8 @@ public final class EventFactory {
         return new ConceptionEvent(id.get(),date, fatherId, motherId, childSex);
     }
 
-    public BirthEvent newBirthEvent(TredecimalDate date, String motherId, String childName, Surname childSurname, Person.Sex childSex) {
-        return new BirthEvent(id.get(), date, motherId, childName, childSurname, childSex);
+    public BirthEvent newBirthEvent(TredecimalDate date, String motherId, String childName, Surname childSurname) {
+        return new BirthEvent(id.get(), date, motherId, childName, childSurname);
     }
 
     public DeathEvent newDeathEvent(TredecimalDate date, String deceasedId) {

@@ -6,6 +6,9 @@ import static java.lang.Math.floor;
 import static java.lang.Math.min;
 
 import com.google.common.collect.ImmutableList;
+import ftg.commons.range.IntegerRange;
+import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateRange;
 import javaslang.collection.Seq;
 
 import java.util.List;
@@ -31,14 +34,12 @@ public final class RandomChoice {
         return from(enumClass.getEnumConstants());
     }
 
-    public static <T extends Enum<T>> Stream<T> streamFrom(Class<T> enumClass) {
-        final T[] options = enumClass.getEnumConstants();
-        return ThreadLocalRandom.current().ints(0, options.length).mapToObj(i -> options[i]);
+    public static TredecimalDate from(TredecimalDateRange range) {
+        return between(range.getFirst(), range.getLast());
     }
 
-    public static <T> Stream<T> streamFrom(T... options) {
-        final T[] optionsCopy = options.clone();
-        return ThreadLocalRandom.current().ints(0, optionsCopy.length).mapToObj(i -> optionsCopy[i]);
+    public static int from(IntegerRange range) {
+        return between(range.getFirst(), range.getLast());
     }
 
     public static <T> Stream<T> streamFrom(List<T> options) {
@@ -48,7 +49,17 @@ public final class RandomChoice {
 
     public static int between(int lower, int higher) {
         checkArgument(lower < higher);
-        return ThreadLocalRandom.current().nextInt(higher - lower + 1) + lower;
+        return ThreadLocalRandom.current().nextInt(lower, higher + 1);
+    }
+
+    public static long between(long lower, long higher) {
+        checkArgument(lower < higher);
+        return ThreadLocalRandom.current().nextLong(lower, higher + 1);
+    }
+
+    public static TredecimalDate between(TredecimalDate lower, TredecimalDate higher) {
+        checkArgument(lower.isBefore(higher));
+        return new TredecimalDate(between(lower.getDayOfEpoch(), higher.getDayOfEpoch()));
     }
 
     public static boolean byChance(double chance) {

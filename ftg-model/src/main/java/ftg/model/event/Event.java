@@ -6,7 +6,7 @@ import ftg.model.person.relation.RelationFactory;
 import ftg.model.time.TredecimalDate;
 import ftg.model.world.World;
 
-public abstract class Event implements Identified {
+public abstract class Event<R> implements Identified {
 
     private final String id;
 
@@ -17,7 +17,7 @@ public abstract class Event implements Identified {
         this.date = date;
     }
 
-    public abstract void apply(World world, PersonFactory personFactory, RelationFactory relationFactory);
+    public abstract R apply(World world, PersonFactory personFactory, RelationFactory relationFactory);
 
     @Override
     public final String getId() {

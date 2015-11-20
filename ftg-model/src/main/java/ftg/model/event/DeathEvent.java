@@ -8,14 +8,18 @@ import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.person.relation.Marriage;
 import ftg.model.person.relation.RelationFactory;
+import ftg.model.person.relation.Widowhood;
 import ftg.model.person.state.Death;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
+import javaslang.Tuple;
+import javaslang.Tuple2;
+import javaslang.collection.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class DeathEvent extends Event {
+public final class DeathEvent extends Event<Tuple2<Death, Set<Widowhood>>> {
 
     private static final Logger LOGGER = LogManager.getLogger(DeathEvent.class);
 
@@ -31,21 +35,23 @@ public final class DeathEvent extends Event {
     }
 
     @Override
-    public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
+    public Tuple2<Death, Set<Widowhood>> apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
 
         final Person deceased = Checked.argument(world.getPerson(deceasedId), p -> p.state(Death.class).isEmpty(),
                                                  "With strange aeons even death may die. But this is not the case ;)");
 
-        deceased.addState(new Death(getDate()));
+        final Death death = deceased.addState(new Death(getDate()));
 
-        deceased.relations(Marriage.class).forEach(marriage -> {
+        final Set<Widowhood> widowhoods = deceased.relations(Marriage.class).map(marriage -> {
             marriage.remove();
-            relationFactory.createWidowhood(deceased, marriage.getSpouse(deceased));
+            return relationFactory.createWidowhood(deceased, marriage.getSpouse(deceased));
         });
 
 
         LOGGER.info("[{}] {} dies at age of {}", TredecimalDateFormat.ISO.format(getDate()), deceased,
                     intervalBetween(getDate(), deceased.getBirthDate()).getYears());
+
+        return Tuple.of(death, widowhoods);
     }
 
     @Override

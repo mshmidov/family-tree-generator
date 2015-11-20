@@ -1,7 +1,8 @@
 package ftg.model.event;
 
-import static ftg.model.person.Person.Sex.FEMALE;
-import static ftg.model.person.Person.Sex.MALE;
+import static ftg.model.person.PersonUtil.FEMALE;
+import static ftg.model.person.PersonUtil.MALE;
+import static ftg.model.person.PersonUtil.PREGNANT;
 
 import com.google.common.base.MoreObjects;
 import ftg.commons.functional.Checked;
@@ -15,7 +16,7 @@ import ftg.model.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class ConceptionEvent extends Event {
+public final class ConceptionEvent extends Event<Pregnancy> {
 
     private static final Logger LOGGER = LogManager.getLogger(ConceptionEvent.class);
 
@@ -43,13 +44,15 @@ public final class ConceptionEvent extends Event {
     }
 
     @Override
-    public void apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
-        final Person mother = Checked
-            .argument(world.getPerson(motherId), p -> p.getSex() == FEMALE && p.state(Pregnancy.class).isEmpty(), "Mother should be non-pregnant female");
-        final Person father = Checked.argument(world.getPerson(fatherId), p -> p.getSex() == MALE, "Father should be male");
-
+    public Pregnancy apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
+        final Person mother = Checked.argument(world.getPerson(motherId), FEMALE.and(PREGNANT.negate()), "Mother should be non-pregnant female");
+        final Person father = Checked.argument(world.getPerson(fatherId), MALE, "Father should be male");
         LOGGER.info("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(getDate()), mother, father);
-        mother.addState(new Pregnancy(getDate(), father, childSex));
+
+        final Pregnancy pregnancy = new Pregnancy(getDate(), father, childSex);
+        mother.addState(pregnancy);
+
+        return pregnancy;
     }
 
     @Override

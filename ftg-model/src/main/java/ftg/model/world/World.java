@@ -57,18 +57,20 @@ public final class World {
         return persons.get(id).orElseThrow(() -> new IllegalArgumentException("No person found by id " + id));
     }
 
-    public void submitEvent(Event event) {
+    public <T> T submitEvent(Event<T> event) {
         events = events.append(event);
-        event.apply(this, personFactory, relationFactory);
+        return event.apply(this, personFactory, relationFactory);
     }
 
-    public void addPerson(Person person) {
+    public Person addPerson(Person person) {
         persons = persons.put(
             Checked.argument(person.getId(), not(persons::containsKey), "Person %s is already added"),
             person);
 
         buckets.values().forEach(bucket -> bucket.update(person));
         person.addListener(this::changePerson);
+
+        return person;
     }
 
     public void changePerson(Person person) {

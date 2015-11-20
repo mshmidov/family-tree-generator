@@ -92,9 +92,10 @@ public final class Person implements Identified {
         return relations.get(relationClass).orElse(HashSet.empty()).map(relationClass::cast);
     }
 
-    public void addState(State state) {
+    public <T extends State> T addState(T state) {
         states = states.put(state.getClass(), state);
         listeners.forEach(listener -> listener.accept(this));
+        return state;
     }
 
     public void removeState(Class<? extends State> stateClass) {
