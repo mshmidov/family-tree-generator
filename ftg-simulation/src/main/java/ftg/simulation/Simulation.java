@@ -72,27 +72,8 @@ public final class Simulation {
         ThreadContext.put("date", TredecimalDateFormat.ISO.format(currentDate));
 
         if (currentDate.isZeroDay()) {
-
-            LOGGER.info(stats.toString() + String.format(", total alive: %s", world.persons(ALL_LIVING).length()));
-            stats = new Stats();
-
-            measurements.yearlyMatchmaker.start();
-            world.countries().forEach(country ->
-                                          matchmaker.decide(currentDate.getYear(), country, world.persons(SINGLE_MALES),
-                                                            world.persons(SINGLE_FEMALES)) // TODO choose people by country
-                                              .forEach(event -> matchmakerPlan =
-                                                  matchmakerPlan
-                                                      .put(event.getDate(), matchmakerPlan.get(event.getDate()).orElseGet(HashSet::empty).add(event))));
-            measurements.yearlyMatchmaker.stop();
-
-            measurements.yearlyReaper.start();
-            world.persons(ALL_LIVING)
-                .forEach(person -> reaper.decide(currentDate.getYear(), person)
-                    .peek(event -> reaperPlan = reaperPlan.put(event.getDate(), reaperPlan.get(event.getDate()).orElseGet(HashSet::empty).add(event))));
-            measurements.yearlyReaper.stop();
+            yearlyPlanning(world);
         }
-
-        // Daily
 
         measurements.dailyMatchmaker.start();
         final Set<MarriageEvent> marriages = matchmakerPlan.get(currentDate).orElseGet(HashSet::empty);
@@ -129,6 +110,26 @@ public final class Simulation {
         measurements.dailyReaper.stop();
 
         stats.peopleDied += deaths.length();
+    }
+
+    private void yearlyPlanning(World world) {
+        LOGGER.info(stats.toString() + String.format(", total alive: %s", world.persons(ALL_LIVING).length()));
+        stats = new Stats();
+
+        measurements.yearlyMatchmaker.start();
+        world.countries().forEach(country ->
+                                      matchmaker.decide(currentDate.getYear(), country, world.persons(SINGLE_MALES),
+                                                        world.persons(SINGLE_FEMALES)) // TODO choose people by country
+                                          .forEach(event -> matchmakerPlan =
+                                              matchmakerPlan
+                                                  .put(event.getDate(), matchmakerPlan.get(event.getDate()).orElseGet(HashSet::empty).add(event))));
+        measurements.yearlyMatchmaker.stop();
+
+        measurements.yearlyReaper.start();
+        world.persons(ALL_LIVING)
+            .forEach(person -> reaper.decide(currentDate.getYear(), person)
+                .peek(event -> reaperPlan = reaperPlan.put(event.getDate(), reaperPlan.get(event.getDate()).orElseGet(HashSet::empty).add(event))));
+        measurements.yearlyReaper.stop();
     }
 
     private Option<ConceptionEvent> decidePregnancyInMarriage(Person female, EventFactory eventFactory) {
