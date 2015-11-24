@@ -9,6 +9,7 @@ import ftg.model.person.PersonFactory;
 import ftg.model.person.Surname;
 import ftg.model.person.relation.Parentage;
 import ftg.model.person.relation.RelationFactory;
+import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
 import javaslang.control.Option;
 import org.junit.Test;
@@ -124,19 +125,19 @@ public class LineagesTest {
         final Lineages lineages = new Lineages();
 
         // then
-        assertThat(lineages.findClosestAncestry(child1, grandfather1), is(equalTo(Option.of(2))));
-        assertThat(lineages.findClosestAncestry(child1, grandmother2), is(equalTo(Option.of(2))));
-        assertThat(lineages.findClosestAncestry(child1, grandmother3), is(equalTo(Option.none())));
-        assertThat(lineages.findClosestAncestry(child1, father1), is(equalTo(Option.of(1))));
-        assertThat(lineages.findClosestAncestry(child1, mother1), is(equalTo(Option.of(1))));
+        assertThat(lineages.isDirectAncestor(child1, grandfather1), is(equalTo(Option.of(2))));
+        assertThat(lineages.isDirectAncestor(child1, grandmother2), is(equalTo(Option.of(2))));
+        assertThat(lineages.isDirectAncestor(child1, grandmother3), is(equalTo(Option.none())));
+        assertThat(lineages.isDirectAncestor(child1, father1), is(equalTo(Option.of(1))));
+        assertThat(lineages.isDirectAncestor(child1, mother1), is(equalTo(Option.of(1))));
 
     }
 
     private Person newMale(String name) {
-        return personFactory.newPerson(name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0), null);
+        return personFactory.newPerson(name, new Surname("A", "A"), Person.Sex.MALE, new TredecimalDate(0), new Residence(null));
     }
 
     private Person newFemale(String name) {
-        return personFactory.newPerson(name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0), null);
+        return personFactory.newPerson(name, new Surname("A", "A"), Person.Sex.FEMALE, new TredecimalDate(0), new Residence(null));
     }
 }

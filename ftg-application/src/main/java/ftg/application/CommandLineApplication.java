@@ -36,7 +36,8 @@ public class CommandLineApplication {
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        new CommandLineApplication().runSimulation();
+        Stream.from(1).take(1).forEach(i ->
+        new CommandLineApplication().runSimulation(100));
     }
 
     private static World populate(World world, Configuration configuration, EventFactory eventFactory) {
@@ -60,7 +61,7 @@ public class CommandLineApplication {
         return world;
     }
 
-    public void runSimulation() {
+    public void runSimulation(int years) {
 
         final Configuration configuration = inject(Configuration.class);
         final PersonFactory personFactory = inject(PersonFactory.class);
@@ -71,7 +72,7 @@ public class CommandLineApplication {
                                      configuration,
                                      eventFactory);
 
-        runner.run(inject(Simulation.class), world, 300 * DAYS_IN_YEAR);
+        runner.run(inject(Simulation.class), world, years * DAYS_IN_YEAR);
     }
 
     private <T> T inject(Class<? extends T> type) {

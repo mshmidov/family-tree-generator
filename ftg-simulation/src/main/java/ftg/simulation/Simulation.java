@@ -1,5 +1,6 @@
 package ftg.simulation;
 
+import static ftg.model.person.PersonUtil.ALIVE;
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
 import static ftg.model.time.TredecimalDateInterval.intervalBetween;
 import static ftg.model.world.PersonBucket.ALL_LIVING;
@@ -24,13 +25,13 @@ import ftg.model.world.World;
 import ftg.model.world.country.Country;
 import ftg.simulation.lineage.Lineages;
 import javaslang.Value;
-import javaslang.collection.Seq;
+import javaslang.collection.HashSet;
+import javaslang.collection.Map;
+import javaslang.collection.Set;
+import javaslang.collection.TreeMap;
 import javaslang.control.Option;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public final class Simulation {
 
@@ -40,36 +41,52 @@ public final class Simulation {
     private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
 
     private final EventFactory eventFactory;
+    private final Reaper reaper;
+    private final Matchmaker matchmaker;
 
-    private TredecimalDate currentDate = new TredecimalDate(0);
+    private TredecimalDate currentDate = new TredecimalDate(-1);
+
+    private Map<TredecimalDate, Set<DeathEvent>> reaperPlan = TreeMap.empty(TredecimalDate::compareTo);
+    private Map<TredecimalDate, Set<MarriageEvent>> matchmakerPlan = TreeMap.empty(TredecimalDate::compareTo);
 
     private Stats stats = new Stats();
 
     @Inject
     public Simulation(EventFactory eventFactory) {
         this.eventFactory = eventFactory;
+        this.reaper = new Reaper(eventFactory);
+        this.matchmaker = new Matchmaker(eventFactory, lineages);
     }
 
     public TredecimalDate getCurrentDate() {
         return currentDate;
     }
 
-    public List<Event> nextDay(World world) {
+    public void nextDay(World world) {
 
         currentDate = currentDate.plusDays(1);
 
         if (currentDate.isZeroDay()) {
+
             LOGGER.info(stats.toString() + String.format(", total alive: %s", world.persons(ALL_LIVING).length()));
             stats = new Stats();
+
+            world.countries().forEach(country ->
+                                          matchmaker.decide(currentDate.getYear(), country, world.persons(SINGLE_MALES),
+                                                            world.persons(SINGLE_FEMALES)) // TODO choose people by country
+                                              .forEach(event -> matchmakerPlan =
+                                                  matchmakerPlan
+                                                      .put(event.getDate(), matchmakerPlan.get(event.getDate()).orElseGet(HashSet::empty).add(event))));
+
+            world.persons(ALL_LIVING)
+                .forEach(person -> reaper.decide(currentDate.getYear(), person)
+                    .peek(event -> reaperPlan = reaperPlan.put(event.getDate(), reaperPlan.get(event.getDate()).orElseGet(HashSet::empty).add(event))));
         }
 
-        final List<Event> events = new ArrayList<>();
+        final Set<MarriageEvent> marriages = matchmakerPlan.get(currentDate).orElseGet(HashSet::empty);
+        matchmakerPlan = matchmakerPlan.remove(currentDate);
 
-        // marriages
-        world.persons(SINGLE_MALES)
-            .map(male -> decideMarriage(male, world.persons(SINGLE_FEMALES).toVector(), eventFactory))
-            .flatMap(Value::toSet)
-            .peek(events::add)
+        marriages.filter(event -> ALIVE.test(world.getPerson(event.getHusbandId())) && ALIVE.test(world.getPerson(event.getWifeId())))
             .peek(event -> stats.marriages++)
             .forEach(world::submitEvent);
 
@@ -78,47 +95,21 @@ public final class Simulation {
             .filter(female -> fertileAge.includes(female.getAge(currentDate).getYears()))
             .map(female -> decidePregnancyInMarriage(female, eventFactory))
             .flatMap(Value::toSet)
-            .peek(events::add)
             .forEach(world::submitEvent);
 
         // births
         world.persons(MARRIED_PREGNANT_FEMALES)
             .filter(person -> person.state(Pregnancy.class).map(pregnancy -> pregnancy.getAge(currentDate).getDays()).orElse(0L) == 280)
             .map(person -> decideBirth(person, eventFactory))
-            .peek(events::add)
             .peek(event -> stats.peopleBorn++)
             .forEach(world::submitEvent);
 
         // deaths
-        world.persons(ALL_LIVING)
-            .map(person -> decideDeath(person, eventFactory))
-            .flatMap(Value::toSet)
-            .peek(events::add)
-            .peek(event -> stats.peopleDied++)
-            .forEach(world::submitEvent);
+        final Set<DeathEvent> deaths = reaperPlan.get(currentDate).orElseGet(HashSet::empty);
+        reaperPlan = reaperPlan.remove(currentDate);
 
-        return events;
-    }
-
-    private Option<MarriageEvent> decideMarriage(Person male, Seq<Person> unmarriedFemales, EventFactory eventFactory) {
-        final double chance = 60D / 1000D / DAYS_IN_YEAR;
-        if (RandomChoice.byChance(chance)) {
-
-            final Seq<Person> candidates = unmarriedFemales
-                .filter(f -> lineages.findClosestAncestry(male, f).isEmpty()) // male is not descendant of female
-                .filter(f -> lineages.findClosestAncestry(f, male).isEmpty()) // female is not descendant of male
-                .filter(f -> lineages.findClosestRelation(male, f, 2).orElse(2) >= 2); // no siblings
-
-            if (candidates.isEmpty()) {
-                // TODO introduce new random female
-            } else {
-                int index = RandomChoice.fromRangeByGaussian(candidates.length());
-                return Option.of(eventFactory.newMarriageEvent(currentDate, male.getId(), unmarriedFemales.get(index).getId()));
-            }
-
-        }
-
-        return Option.none();
+        stats.peopleDied += deaths.length();
+        deaths.forEach(world::submitEvent);
     }
 
     private Option<ConceptionEvent> decidePregnancyInMarriage(Person female, EventFactory eventFactory) {

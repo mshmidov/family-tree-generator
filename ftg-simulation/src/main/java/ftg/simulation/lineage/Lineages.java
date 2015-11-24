@@ -8,21 +8,28 @@ import com.google.common.collect.Table;
 import ftg.model.person.Person;
 import ftg.model.person.relation.Parentage;
 import ftg.model.person.relation.Role;
+import javaslang.Tuple;
+import javaslang.Tuple2;
 import javaslang.Value;
+import javaslang.collection.HashMap;
 import javaslang.collection.HashSet;
 import javaslang.collection.List;
+import javaslang.collection.Map;
 import javaslang.collection.Set;
 import javaslang.control.Match;
 import javaslang.control.Option;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 public final class Lineages {
 
     private static final Set<Ancestors> PARENTS = HashSet.ofAll(Ancestors.FATHER, Ancestors.MOTHER);
 
     private final Table<Person, Person, Integer> knownRelation = HashBasedTable.create();
+
+    private Map<Person, Set<Tuple2<Person, Integer>>> knownAncestors = HashMap.empty();
 
     public static Option<Person> findFather(Person person) {
         return person.relations(Parentage.class)
@@ -49,28 +56,20 @@ public final class Lineages {
             .orElseThrow(IllegalArgumentException::new);
     }
 
-    public Option<Integer> findClosestAncestry(Person person, Person ancestor) {
-        if (knownRelation.contains(person, ancestor)) {
-            return Option.of(knownRelation.get(person, ancestor));
-        }
-
-        if (Objects.equals(person, ancestor)) {
-            return Option.of(0);
-        }
-
-        return PARENTS
-            .flatMap(parent -> getAncestor(person, parent))
-            .flatMap(parent -> findClosestAncestry(parent, ancestor))
-            .map(r -> r + 1)
-            .peek(r -> cacheRelation(person, ancestor, r))
-            .min();
+    public Option<Integer> isDirectAncestor(Person person, Person ancestor) {
+        final Map<Person, Integer> allAncestors = HashMap.ofAll(findAllAncestors(person));
+        return allAncestors.get(ancestor);
     }
 
     public Option<Integer> findClosestRelation(Person a, Person b, int depthLimit) {
-
         checkState(!Objects.equals(requireNonNull(a), requireNonNull(b)), "Both arguments are same person");
 
-        return recursiveFindClosestRelation(a, b, 0, depthLimit);
+        final Set<Tuple2<Person, Integer>> aTree = findAllAncestors(a);
+        final Set<Tuple2<Person, Integer>> bTree = findAllAncestors(b);
+
+        final Set<Tuple2<Person, Integer>> commonRelations = aTree.intersect(bTree);
+
+        return commonRelations.map(Tuple2::_2).min().flatMap(relation -> (relation < depthLimit) ? Option.of(relation) : Option.none());
     }
 
     private Option<Integer> recursiveFindClosestRelation(Person a, Person b, int depth, int depthLimit) {
@@ -104,5 +103,23 @@ public final class Lineages {
         if (Optional.ofNullable(knownRelation.get(a, b)).orElse(Integer.MAX_VALUE) > requireNonNull(relation)) {
             knownRelation.put(a, b, relation);
         }
+    }
+
+    private Set<Tuple2<Person, Integer>> findAllAncestors(Person person) {
+        if (knownAncestors.containsKey(person)) {
+            return knownAncestors.get(person).get();
+        }
+
+        Set<Tuple2<Person, Integer>> ancestors = PARENTS
+            .flatMap(parent -> getAncestor(person, parent))
+            .map(ancestor -> Tuple.of(ancestor, 1));
+
+        ancestors = ancestors.addAll(ancestors
+                                         .flatMap(p -> findAllAncestors(p._1))
+                                         .map(p -> p.map(Function.identity(), i -> i + 1)));
+
+        knownAncestors = knownAncestors.put(person, ancestors);
+
+        return ancestors;
     }
 }

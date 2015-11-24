@@ -27,6 +27,14 @@ public final class MarriageEvent extends Event<Marriage> {
         this.wifeId = wifeId;
     }
 
+    public String getHusbandId() {
+        return husbandId;
+    }
+
+    public String getWifeId() {
+        return wifeId;
+    }
+
     @Override
     public Marriage apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
 

@@ -17,7 +17,7 @@ public enum PersonBucket {
     ALL_LIVING(ALIVE, Option.none()),
     LIVING_MALES(ALIVE.and(MALE), Option.none()),
     LIVING_FEMALES(ALIVE.and(FEMALE), Option.none()),
-    SINGLE_MALES(ALIVE.and(MALE).and(MARRIED.negate()), Option.none()),
+    SINGLE_MALES(ALIVE.and(MALE).and(MARRIED.negate()), Option.of(Comparator.comparing(Person::getBirthDate))),
     SINGLE_FEMALES(ALIVE.and(FEMALE).and(MARRIED.negate()), Option.of(Comparator.comparing(Person::getBirthDate))),
     MARRIED_MALES(ALIVE.and(MALE).and(MARRIED), Option.none()),
     MARRIED_NON_PREGNANT_FEMALES(ALIVE.and(FEMALE).and(MARRIED).and(PREGNANT.negate()), Option.none()),
