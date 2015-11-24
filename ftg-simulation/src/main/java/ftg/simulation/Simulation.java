@@ -1,11 +1,9 @@
 package ftg.simulation;
 
 import static ftg.model.person.PersonUtil.ALIVE;
+import static ftg.model.person.PersonUtil.MARRIED;
 import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
-import static ftg.model.time.TredecimalDateInterval.intervalBetween;
 import static ftg.model.world.PersonBucket.ALL_LIVING;
-import static ftg.model.world.PersonBucket.MARRIED_NON_PREGNANT_FEMALES;
-import static ftg.model.world.PersonBucket.MARRIED_PREGNANT_FEMALES;
 import static ftg.model.world.PersonBucket.SINGLE_FEMALES;
 import static ftg.model.world.PersonBucket.SINGLE_MALES;
 
@@ -27,7 +25,7 @@ import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
 import ftg.model.world.country.Country;
 import ftg.simulation.lineage.Lineages;
-import javaslang.Value;
+import javaslang.collection.HashMap;
 import javaslang.collection.HashSet;
 import javaslang.collection.Map;
 import javaslang.collection.Set;
@@ -45,13 +43,14 @@ public final class Simulation {
 
     private final Lineages lineages = new Lineages();
     private final IntegerRange fertileAge = IntegerRange.inclusive(17, 49);
+    private final double pregnancyChance = 60D / 1000D / DAYS_IN_YEAR;
+
     private final EventFactory eventFactory;
     private final Reaper reaper;
     private final Matchmaker matchmaker;
 
-    private TredecimalDate currentDate = new TredecimalDate(-1);
-    private Map<TredecimalDate, Set<DeathEvent>> reaperPlan = TreeMap.empty(TredecimalDate::compareTo);
-    private Map<TredecimalDate, Set<MarriageEvent>> matchmakerPlan = TreeMap.empty(TredecimalDate::compareTo);
+    private Map<TredecimalDate, Map<String, DeathEvent>> reaperPlan = TreeMap.empty(TredecimalDate::compareTo);
+    private Map<TredecimalDate, Map<String, MarriageEvent>> matchmakerPlan = TreeMap.empty(TredecimalDate::compareTo);
     private Stats stats = new Stats();
 
 
@@ -62,107 +61,106 @@ public final class Simulation {
         this.matchmaker = new Matchmaker(eventFactory, lineages);
     }
 
-    public TredecimalDate getCurrentDate() {
-        return currentDate;
-    }
-
     public void nextDay(World world) {
-
-        currentDate = currentDate.plusDays(1);
+        measurements.simulationDay.start();
+        final TredecimalDate currentDate = world.nextDay();
         ThreadContext.put("date", TredecimalDateFormat.ISO.format(currentDate));
 
         if (currentDate.isZeroDay()) {
             yearlyPlanning(world);
         }
 
-        measurements.dailyMatchmaker.start();
-        final Set<MarriageEvent> marriages = matchmakerPlan.get(currentDate).orElseGet(HashSet::empty);
+        measurements.dailyCalculations.start();
+        final Map<String, MarriageEvent> marriages = matchmakerPlan.get(currentDate).orElseGet(HashMap::empty);
         matchmakerPlan = matchmakerPlan.remove(currentDate);
 
-        marriages.filter(event -> ALIVE.test(world.getPerson(event.getHusbandId())) && ALIVE.test(world.getPerson(event.getWifeId())))
-            .peek(event -> stats.marriages++)
-            .forEach(world::submitEvent);
-        measurements.dailyMatchmaker.stop();
-
-        // pregnancies
-        measurements.dailyPregnancies.start();
-        world.persons(MARRIED_NON_PREGNANT_FEMALES)
-            .filter(female -> fertileAge.includes(female.getAge(currentDate).getYears()))
-            .map(female -> decidePregnancyInMarriage(female, eventFactory))
-            .flatMap(Value::toSet)
-            .forEach(world::submitEvent);
-        measurements.dailyPregnancies.stop();
-
-        // births
-        measurements.dailyBirths.start();
-        world.persons(MARRIED_PREGNANT_FEMALES)
-            .filter(person -> person.state(Pregnancy.class).map(pregnancy -> pregnancy.getAge(currentDate).getDays()).orElse(0L) == 280)
-            .map(person -> decideBirth(person, eventFactory))
-            .peek(event -> stats.peopleBorn++)
-            .forEach(world::submitEvent);
-        measurements.dailyBirths.stop();
-
-        // deaths
-        measurements.dailyReaper.start();
-        final Set<DeathEvent> deaths = reaperPlan.get(currentDate).orElseGet(HashSet::empty);
+        final Map<String, DeathEvent> deaths = reaperPlan.get(currentDate).orElseGet(HashMap::empty);
         reaperPlan = reaperPlan.remove(currentDate);
-        deaths.forEach(world::submitEvent);
-        measurements.dailyReaper.stop();
 
-        stats.peopleDied += deaths.length();
+        // Decision cycle
+        for (Person person : world.persons(ALL_LIVING)) {
+
+            // marriage
+            marriages.get(person.getId())
+                .filter(event -> HashSet.ofAll(event.getHusbandId(), event.getWifeId()).map(world::getPerson).forAll(ALIVE))
+                .filter(event -> HashSet.ofAll(event.getHusbandId(), event.getWifeId()).map(world::getPerson).forAll(MARRIED.negate()))
+                .peek(event -> stats.marriages++)
+                .forEach(world::submitEvent);
+
+            if (person.getSex() == Person.Sex.FEMALE) {
+
+                final Option<Pregnancy> pregnancy = person.state(Pregnancy.class);
+
+                if (pregnancy.isEmpty()) {
+                    world.submitEvents(decidePregnancy(currentDate, person));
+                } else {
+                    world.submitEvents(decideBirth(currentDate, person, pregnancy.get())
+                        .peek(event -> stats.peopleBorn += 1));
+                }
+            }
+
+
+            // death
+            deaths.get(person.getId())
+                .peek(event -> stats.peopleDied += 1)
+                .forEach(world::submitEvent);
+        }
+
+        measurements.dailyCalculations.stop();
+        measurements.simulationDay.stop();
     }
 
     private void yearlyPlanning(World world) {
+        final TredecimalDate currentDate = world.getCurrentDate();
+
         LOGGER.info(stats.toString() + String.format(", total alive: %s", world.persons(ALL_LIVING).length()));
         stats = new Stats();
 
         measurements.yearlyMatchmaker.start();
-        world.countries().forEach(country ->
-                                      matchmaker.decide(currentDate.getYear(), country, world.persons(SINGLE_MALES),
-                                                        world.persons(SINGLE_FEMALES)) // TODO choose people by country
-                                          .forEach(event -> matchmakerPlan =
-                                              matchmakerPlan
-                                                  .put(event.getDate(), matchmakerPlan.get(event.getDate()).orElseGet(HashSet::empty).add(event))));
+        for (Country country : world.countries()) {
+            final Set<MarriageEvent> decision = matchmaker.decide(currentDate.getYear(),
+                country,
+                world.persons(SINGLE_MALES),
+                world.persons(SINGLE_FEMALES));// TODO choose people by country
+
+            for (MarriageEvent marriage : decision) {
+                final Map<String, MarriageEvent> planForDay = matchmakerPlan.get(marriage.getDate()).orElseGet(HashMap::empty);
+                matchmakerPlan = matchmakerPlan.put(marriage.getDate(), planForDay.put(marriage.getHusbandId(), marriage).put(marriage.getWifeId(), marriage));
+            }
+        }
         measurements.yearlyMatchmaker.stop();
 
         measurements.yearlyReaper.start();
-        world.persons(ALL_LIVING)
-            .forEach(person -> reaper.decide(currentDate.getYear(), person)
-                .peek(event -> reaperPlan = reaperPlan.put(event.getDate(), reaperPlan.get(event.getDate()).orElseGet(HashSet::empty).add(event))));
+        world.persons(ALL_LIVING).forEach(person -> reaper.decide(currentDate.getYear(), person)
+            .peek(event -> {
+                    final Map<String, DeathEvent> planForDay = reaperPlan.get(event.getDate()).orElseGet(HashMap::empty);
+                    reaperPlan = reaperPlan.put(event.getDate(), planForDay.put(event.getDeceasedId(), event));
+                }
+            ));
         measurements.yearlyReaper.stop();
     }
 
-    private Option<ConceptionEvent> decidePregnancyInMarriage(Person female, EventFactory eventFactory) {
-        final double chance = 60D / 1000D / DAYS_IN_YEAR;
-        if (RandomChoice.byChance(chance)) {
+    private Option<ConceptionEvent> decidePregnancy(TredecimalDate currentDate, Person person) {
+        final Set<Marriage> marriage = person.relations(Marriage.class);
+        if (marriage.isDefined() && RandomChoice.byChance(pregnancyChance)) {
 
-            final Person.Sex sex = RandomChoice.from(Person.Sex.class);
-
-            return Option.of(eventFactory.newConceptionEvent(currentDate,
-                                                             female.relations(Marriage.class).head().getHusband().getId(),
-                                                             female.getId(),
-                                                             sex));
+            return Option.of(eventFactory.newConceptionEvent(
+                currentDate,
+                marriage.head().getHusband().getId(),
+                person.getId(),
+                RandomChoice.from(Person.Sex.class)));
         }
+
         return Option.none();
     }
 
-    private Event decideBirth(Person mother, EventFactory eventFactory) {
-        final Pregnancy pregnancy = mother.state(Pregnancy.class).get();
+
+    private Option<Event> decideBirth(TredecimalDate currentDate, Person mother, Pregnancy pregnancy) {
 
         final Country country = mother.state(Residence.class).get().getCountry();
         final String childName = country.getNativeNames().childName(mother, pregnancy);
 
-        return eventFactory.newBirthEvent(currentDate, mother.getId(), childName, pregnancy.getFather().getSurnameObject());
-    }
-
-    private Option<DeathEvent> decideDeath(Person person, EventFactory eventFactory) {
-        final long age = intervalBetween(person.getBirthDate(), currentDate).getYears();
-        final Country country = person.state(Residence.class).get().getCountry();
-        final double chance = 1 / country.getDemography().getDeathRisk(age, person.getSex()) / DAYS_IN_YEAR;
-
-        return RandomChoice.byChance(chance)
-               ? Option.of(eventFactory.newDeathEvent(currentDate, person.getId()))
-               : Option.none();
+        return Option.of(eventFactory.newBirthEvent(currentDate, mother.getId(), childName, pregnancy.getFather().getSurnameObject()));
     }
 
     private static final class Stats {
@@ -180,22 +178,18 @@ public final class Simulation {
 
     public static final class Measurements {
 
+        final AveragingStopwatch simulationDay = new AveragingStopwatch();
+        final AveragingStopwatch dailyCalculations = new AveragingStopwatch();
         final AveragingStopwatch yearlyMatchmaker = new AveragingStopwatch();
         final AveragingStopwatch yearlyReaper = new AveragingStopwatch();
-        final AveragingStopwatch dailyMatchmaker = new AveragingStopwatch();
-        final AveragingStopwatch dailyPregnancies = new AveragingStopwatch();
-        final AveragingStopwatch dailyBirths = new AveragingStopwatch();
-        final AveragingStopwatch dailyReaper = new AveragingStopwatch();
 
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
+                .add("simulationDay", simulationDay)
+                .add("dailyCalculations", dailyCalculations)
                 .add("yearlyMatchmaker", yearlyMatchmaker)
                 .add("yearlyReaper", yearlyReaper)
-                .add("dailyMatchmaker", dailyMatchmaker)
-                .add("dailyPregnancies", dailyPregnancies)
-                .add("dailyBirths", dailyBirths)
-                .add("dailyReaper", dailyReaper)
                 .toString();
         }
     }

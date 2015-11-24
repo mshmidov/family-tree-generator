@@ -8,6 +8,7 @@ import ftg.model.event.Event;
 import ftg.model.person.Person;
 import ftg.model.person.PersonFactory;
 import ftg.model.person.relation.RelationFactory;
+import ftg.model.time.TredecimalDate;
 import ftg.model.world.country.Country;
 import javaslang.Tuple;
 import javaslang.collection.Array;
@@ -27,6 +28,8 @@ public final class World {
     private final PersonFactory personFactory;
     private final RelationFactory relationFactory;
 
+    private TredecimalDate currentDate = new TredecimalDate(-1);
+
     private Vector<Event> events = Vector.empty();
     private Map<String, Person> persons = HashMap.empty();
 
@@ -39,6 +42,15 @@ public final class World {
 
     public Set<Country> countries() {
         return countries;
+    }
+
+    public TredecimalDate getCurrentDate() {
+        return currentDate;
+    }
+
+    public TredecimalDate nextDay() {
+        currentDate = currentDate.plusDays(1);
+        return currentDate;
     }
 
     public Seq<Event> events() {
@@ -60,6 +72,13 @@ public final class World {
     public <T> T submitEvent(Event<T> event) {
         events = events.append(event);
         return event.apply(this, personFactory, relationFactory);
+    }
+
+    public void submitEvents(Iterable<? extends Event> newEvents) {
+        events = events.appendAll(newEvents);
+        for (Event<?> event : newEvents) {
+            event.apply(this, personFactory, relationFactory);
+        }
     }
 
     public Person addPerson(Person person) {

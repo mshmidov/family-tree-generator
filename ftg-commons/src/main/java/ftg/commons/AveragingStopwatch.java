@@ -15,7 +15,7 @@ public final class AveragingStopwatch {
     }
 
     public void stop() {
-        measurement.add(stopwatch.elapsed(TimeUnit.MICROSECONDS));
+        measurement.add(stopwatch.elapsed(TimeUnit.MILLISECONDS));
         stopwatch.reset();
     }
 
