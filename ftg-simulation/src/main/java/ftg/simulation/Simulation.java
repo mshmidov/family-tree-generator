@@ -23,6 +23,7 @@ import ftg.model.person.relation.Marriage;
 import ftg.model.person.state.Pregnancy;
 import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
+import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
 import ftg.model.world.country.Country;
 import ftg.simulation.lineage.Lineages;
@@ -34,6 +35,7 @@ import javaslang.collection.TreeMap;
 import javaslang.control.Option;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 public final class Simulation {
 
@@ -67,6 +69,7 @@ public final class Simulation {
     public void nextDay(World world) {
 
         currentDate = currentDate.plusDays(1);
+        ThreadContext.put("date", TredecimalDateFormat.ISO.format(currentDate));
 
         if (currentDate.isZeroDay()) {
 
