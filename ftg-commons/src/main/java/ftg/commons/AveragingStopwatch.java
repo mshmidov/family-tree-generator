@@ -23,6 +23,10 @@ public final class AveragingStopwatch {
         return measurement.get();
     }
 
+    public double getLast() {
+        return measurement.getLast();
+    }
+
     @Override
     public String toString() {
         return String.format("%.2f (%s)", measurement.get(), measurement.getCount());

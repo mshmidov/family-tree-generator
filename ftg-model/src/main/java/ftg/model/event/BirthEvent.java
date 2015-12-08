@@ -9,14 +9,9 @@ import ftg.model.person.relation.RelationFactory;
 import ftg.model.person.state.Pregnancy;
 import ftg.model.person.state.Residence;
 import ftg.model.time.TredecimalDate;
-import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class BirthEvent extends Event<Parentage> {
-
-    private static final Logger LOGGER = LogManager.getLogger(BirthEvent.class);
 
     private final String motherId;
     private final String childName;
@@ -37,10 +32,7 @@ public final class BirthEvent extends Event<Parentage> {
         final Person father = pregnancy.getFather();
 
         mother.removeState(Pregnancy.class);
-        final Person child = world.addPerson(
-            personFactory.newPerson(childName, childSurname, pregnancy.getChildSex(), getDate(), mother.state(Residence.class).get()));
-
-        LOGGER.debug("[{}] {} is born of {} and {}", TredecimalDateFormat.ISO.format(getDate()), child, father, mother);
+        final Person child = personFactory.newPerson(childName, childSurname, pregnancy.getChildSex(), getDate(), mother.state(Residence.class).get());
 
         return relationFactory.createParentage(father, mother, child);
     }

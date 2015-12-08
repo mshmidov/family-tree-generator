@@ -10,8 +10,8 @@ import ftg.model.time.TredecimalDate;
 import ftg.model.world.country.Country;
 import ftg.simulation.lineage.Lineages;
 import javaslang.collection.HashSet;
+import javaslang.collection.Seq;
 import javaslang.collection.Set;
-import javaslang.collection.Vector;
 
 final class Matchmaker {
 
@@ -26,15 +26,15 @@ final class Matchmaker {
         this.lineages = lineages;
     }
 
-    public Set<MarriageEvent> decide(long year, Country country, Set<Person> males, Set<Person> females) {
+    public Set<MarriageEvent> decide(long year, Country country, Seq<Person> males, Seq<Person> females) {
         Set<MarriageEvent> result = HashSet.empty();
         final TredecimalDate zeroDay = new TredecimalDate(year, 0);
 
         // marriages
-        final Set<Person> grooms = males
+        final Seq<Person> grooms = males
             .filter(man -> fertileAge.includes(man.getAge(zeroDay).getYears()));
 
-        Set<Person> brides = females
+        Seq<Person> brides = females
             .filter(woman -> fertileAge.includes(woman.getAge(zeroDay).getYears()));
 
         final double chance = 60D / 1000D;
@@ -42,16 +42,16 @@ final class Matchmaker {
         for (Person groom : grooms) {
             if (RandomChoice.byChance(chance)) {
 
-                final Vector<Person> candidates = brides
+                final Seq<Person> candidates = brides
                     .filter(f -> lineages.isDirectAncestor(groom, f).isEmpty()) // male is not descendant of female
                     .filter(f -> lineages.isDirectAncestor(f, groom).isEmpty()) // female is not descendant of male
-                    .filter(f -> lineages.findClosestRelation(groom, f, 2).orElse(2) >= 2) // no siblings
-                    .toVector();
+                    .filter(f -> lineages.findClosestRelation(groom, f, 2).orElse(2) >= 2); // no siblings
+
 
                 if (candidates.isDefined()) {
                     int index = RandomChoice.fromRangeByGaussian(candidates.length());
                     final Person bride = candidates.get(index);
-                    brides = brides.remove(bride);
+                    brides = brides.removeAt(index);
 
                     final TredecimalDate date = RandomChoice.between(zeroDay, zeroDay.plusDays(DAYS_IN_YEAR));
                     result = result.add(eventFactory.newMarriageEvent(date, groom.getId(), bride.getId()));

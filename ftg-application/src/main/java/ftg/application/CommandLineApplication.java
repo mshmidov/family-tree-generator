@@ -1,7 +1,5 @@
 package ftg.application;
 
-import static ftg.model.time.TredecimalCalendar.DAYS_IN_YEAR;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import ftg.application.bootstrap.Configuration;
@@ -36,8 +34,7 @@ public class CommandLineApplication {
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        Stream.from(1).take(1).forEach(i ->
-        new CommandLineApplication().runSimulation(100));
+        new CommandLineApplication().runSimulation(100);
     }
 
     private static World populate(World world, Configuration configuration, EventFactory eventFactory) {
@@ -72,7 +69,7 @@ public class CommandLineApplication {
                                      configuration,
                                      eventFactory);
 
-        runner.run(inject(Simulation.class), world, years * DAYS_IN_YEAR);
+        runner.run(inject(Simulation.class), world, years);
     }
 
     private <T> T inject(Class<? extends T> type) {

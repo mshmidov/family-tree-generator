@@ -10,10 +10,8 @@ import ftg.model.person.relation.Parentage;
 import ftg.model.person.relation.Role;
 import javaslang.Tuple;
 import javaslang.Tuple2;
-import javaslang.Value;
 import javaslang.collection.HashMap;
 import javaslang.collection.HashSet;
-import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.Set;
 import javaslang.control.Match;
@@ -71,33 +69,6 @@ public final class Lineages {
 
         return commonRelations.map(Tuple2::_2).min().flatMap(relation -> (relation < depthLimit) ? Option.of(relation) : Option.none());
     }
-
-    private Option<Integer> recursiveFindClosestRelation(Person a, Person b, int depth, int depthLimit) {
-        if (depth > depthLimit) {
-            return Option.none();
-        }
-
-        if (knownRelation.contains(a, b)) {
-            return Option.of(knownRelation.get(a, b));
-        }
-
-        if (Objects.equals(requireNonNull(a), requireNonNull(b))) {
-            return Option.of(0);
-        }
-
-
-        final List<Person> ancestors = List.ofAll(a, b).crossProduct(PARENTS)
-            .map(pair -> getAncestor(pair._1, pair._2))
-            .flatMap(Value::toSet);
-
-        return ancestors.combinations(2)
-            .map(pair -> recursiveFindClosestRelation(pair.get(0), pair.get(1), depth + 1, depthLimit))
-            .flatMap(Value::toSet)
-            .map(r -> r + 1)
-            .peek(r -> cacheRelation(a, b, r))
-            .min();
-    }
-
 
     private void cacheRelation(Person a, Person b, Integer relation) {
         if (Optional.ofNullable(knownRelation.get(a, b)).orElse(Integer.MAX_VALUE) > requireNonNull(relation)) {

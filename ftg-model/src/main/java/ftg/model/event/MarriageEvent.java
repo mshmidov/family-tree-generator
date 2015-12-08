@@ -7,16 +7,11 @@ import ftg.model.person.PersonFactory;
 import ftg.model.person.relation.Marriage;
 import ftg.model.person.relation.RelationFactory;
 import ftg.model.time.TredecimalDate;
-import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
 import javaslang.collection.Array;
 import javaslang.collection.Set;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class MarriageEvent extends Event<Marriage> {
-
-    private static final Logger LOGGER = LogManager.getLogger(MarriageEvent.class);
 
     private final String husbandId;
     private final String wifeId;
@@ -47,7 +42,6 @@ public final class MarriageEvent extends Event<Marriage> {
         Array.ofAll(husband, wife).forEach(person -> Checked.argument(person.relations(Marriage.class), Set::isEmpty,
                                                                       "Person can participate in only one marriage at a time"));
 
-        LOGGER.debug("[{}] {} marries {}", TredecimalDateFormat.ISO.format(getDate()), husband, wife);
         wife.setSurname(husband.getSurnameObject());
         return relationFactory.createMarriage(husband, wife);
     }

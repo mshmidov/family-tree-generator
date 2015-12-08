@@ -1,7 +1,5 @@
 package ftg.model.event;
 
-import static ftg.model.time.TredecimalDateInterval.intervalBetween;
-
 import com.google.common.base.MoreObjects;
 import ftg.commons.functional.Checked;
 import ftg.model.person.Person;
@@ -11,17 +9,12 @@ import ftg.model.person.relation.RelationFactory;
 import ftg.model.person.relation.Widowhood;
 import ftg.model.person.state.Death;
 import ftg.model.time.TredecimalDate;
-import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
 import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.Set;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class DeathEvent extends Event<Tuple2<Death, Set<Widowhood>>> {
-
-    private static final Logger LOGGER = LogManager.getLogger(DeathEvent.class);
 
     private final String deceasedId;
 
@@ -46,10 +39,6 @@ public final class DeathEvent extends Event<Tuple2<Death, Set<Widowhood>>> {
             marriage.remove();
             return relationFactory.createWidowhood(deceased, marriage.getSpouse(deceased));
         });
-
-
-        LOGGER.debug("[{}] {} dies at age of {}", TredecimalDateFormat.ISO.format(getDate()), deceased,
-                    intervalBetween(getDate(), deceased.getBirthDate()).getYears());
 
         return Tuple.of(death, widowhoods);
     }

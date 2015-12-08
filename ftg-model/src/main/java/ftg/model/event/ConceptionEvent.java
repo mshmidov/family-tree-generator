@@ -11,14 +11,9 @@ import ftg.model.person.PersonFactory;
 import ftg.model.person.relation.RelationFactory;
 import ftg.model.person.state.Pregnancy;
 import ftg.model.time.TredecimalDate;
-import ftg.model.time.TredecimalDateFormat;
 import ftg.model.world.World;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class ConceptionEvent extends Event<Pregnancy> {
-
-    private static final Logger LOGGER = LogManager.getLogger(ConceptionEvent.class);
 
     private final String fatherId;
     private final String motherId;
@@ -47,7 +42,6 @@ public final class ConceptionEvent extends Event<Pregnancy> {
     public Pregnancy apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
         final Person mother = Checked.argument(world.getPerson(motherId), FEMALE.and(PREGNANT.negate()), "Mother should be non-pregnant female");
         final Person father = Checked.argument(world.getPerson(fatherId), MALE, "Father should be male");
-        LOGGER.debug("[{}] {} is pregnant from {}", TredecimalDateFormat.ISO.format(getDate()), mother, father);
 
         final Pregnancy pregnancy = new Pregnancy(getDate(), father, childSex);
         mother.addState(pregnancy);

@@ -32,9 +32,7 @@ public final class PersonIntroductionEvent extends Event<Person> {
 
     @Override
     public Person apply(World world, PersonFactory personFactory, RelationFactory relationFactory) {
-        final Person person = personFactory.newPerson(name, surname, sex, birthDate, new Residence(country));
-        world.addPerson(person);
-        return person;
+        return personFactory.newPerson(name, surname, sex, birthDate, new Residence(country));
     }
 
     @Override

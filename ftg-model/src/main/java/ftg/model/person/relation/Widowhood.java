@@ -11,4 +11,12 @@ public final class Widowhood extends AbstractRelation implements Relation {
             Tuple.of(Role.DECEASED, deceased),
             Tuple.of(Role.WIDOW, widow)));
     }
+
+    public Person getDeceased() {
+        return getParticipant(Role.DECEASED);
+    }
+
+    public Person getWidow() {
+        return getParticipant(Role.WIDOW);
+    }
 }

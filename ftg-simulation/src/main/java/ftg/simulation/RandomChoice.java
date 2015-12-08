@@ -9,24 +9,26 @@ import com.google.common.collect.ImmutableList;
 import ftg.commons.range.IntegerRange;
 import ftg.model.time.TredecimalDate;
 import ftg.model.time.TredecimalDateRange;
+import it.unimi.dsi.util.XorShift128PlusRandom;
 import javaslang.collection.Seq;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public final class RandomChoice {
+
+    private static final XorShift128PlusRandom RANDOM = new XorShift128PlusRandom();
 
     private RandomChoice() {
     }
 
     public static <T> T from(T... options) {
-        final int i = ThreadLocalRandom.current().nextInt(options.length);
+        final int i = RANDOM.nextInt(options.length);
         return options[i];
     }
 
     public static <T> T from(Seq<T> options) {
-        final int i = ThreadLocalRandom.current().nextInt(options.length());
+        final int i = RANDOM.nextInt(options.length());
         return options.get(i);
     }
 
@@ -44,17 +46,17 @@ public final class RandomChoice {
 
     public static <T> Stream<T> streamFrom(List<T> options) {
         final List<T> optionsCopy = ImmutableList.copyOf(options);
-        return ThreadLocalRandom.current().ints(0, optionsCopy.size()).mapToObj(optionsCopy::get);
+        return RANDOM.ints(0, optionsCopy.size()).mapToObj(optionsCopy::get);
     }
 
     public static int between(int lower, int higher) {
         checkArgument(lower < higher);
-        return ThreadLocalRandom.current().nextInt(lower, higher + 1);
+        return RANDOM.nextInt((higher - lower) + 1) + lower;
     }
 
     public static long between(long lower, long higher) {
         checkArgument(lower < higher);
-        return ThreadLocalRandom.current().nextLong(lower, higher + 1);
+        return RANDOM.nextLong((higher - lower) + 1) + lower;
     }
 
     public static TredecimalDate between(TredecimalDate lower, TredecimalDate higher) {
@@ -64,11 +66,11 @@ public final class RandomChoice {
 
     public static boolean byChance(double chance) {
         checkArgument(chance >= 0F && chance <= 1F);
-        return ThreadLocalRandom.current().nextDouble() >= 1 - chance;
+        return RANDOM.nextDouble() >= 1 - chance;
     }
 
     public static int fromRangeByGaussian(int listSize) {
-        final int index = (int) floor(abs(ThreadLocalRandom.current().nextGaussian() * (listSize - 1) / 3));
+        final int index = (int) floor(abs(RANDOM.nextGaussian() * (listSize - 1) / 3));
         return min(index, listSize - 1);
     }
 }

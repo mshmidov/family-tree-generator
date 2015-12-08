@@ -26,16 +26,16 @@ public final class RandomModel {
 
         final IntegerRange baselineGeneration = IntegerRange.inclusive(25, 40);
 
-        final Person man = world.submitEvent(new RandomPerson(country).surname(surname).sex(Person.Sex.MALE).randomAge(baselineGeneration, currentDate)
+        final Person man = world.submitPersonIntroduction(new RandomPerson(country).surname(surname).sex(Person.Sex.MALE).randomAge(baselineGeneration, currentDate)
                                                  .introduce(currentDate, eventFactory));
 
-        final Person woman = world.submitEvent(new RandomPerson(country).surname(surname).sex(Person.Sex.FEMALE).randomAge(baselineGeneration, currentDate)
+        final Person woman = world.submitPersonIntroduction(new RandomPerson(country).surname(surname).sex(Person.Sex.FEMALE).randomAge(baselineGeneration, currentDate)
                                                    .introduce(currentDate, eventFactory));
 
         final TredecimalDate husbandAdulthood = man.getBirthDate().plusYears(17);
         final TredecimalDate wifeAdulthood = woman.getBirthDate().plusYears(17);
         final TredecimalDate marriageDate = max(husbandAdulthood, wifeAdulthood);
-        world.submitEvent(eventFactory.newMarriageEvent(marriageDate, man.getId(), woman.getId()));
+        world.submitMarriage(eventFactory.newMarriageEvent(marriageDate, man.getId(), woman.getId()));
 
         // children
 
@@ -45,10 +45,10 @@ public final class RandomModel {
             if (RandomChoice.byChance(0.9)) {
                 final TredecimalDate conceptionDate = RandomChoice.between(year, year.plusDays(TredecimalCalendar.DAYS_IN_YEAR - 310));
 
-                final Pregnancy pregnancy = world.submitEvent(
+                final Pregnancy pregnancy = world.submitPregnancy(
                     eventFactory.newConceptionEvent(conceptionDate, man.getId(), woman.getId(), RandomChoice.from(Person.Sex.class)));
 
-                world.submitEvent(
+                world.submitBirth(
                     eventFactory.newBirthEvent(conceptionDate.plusDays(280), woman.getId(), country.getNativeNames().childName(woman, pregnancy), surname));
             }
         }
